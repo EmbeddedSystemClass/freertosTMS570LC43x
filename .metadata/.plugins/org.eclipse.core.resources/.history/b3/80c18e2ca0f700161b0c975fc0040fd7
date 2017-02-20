@@ -1,0 +1,26 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../FreeRTOS-Plus-FAT/portable/lpc18xx/ff_sddisk.c 
+
+C_DEPS += \
+./FreeRTOS-Plus-FAT/portable/lpc18xx/ff_sddisk.d 
+
+OBJS += \
+./FreeRTOS-Plus-FAT/portable/lpc18xx/ff_sddisk.obj 
+
+OBJS__QUOTED += \
+"FreeRTOS-Plus-FAT\portable\lpc18xx\ff_sddisk.obj" 
+
+C_DEPS__QUOTED += \
+"FreeRTOS-Plus-FAT\portable\lpc18xx\ff_sddisk.d" 
+
+C_SRCS__QUOTED += \
+"../FreeRTOS-Plus-FAT/portable/lpc18xx/ff_sddisk.c" 
+
+

@@ -1,0 +1,56 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../FreeRTOS-Plus-FAT/portable/Zynq/ff_sddisk.c \
+../FreeRTOS-Plus-FAT/portable/Zynq/xsdps.c \
+../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_g.c \
+../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_info.c \
+../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_options.c \
+../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_sinit.c 
+
+C_DEPS += \
+./FreeRTOS-Plus-FAT/portable/Zynq/ff_sddisk.d \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps.d \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_g.d \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_info.d \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_options.d \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_sinit.d 
+
+OBJS += \
+./FreeRTOS-Plus-FAT/portable/Zynq/ff_sddisk.obj \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps.obj \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_g.obj \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_info.obj \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_options.obj \
+./FreeRTOS-Plus-FAT/portable/Zynq/xsdps_sinit.obj 
+
+OBJS__QUOTED += \
+"FreeRTOS-Plus-FAT\portable\Zynq\ff_sddisk.obj" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps.obj" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_g.obj" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_info.obj" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_options.obj" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_sinit.obj" 
+
+C_DEPS__QUOTED += \
+"FreeRTOS-Plus-FAT\portable\Zynq\ff_sddisk.d" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps.d" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_g.d" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_info.d" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_options.d" \
+"FreeRTOS-Plus-FAT\portable\Zynq\xsdps_sinit.d" 
+
+C_SRCS__QUOTED += \
+"../FreeRTOS-Plus-FAT/portable/Zynq/ff_sddisk.c" \
+"../FreeRTOS-Plus-FAT/portable/Zynq/xsdps.c" \
+"../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_g.c" \
+"../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_info.c" \
+"../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_options.c" \
+"../FreeRTOS-Plus-FAT/portable/Zynq/xsdps_sinit.c" 
+
+

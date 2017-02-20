@@ -1,0 +1,15 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Each subdirectory must supply rules for building sources it contributes
+FreeRTOS-Plus-TCP/protocols/Common/FreeRTOS_TCP_server.obj: ../FreeRTOS-Plus-TCP/protocols/Common/FreeRTOS_TCP_server.c $(GEN_OPTS) | $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: ARM Compiler'
+	"C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.12.0.STS/bin/armcl" -mv7R5 --code_state=32 --float_support=VFPv3D16 --include_path="C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.12.0.STS/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/source" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-TCP/portable/Compiler/CCS" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-TCP/protocols/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-FAT/portable/common" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS_Plus_FAT_Demos" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-CLI/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-FAT/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-IO/Include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-TCP/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-UART-Console/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/FreeRTOS-Plus-UDP-Console/include" --include_path="C:/Users/sleewin/repos/code/lwiprtos/TMS570LC43x/include" -g --diag_warning=225 --diag_wrap=off --display_error_number --enum_type=packed --abi=eabi --preproc_with_compile --preproc_dependency="FreeRTOS-Plus-TCP/protocols/Common/FreeRTOS_TCP_server.d" --obj_directory="FreeRTOS-Plus-TCP/protocols/Common" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
+

@@ -153,6 +153,11 @@
 #define mainUDP_CLI_PORT_NUMBER			( 5001UL )
 #define mainUDP_CLI_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
 
+/* UDP echo server task parameters. */
+#define mainUDP_Echo_TASK_PRIORITY			(4 | portPRIVILEGE_BIT)
+#define mainUDP_Echo_PORT_NUMBER			( 5000UL )
+#define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
+
 /* Thread Local Storage - Jelenleg csak a FreeRTOS-plus-FAT csomag használja */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 

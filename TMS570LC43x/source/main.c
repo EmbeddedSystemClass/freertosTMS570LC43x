@@ -56,6 +56,8 @@
 #include "ff_stdio.h"
 #include "ff_ramdisk.h"
 
+#include "udp_echo.h"
+
 uint8 emacAddress[6U] =	{0x00U, 0x08U, 0xEEU, 0x03U, 0xA6U, 0x6CU};
 uint32 emacPhyAddress =	1U;
 static const uint8_t ucIPAddress[4] = {configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3};
@@ -311,6 +313,9 @@ if( eNetworkEvent == eNetworkUp )
         {
         	/* Start the UDP command line on port 5001 */
         	vStartUDPCommandInterpreterTask( mainUDP_CLI_TASK_STACK_SIZE, mainUDP_CLI_PORT_NUMBER, mainUDP_CLI_TASK_PRIORITY );
+
+        	/* Start the UDP echo on port 5000 */
+        	vStartUDPEchoTask(mainUDP_Echo_TASK_STACK_SIZE, mainUDP_Echo_PORT_NUMBER, mainUDP_Echo_TASK_PRIORITY);
 
         	/* Start TCP server task (HTTP, FTP) */
         	xTaskCreate(vServerWorkTask, "TCPSrv", mainTCP_SERVER_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3 | portPRIVILEGE_BIT, &xServerWorkTaskHandle);

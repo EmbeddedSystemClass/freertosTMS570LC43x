@@ -1,0 +1,50 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../EPL_v193_20091023/protocol/PTP/PTPStack/arith.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/bmc.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/probe.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/protocol.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/ptpd.c 
+
+C_DEPS += \
+./EPL_v193_20091023/protocol/PTP/PTPStack/arith.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/bmc.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/probe.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/protocol.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/ptpd.d 
+
+OBJS += \
+./EPL_v193_20091023/protocol/PTP/PTPStack/arith.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/bmc.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/probe.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/protocol.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/ptpd.obj 
+
+OBJS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\PTPStack\arith.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\bmc.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\probe.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\protocol.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\ptpd.obj" 
+
+C_DEPS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\PTPStack\arith.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\bmc.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\probe.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\protocol.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\ptpd.d" 
+
+C_SRCS__QUOTED += \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/arith.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/bmc.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/probe.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/protocol.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/ptpd.c" 
+
+

@@ -317,10 +317,10 @@ void vOutputString(uint8_t * pucMessage )
 
 void vLoggingPrintf( const char *pcFormatString, ... )
 	{
-	static char cBuffer[configCOMMAND_INT_MAX_OUTPUT_SIZE];
-	static unsigned int xMissedMessageCounter = 0;
-	static unsigned int xIndex = 0;
-	va_list args;
+//	static char cBuffer[configCOMMAND_INT_MAX_OUTPUT_SIZE];
+//	static unsigned int xMissedMessageCounter = 0;
+//	static unsigned int xIndex = 0;
+//	va_list args;
 //		if( xConsoleUART != NULL )
 //		{
 //			if( FreeRTOS_ioctl( xConsoleUART, ioctlOBTAIN_WRITE_MUTEX, (void *)portMAX_DELAY ) == pdPASS )

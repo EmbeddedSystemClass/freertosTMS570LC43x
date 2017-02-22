@@ -1,0 +1,62 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/epl_1588.c \
+../epl_1588/epl_bist.c \
+../epl_1588/epl_core.c \
+../epl_1588/epl_link.c \
+../epl_1588/epl_miiconfig.c \
+../epl_1588/epl_quality.c \
+../epl_1588/epl_tdr.c 
+
+C_DEPS += \
+./epl_1588/epl_1588.d \
+./epl_1588/epl_bist.d \
+./epl_1588/epl_core.d \
+./epl_1588/epl_link.d \
+./epl_1588/epl_miiconfig.d \
+./epl_1588/epl_quality.d \
+./epl_1588/epl_tdr.d 
+
+OBJS += \
+./epl_1588/epl_1588.obj \
+./epl_1588/epl_bist.obj \
+./epl_1588/epl_core.obj \
+./epl_1588/epl_link.obj \
+./epl_1588/epl_miiconfig.obj \
+./epl_1588/epl_quality.obj \
+./epl_1588/epl_tdr.obj 
+
+OBJS__QUOTED += \
+"epl_1588\epl_1588.obj" \
+"epl_1588\epl_bist.obj" \
+"epl_1588\epl_core.obj" \
+"epl_1588\epl_link.obj" \
+"epl_1588\epl_miiconfig.obj" \
+"epl_1588\epl_quality.obj" \
+"epl_1588\epl_tdr.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588\epl_1588.d" \
+"epl_1588\epl_bist.d" \
+"epl_1588\epl_core.d" \
+"epl_1588\epl_link.d" \
+"epl_1588\epl_miiconfig.d" \
+"epl_1588\epl_quality.d" \
+"epl_1588\epl_tdr.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/epl_1588.c" \
+"../epl_1588/epl_bist.c" \
+"../epl_1588/epl_core.c" \
+"../epl_1588/epl_link.c" \
+"../epl_1588/epl_miiconfig.c" \
+"../epl_1588/epl_quality.c" \
+"../epl_1588/epl_tdr.c" 
+
+

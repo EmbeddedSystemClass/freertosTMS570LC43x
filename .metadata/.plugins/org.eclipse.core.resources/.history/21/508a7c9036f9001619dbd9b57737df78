@@ -1,0 +1,26 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../EPL_v193_20091023/OS/freeRTOS/oai.c 
+
+C_DEPS += \
+./EPL_v193_20091023/OS/freeRTOS/oai.d 
+
+OBJS += \
+./EPL_v193_20091023/OS/freeRTOS/oai.obj 
+
+OBJS__QUOTED += \
+"EPL_v193_20091023\OS\freeRTOS\oai.obj" 
+
+C_DEPS__QUOTED += \
+"EPL_v193_20091023\OS\freeRTOS\oai.d" 
+
+C_SRCS__QUOTED += \
+"../EPL_v193_20091023/OS/freeRTOS/oai.c" 
+
+

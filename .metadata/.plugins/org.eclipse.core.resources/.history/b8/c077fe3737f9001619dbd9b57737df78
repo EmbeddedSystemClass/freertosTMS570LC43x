@@ -1,0 +1,32 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../EPL_v193_20091023/protocol/PTP/epl_1588.c \
+../EPL_v193_20091023/protocol/PTP/ptpControl.c 
+
+C_DEPS += \
+./EPL_v193_20091023/protocol/PTP/epl_1588.d \
+./EPL_v193_20091023/protocol/PTP/ptpControl.d 
+
+OBJS += \
+./EPL_v193_20091023/protocol/PTP/epl_1588.obj \
+./EPL_v193_20091023/protocol/PTP/ptpControl.obj 
+
+OBJS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\epl_1588.obj" \
+"EPL_v193_20091023\protocol\PTP\ptpControl.obj" 
+
+C_DEPS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\epl_1588.d" \
+"EPL_v193_20091023\protocol\PTP\ptpControl.d" 
+
+C_SRCS__QUOTED += \
+"../EPL_v193_20091023/protocol/PTP/epl_1588.c" \
+"../EPL_v193_20091023/protocol/PTP/ptpControl.c" 
+
+

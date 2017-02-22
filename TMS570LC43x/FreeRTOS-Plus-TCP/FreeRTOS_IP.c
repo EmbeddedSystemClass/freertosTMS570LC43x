@@ -1583,6 +1583,8 @@ eFrameProcessingResult_t eReturn = eProcessBuffer;
 			else if( ( ulDestinationIPAddress != *ipLOCAL_IP_ADDRESS_POINTER ) &&
 				/* Is it the global broadcast address 255.255.255.255 ? */
 				( ulDestinationIPAddress != ipBROADCAST_IP_ADDRESS ) &&
+				/* Is it ptp, scott */
+				( ulDestinationIPAddress != ipPTP_IP_ADDRESS ) &&
 				/* Is it a specific broadcast address 192.168.1.255 ? */
 				( ulDestinationIPAddress != xNetworkAddressing.ulBroadcastAddress ) &&
 			#if( ipconfigUSE_LLMNR == 1 )

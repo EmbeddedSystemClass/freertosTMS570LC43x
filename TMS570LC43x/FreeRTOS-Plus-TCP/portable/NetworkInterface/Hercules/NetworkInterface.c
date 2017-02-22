@@ -57,6 +57,8 @@
 
 /* HALCoGen generated c files */
 #include "HL_emac.c"
+#include "epl.h"
+static void init1588(hdkif_t *hdkif);
 
 #define EMAC_INT_CORE0_RX_THRESH		(0x0U)		// Acknowledge C0RXTHRESH Interrupt
 #define EMAC_INT_CORE0_MISC				(0x3U)		// Acknowledge C0MISC Interrupt (STATPEND, HOSTPEND, MDIO LINKINT0, MDIO USERINT0)
@@ -183,10 +185,16 @@ extern hdkif_t hdkif_data[];
 /* If ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES is set to 1, then the Ethernet
 driver will filter incoming packets and only pass the stack those packets it
 considers need processing. */
+//#if(ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES == 0)
+//	#define ipCONSIDER_FRAME_FOR_PROCESSING(pucEthernetBuffer) eProcessBuffer
+//#else
+//	#define ipCONSIDER_FRAME_FOR_PROCESSING(pucEthernetBuffer) eConsiderFrameForProcessing((pucEthernetBuffer))
+//#endif
+//scott changed
 #if(ipconfigETHERNET_DRIVER_FILTERS_FRAME_TYPES == 0)
-	#define ipCONSIDER_FRAME_FOR_PROCESSING(pucEthernetBuffer) eProcessBuffer
-#else
 	#define ipCONSIDER_FRAME_FOR_PROCESSING(pucEthernetBuffer) eConsiderFrameForProcessing((pucEthernetBuffer))
+#else
+	#define ipCONSIDER_FRAME_FOR_PROCESSING(pucEthernetBuffer) eProcessBuffer
 #endif
 
 
@@ -549,7 +557,9 @@ void prvEmacRxTask(void *pvParameters)
 					}
 
 					/* Csomagkezelés */
-					if(eConsiderFrameForProcessing((const uint8_t *)EMACSwizzleData((uint32_t)pxCurrentBufferDescriptor->bufptr)) == eProcessBuffer)
+//					if(eConsiderFrameForProcessing((const uint8_t *)EMACSwizzleData((uint32_t)pxCurrentBufferDescriptor->bufptr)) == eProcessBuffer)
+					//scott changed
+					if(ipCONSIDER_FRAME_FOR_PROCESSING((const uint8_t *)EMACSwizzleData((uint32_t)pxCurrentBufferDescriptor->bufptr)) == eProcessBuffer)
 					{
 						if(xEMACDriverLoggingLevel > 1)FreeRTOS_debug_printf(("EMACRX: BD processing: %p, RXHP: %p\r\n", pxCurrentBufferDescriptor, HWREG(hdkif->emac_base + EMAC_RXHDP(EMAC_CHANNELNUMBER))));
 
@@ -739,11 +749,62 @@ uint32 xFreeRTOSEMACHWInit(uint8_t macaddr[6U])
 	EMACMIIEnable(hdkif->emac_base);
 	EMACRxBroadCastEnable(hdkif->emac_base, (uint32)EMAC_CHANNELNUMBER);
 	EMACRxUnicastSet(hdkif->emac_base, (uint32)EMAC_CHANNELNUMBER);
+
+	//Scott added
+	EMACRxMultiCastEnable(hdkif->emac_base, (uint32)EMAC_CHANNELNUMBER);
+	EMACFrameSelect(hdkif->emac_base, 0xFFFFFFFFFFFFFFFF);
+//    HWREG(hdkif->emac_base + EMAC_RXMBPENABLE) &= (~(uint32)EMAC_RXMBPENABLE_RXCAFEN);
+//    HWREG(hdkif->emac_base + EMAC_RXMBPENABLE) |= ((uint32)EMAC_RXMBPENABLE_RXCAFEN|(EMAC_CHANNELNUMBER));
+
 	EMACDisableLoopback(hdkif->emac_base);
+
+	init1588(hdkif);
 
 	return xReturn;
 }
 
+static void init1588(hdkif_t *hdkif){
+	PTPEnable(hdkif->emac_base, hdkif->phy_addr, false);
+	PTPClockSetRateAdjustment(hdkif->emac_base, hdkif->phy_addr, 0, false, false);
+	PTPClockSet(hdkif->emac_base, hdkif->phy_addr, 1, 0);
+	PTPSetClockConfig(hdkif->emac_base, hdkif->phy_addr, CLKOPT_CLK_OUT_EN, 0x0A, 0x00, 8);
+	PTPEnable(hdkif->emac_base, hdkif->phy_addr, true);
+
+	PTPSetTransmitConfig(hdkif->emac_base, hdkif->phy_addr, 0, 0, 0, 0);
+	RX_CFG_ITEMS rxCfgItems;
+	memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
+	PTPSetReceiveConfig(hdkif->emac_base, hdkif->phy_addr, 0, &rxCfgItems);
+
+	//TODO: flush tx queue
+	uint32_t events;
+	while((events = PTPCheckForEvents(hdkif->emac_base, hdkif->phy_addr))){
+		if(events & PTPEVT_TRANSMIT_TIMESTAMP_BIT){
+			Dp83640GetTimeStamp(hdkif->emac_base, hdkif->phy_addr, 1);
+		} else if(events & PTPEVT_RECEIVE_TIMESTAMP_BIT){
+			Dp83640GetTimeStamp(hdkif->emac_base, hdkif->phy_addr, 0);
+		}
+	}
+
+	PTPSetTransmitConfig(hdkif->emac_base, hdkif->phy_addr,
+			TXOPT_IP1588_EN|TXOPT_IPV4_EN|TXOPT_TS_EN, 1, 0xFF, 0x00);
+
+	rxCfgItems.ptpVersion = 0x02;
+	rxCfgItems.ptpFirstByteMask = 0xFF;
+	rxCfgItems.ptpFirstByteData = 0x00;
+	rxCfgItems.ipAddrData = 0;
+	rxCfgItems.tsMinIFG = 0x0C;
+	rxCfgItems.srcIdHash = 0;
+	rxCfgItems.ptpDomain = 0;
+	rxCfgItems.tsSecLen = 4;
+	rxCfgItems.rxTsNanoSecOffset = 0;
+	rxCfgItems.rxTsSecondsOffset = 0;
+
+	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
+			RXOPT_TS_INSERT|RXOPT_TS_APPEND;
+
+	PTPSetReceiveConfig(hdkif->emac_base, hdkif->phy_addr, rxCfgOpts, &rxCfgItems);
+}
 
 /** ***************************************************************************************************
  * @fn		static void prvEmacDMAInit(hdkif_t *hdkif)

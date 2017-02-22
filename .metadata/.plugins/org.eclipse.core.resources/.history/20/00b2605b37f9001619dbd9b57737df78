@@ -1,0 +1,56 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/msg.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/net.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/servo.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/startup.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/sys.c \
+../EPL_v193_20091023/protocol/PTP/PTPStack/dep/timer.c 
+
+C_DEPS += \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/msg.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/net.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/servo.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/startup.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/sys.d \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/timer.d 
+
+OBJS += \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/msg.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/net.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/servo.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/startup.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/sys.obj \
+./EPL_v193_20091023/protocol/PTP/PTPStack/dep/timer.obj 
+
+OBJS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\msg.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\net.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\servo.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\startup.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\sys.obj" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\timer.obj" 
+
+C_DEPS__QUOTED += \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\msg.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\net.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\servo.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\startup.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\sys.d" \
+"EPL_v193_20091023\protocol\PTP\PTPStack\dep\timer.d" 
+
+C_SRCS__QUOTED += \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/msg.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/net.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/servo.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/startup.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/sys.c" \
+"../EPL_v193_20091023/protocol/PTP/PTPStack/dep/timer.c" 
+
+

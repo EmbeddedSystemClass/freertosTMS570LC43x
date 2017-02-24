@@ -90,6 +90,8 @@ purpose.
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
+#include "HL_emac.h"
+
 typedef struct {
   UInteger32 seconds;
   Integer32 nanoseconds;  
@@ -327,7 +329,9 @@ typedef struct RunTimeOpts {
   Octet srcIPAddress[4];
 
   void *eplPortHandle;
-  OAI_DEV_HANDLE_STRUCT *oaiHandle;
+  hdkif_t hdkif;
+
+//  OAI_DEV_HANDLE_STRUCT *oaiHandle;
   
   Boolean forceBMCFlag;
   Boolean useOneStepFlag;

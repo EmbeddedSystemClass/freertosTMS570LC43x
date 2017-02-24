@@ -94,21 +94,21 @@ purpose.
 #include<stdio.h>
 #include<string.h>
 #include<signal.h>
-#include<fcntl.h>
-#include<sys/stat.h>
+//#include<fcntl.h>
+//#include<sys/stat.h>
 #include<time.h>
 
-#ifndef _WIN32
-#include<unistd.h>
-#include<sys/time.h>
-#include<sys/timex.h>
-#include<sys/socket.h>
-#include<sys/select.h>
-#include<sys/ioctl.h>
-#include<arpa/inet.h>
-#endif //WIN32
-
-#include "ptpControl.h"
+//#ifndef _WIN32
+//#include<unistd.h>
+//#include<sys/time.h>
+//#include<sys/timex.h>
+//#include<sys/socket.h>
+//#include<sys/select.h>
+//#include<sys/ioctl.h>
+//#include<arpa/inet.h>
+//#endif //WIN32
+//
+//#include "ptpControl.h"
 
 /* system messages */
 #ifdef ERROR
@@ -176,21 +176,21 @@ static inline Integer32 flip32(x)
 
 /* msg.c */
 Boolean msgPeek(void*);
-void msgUnpackHeader(void*,MsgHeader*);
-void msgUnpackSync(void*,MsgSync*);
-void msgUnpackDelayReq(void*,MsgDelayReq*);
-void msgUnpackFollowUp(void*,MsgFollowUp*);
-void msgUnpackDelayResp(void*,MsgDelayResp*);
-void msgUnpackManagement(void*,MsgManagement*);
-UInteger8 msgUnloadManagement(void*,MsgManagement*,PtpClock*,RunTimeOpts*);
-void msgUnpackManagementPayload(void *buf, MsgManagement *manage);
-void msgPackHeader(void*,PtpClock*);
-void msgPackSync(void*,Boolean,TimeRepresentation*,PtpClock*);
-void msgPackDelayReq(void*,Boolean,TimeRepresentation*,PtpClock*);
-void msgPackFollowUp(void*,UInteger16,TimeRepresentation*,PtpClock*);
-void msgPackDelayResp(void*,MsgHeader*,TimeRepresentation*,PtpClock*);
-UInteger16 msgPackManagement(void*,MsgManagement*,PtpClock*);
-UInteger16 msgPackManagementResponse(void*,MsgHeader*,MsgManagement*,PtpClock*);
+void msgUnpackHeader(UInteger8*,MsgHeader*);
+void msgUnpackSync(UInteger8*,MsgSync*);
+void msgUnpackDelayReq(UInteger8*,MsgDelayReq*);
+void msgUnpackFollowUp(UInteger8*,MsgFollowUp*);
+void msgUnpackDelayResp(UInteger8*,MsgDelayResp*);
+void msgUnpackManagement(UInteger8*,MsgManagement*);
+UInteger8 msgUnloadManagement(UInteger8*,MsgManagement*,PtpClock*,RunTimeOpts*);
+void msgUnpackManagementPayload(UInteger8*buf, MsgManagement *manage);
+void msgPackHeader(UInteger8*,PtpClock*);
+void msgPackSync(UInteger8*,Boolean,TimeRepresentation*,PtpClock*);
+void msgPackDelayReq(UInteger8*,Boolean,TimeRepresentation*,PtpClock*);
+void msgPackFollowUp(UInteger8*,UInteger16,TimeRepresentation*,PtpClock*);
+void msgPackDelayResp(UInteger8*,MsgHeader*,TimeRepresentation*,PtpClock*);
+UInteger16 msgPackManagement(UInteger8*,MsgManagement*,PtpClock*);
+UInteger16 msgPackManagementResponse(UInteger8*,MsgHeader*,MsgManagement*,PtpClock*);
 
 /* net.c */
 /* linux API dependent */

@@ -138,9 +138,13 @@ void timerUpdate(IntervalTimer *itimer)
   
 #ifdef _WIN32
     DWORD curTime = GetTickCount();
-#else
+#elif defined(linux)
   delta = elapsed.seconds;
   elapsed.seconds = 0;
+#else
+  //TODO: implement
+  delta = 0;
+  uint32_t curTime = 0;
 #endif
   
 //  if(delta <= 0)

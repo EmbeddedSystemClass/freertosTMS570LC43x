@@ -87,7 +87,8 @@ purpose.
 ******************************************************************************/
 
 
-#include "epl.h"
+//#include "epl.h"
+#include "ptpd.h"
 
 NS_UINT8 *
     intGetNextPhyMessage (

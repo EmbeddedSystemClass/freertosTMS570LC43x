@@ -135,14 +135,15 @@ void protocol(RunTimeOpts *rtOpts, PtpClock *ptpClock)
       DBGV("activity\n");
     else
     {
-      Sleep(0);
+//      Sleep(0);
       //DBGV("no activity\n")
     }
       
-    if ( rtOpts->oaiHandle->killThread)
-        break;
+    //TODO: implement
+//    if ( rtOpts->oaiHandle->killThread)
+//        break;
 
-    Sleep(0);
+//    Sleep(0);
   }
 }
 
@@ -283,7 +284,7 @@ void doState(RunTimeOpts *rtOpts, PtpClock *ptpClock)
     break;
   }
 
-  Sleep(5);
+//  Sleep(5);
 }
 
 /* perform actions required when leaving 'port_state' and entering 'state' */

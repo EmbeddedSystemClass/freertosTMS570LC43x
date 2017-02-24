@@ -48,6 +48,7 @@ void EPLWriteReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t d
 void EPLReadReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t * data);
 
 void EPLReadReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t * data){
+	//TODO: return data to be consistent with original API
 	dp83630_set_page(mdio_base, phy_addr, reg);
 	MDIOPhyRegRead(mdio_base, phy_addr, reg, data);
 }
@@ -110,8 +111,7 @@ void PTPSetTriggerConfig(uint32_t baseAddr, uint32_t phyAddr,
     return;
 }
  
-void PTPSetEventConfig (
-		uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetEventConfig (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t event,
         boolean eventRiseFlag,
         boolean eventFallFlag,

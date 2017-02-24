@@ -136,7 +136,8 @@ void initClock(RunTimeOpts *rtOpts, PtpClock *ptpClock)
     PTPSetTempRateDurationConfig( rtOpts->eplPortHandle, (rtOpts->tempRateLength * 1000) / 8);
     
     // Clear the rx queue of any backed up sync msgs
-    MACFlushReceiveFifos( rtOpts->eplPortHandle);
+    //TODO: implement
+//    MACFlushReceiveFifos( rtOpts->eplPortHandle);
 }
 
 
@@ -363,7 +364,8 @@ int x, avgRates, avgOfAvgsRate, deltaRate;
             ptpClock->waitingForAdjFlag = TRUE;
             
             // Wait for temp rate to finish
-            Sleep( rtOpts->tempRateLength / 1000);
+            //TODO: implement
+//            Sleep( rtOpts->tempRateLength / 1000);
             
             DBG( "Normal Rate: %d, Delta Rate: %d (%dns), Temp Rate: %d\n", ptpClock->lastRateAdj, deltaRate, ptpClock->offset_from_master.nanoseconds, ptpClock->lastRateAdj - deltaRate);
         }    

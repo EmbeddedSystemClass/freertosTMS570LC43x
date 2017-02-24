@@ -1,0 +1,50 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/PTPStack/arith.c \
+../epl_1588/PTPStack/bmc.c \
+../epl_1588/PTPStack/probe.c \
+../epl_1588/PTPStack/protocol.c \
+../epl_1588/PTPStack/ptpd.c 
+
+C_DEPS += \
+./epl_1588/PTPStack/arith.d \
+./epl_1588/PTPStack/bmc.d \
+./epl_1588/PTPStack/probe.d \
+./epl_1588/PTPStack/protocol.d \
+./epl_1588/PTPStack/ptpd.d 
+
+OBJS += \
+./epl_1588/PTPStack/arith.obj \
+./epl_1588/PTPStack/bmc.obj \
+./epl_1588/PTPStack/probe.obj \
+./epl_1588/PTPStack/protocol.obj \
+./epl_1588/PTPStack/ptpd.obj 
+
+OBJS__QUOTED += \
+"epl_1588\PTPStack\arith.obj" \
+"epl_1588\PTPStack\bmc.obj" \
+"epl_1588\PTPStack\probe.obj" \
+"epl_1588\PTPStack\protocol.obj" \
+"epl_1588\PTPStack\ptpd.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588\PTPStack\arith.d" \
+"epl_1588\PTPStack\bmc.d" \
+"epl_1588\PTPStack\probe.d" \
+"epl_1588\PTPStack\protocol.d" \
+"epl_1588\PTPStack\ptpd.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/PTPStack/arith.c" \
+"../epl_1588/PTPStack/bmc.c" \
+"../epl_1588/PTPStack/probe.c" \
+"../epl_1588/PTPStack/protocol.c" \
+"../epl_1588/PTPStack/ptpd.c" 
+
+

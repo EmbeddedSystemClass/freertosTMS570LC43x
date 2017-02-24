@@ -170,7 +170,9 @@ Boolean nanoSleep(TimeInternal *t)
 #elif defined(_WIN32)
 
   return TRUE;
-  
+#else
+  //TODO: implement
+  return 0;
 #endif
 }
 
@@ -218,6 +220,9 @@ UInteger16 getRand(UInteger32 *seed)
     }
         
     return rand();
+#else
+    //TODO: implement
+    return 0;
 #endif
 }
 
@@ -238,7 +243,9 @@ Boolean adjFreq(Integer32 adj)
   
 #elif defined(_WIN32)
   return 0;
-
+#else
+  //TODO: implement
+  return 0;
 #endif
 }
 

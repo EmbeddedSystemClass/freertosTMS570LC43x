@@ -97,6 +97,8 @@ purpose.
 #define TRUE 1
 #endif
 
+typedef uint32_t DWORD;
+typedef uint32_t HANDLE;
 typedef int Boolean;
 typedef char Octet;
 typedef signed char Integer8;

@@ -1,0 +1,38 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+SHELL = cmd.exe
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/PTPStack/dep/msg.c \
+../epl_1588/PTPStack/dep/net.c \
+../epl_1588/PTPStack/dep/servo.c 
+
+C_DEPS += \
+./epl_1588/PTPStack/dep/msg.d \
+./epl_1588/PTPStack/dep/net.d \
+./epl_1588/PTPStack/dep/servo.d 
+
+OBJS += \
+./epl_1588/PTPStack/dep/msg.obj \
+./epl_1588/PTPStack/dep/net.obj \
+./epl_1588/PTPStack/dep/servo.obj 
+
+OBJS__QUOTED += \
+"epl_1588\PTPStack\dep\msg.obj" \
+"epl_1588\PTPStack\dep\net.obj" \
+"epl_1588\PTPStack\dep\servo.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588\PTPStack\dep\msg.d" \
+"epl_1588\PTPStack\dep\net.d" \
+"epl_1588\PTPStack\dep\servo.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/PTPStack/dep/msg.c" \
+"../epl_1588/PTPStack/dep/net.c" \
+"../epl_1588/PTPStack/dep/servo.c" 
+
+

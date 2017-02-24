@@ -320,7 +320,7 @@ struct xUDP_IP_FRAGMENT_PARAMETERS
 	uint16_t usFragmentedPacketOffset;
 	uint16_t usFragmentLength;
 	uint16_t usPayloadChecksum;
-}
+};
 #include "pack_struct_end.h"
 typedef struct xUDP_IP_FRAGMENT_PARAMETERS IPFragmentParameters_t;
 

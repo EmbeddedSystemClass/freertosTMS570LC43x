@@ -91,13 +91,14 @@ purpose.
 #define CONSTANTS_DEP_H
 
 //#include "epl.h"
-#include "oai.h"
+#include "ptpControl.h"
+//#include "oai.h"
 
 /* platform dependent */
 
-#if !defined(_WIN32) && !defined(linux) && !defined(__NetBSD__) && !defined(__FreeBSD__)
-#error Not ported to this architecture, please update.
-#endif
+//#if !defined(_WIN32) && !defined(linux) && !defined(__NetBSD__) && !defined(__FreeBSD__)
+//#error Not ported to this architecture, please update.
+//#endif
 
 #ifdef	_WIN32
 
@@ -159,6 +160,12 @@ purpose.
 # endif
 #endif
 
+
+#define NET_ADDRESS_LENGTH        16
+#define IFACE_NAME_LENGTH         50
+#define PTPD_LSBF
+
+#define INT_MAX POW_2_32
 
 #define ADJ_FREQ_MAX  512000
 

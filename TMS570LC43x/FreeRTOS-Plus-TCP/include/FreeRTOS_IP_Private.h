@@ -356,6 +356,9 @@ defined const for quick reference. */
 extern const MACAddress_t xBroadcastMACAddress; /* all 0xff's */
 extern uint16_t usPacketIdentifier;
 
+//ptp1588 support scott lee
+extern const MACAddress_t xPTP1588MACAddress;
+
 /* Define a default UDP packet header (declared in FreeRTOS_UDP_IP.c) */
 typedef union _UdpPacketHeader
 {

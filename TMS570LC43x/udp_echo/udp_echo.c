@@ -86,6 +86,7 @@
 
 /* Demo app includes. */
 #include "udp_echo.h"
+#include "NetworkInterface.h"
 
 /* Dimensions the buffer into which input characters are placed. */
 #define cmdMAX_INPUT_SIZE	1024
@@ -135,8 +136,9 @@ struct freertos_sockaddr xClient;
 	parameter.  The strange casting is to remove compiler warnings on 32-bit
 	machines. */
 	xSocket = prvOpenUDPServerSocket( ( uint16_t ) ( ( uint32_t ) pvParameters ) & 0xffffUL );
-	const char return_ip[4] = {224,0,1,129};
 	uint32_t bits_written = 0;
+	uint32_t seconds = 0;
+	uint32_t nano_seconds = 0;
 
 	if( xSocket != FREERTOS_INVALID_SOCKET )
 	{
@@ -147,9 +149,11 @@ struct freertos_sockaddr xClient;
 
 			if( lBytes > 0 )
 			{
+				if(lBytes > rxCfgItems.rxTsNanoSecOffset + 4){
+					PTPGetTimestampFromFrame((uint8_t *)cLocalBuffer, &seconds, &nano_seconds);
+				}
 				xClient.sin_port = FreeRTOS_htons(320);
 				xClient.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
-//				memset(cLocalBuffer, 0, sizeof(cLocalBuffer));
 				bits_written = FreeRTOS_sendto( xSocket, cLocalBuffer,  lBytes, 0, &xClient, xClientAddressLength );
 			}
 		}
@@ -161,6 +165,10 @@ struct freertos_sockaddr xClient;
 	}
 }
 /*-----------------------------------------------------------*/
+
+boolean is_ptp1588_packet(uint8_t * packet){
+	return 0;
+}
 
 static Socket_t prvOpenUDPServerSocket( uint16_t usPort )
 {

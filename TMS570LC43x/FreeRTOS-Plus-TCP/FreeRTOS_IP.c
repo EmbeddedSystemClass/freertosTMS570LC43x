@@ -356,6 +356,9 @@ uint16_t usPacketIdentifier = 0U;
 reference. */
 const MACAddress_t xBroadcastMACAddress = { { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } };
 
+//ptp1588 support scott lee
+const MACAddress_t xPTP1588MACAddress = { { 0x01, 0x00, 0x5e, 0x00, 0x01, 0x81 } };
+
 /* Structure that stores the netmask, gateway address and DNS server addresses. */
 NetworkAddressingParameters_t xNetworkAddressing = { 0, 0, 0, 0, 0 };
 
@@ -1584,7 +1587,7 @@ eFrameProcessingResult_t eReturn = eProcessBuffer;
 				/* Is it the global broadcast address 255.255.255.255 ? */
 				( ulDestinationIPAddress != ipBROADCAST_IP_ADDRESS ) &&
 				/* Is it ptp, scott */
-				( ulDestinationIPAddress != ipPTP_IP_ADDRESS ) &&
+				( ulDestinationIPAddress != ipPTP1588_IP_ADDRESS ) &&
 				/* Is it a specific broadcast address 192.168.1.255 ? */
 				( ulDestinationIPAddress != xNetworkAddressing.ulBroadcastAddress ) &&
 			#if( ipconfigUSE_LLMNR == 1 )

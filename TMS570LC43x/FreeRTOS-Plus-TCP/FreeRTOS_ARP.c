@@ -404,9 +404,19 @@ uint32_t ulAddressToLookup;
 	}
 	else
 #endif
+
+//Added ptp1588 support scott lee
+#if( ipconfigUSE_PTP1588 == 1 )
+	if( *pulIPAddress == ipPTP1588_IP_ADDRESS)	/* Is in network byte order */
+	{
+		/* The LLMNR IP-address has a fixed virtual MAC address */
+		memcpy( pxMACAddress->ucBytes, xPTP1588MACAddress.ucBytes, sizeof( MACAddress_t ) );
+		eReturn = eARPCacheHit;
+	}
+	else
+#endif
 	if( ( *pulIPAddress == ipBROADCAST_IP_ADDRESS ) ||	/* Is it the general broadcast address 255.255.255.255 ? */
-		( *pulIPAddress == xNetworkAddressing.ulBroadcastAddress ||
-		  *pulIPAddress == ipPTP_IP_ADDRESS) )/* Or a local broadcast address 192.168.1.255 ? */
+		( *pulIPAddress == xNetworkAddressing.ulBroadcastAddress ) )/* Or a local broadcast address 192.168.1.255 ? */
 	{
 		/* This is a broadcast so uses the broadcast MAC address. */
 		memcpy( pxMACAddress->ucBytes, xBroadcastMACAddress.ucBytes, sizeof( MACAddress_t ) );

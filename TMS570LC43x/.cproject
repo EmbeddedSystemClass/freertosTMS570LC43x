@@ -58,7 +58,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS-Plus-UDP-Console/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
 								</option>
-								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE.1448526791" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE" useByScannerDiscovery="false" valueType="definedSymbols"/>
+								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE.1448526791" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE" useByScannerDiscovery="false"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__C_SRCS.2036494037" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__C_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__CPP_SRCS.552527500" name="C++ Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__CPP_SRCS"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__ASM_SRCS.1930165934" name="Assembly Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__ASM_SRCS"/>
@@ -88,7 +88,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="EPL_v193_20091023|EPL_v193_20091023/OS/Windows|EPL_v193_20091023/tools|EPL_v193_20091023/interface/LPT|EPL_v193_20091023/interface/CyUSB|EPL_v193_20091023/interface/ALP_OK|source/mainDemo.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|source/HL_sci.c|source/HL_sys_main.c|source/HL_emac.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/ff_dev_support.c|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-FAT/portable/avr32_uc3|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="EPL_v193_20091023|EPL_v193_20091023/OS/Windows|EPL_v193_20091023/tools|EPL_v193_20091023/interface/LPT|EPL_v193_20091023/interface/CyUSB|EPL_v193_20091023/interface/ALP_OK|source/mainDemo.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|source/HL_sci.c|source/HL_sys_main.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/ff_dev_support.c|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-FAT/portable/avr32_uc3|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

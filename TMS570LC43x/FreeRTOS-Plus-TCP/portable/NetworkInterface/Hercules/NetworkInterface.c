@@ -43,8 +43,8 @@
 #include "os_semphr.h"
 
 /* HALCoGen generated header files */
-#include "HL_emac.h"
 #include "HL_mdio.h"
+#include "HL_emac.h"
 #include "HL_phy_dp83640.h"
 #include "HL_sys_vim.h"
 #include "HL_gio.h"
@@ -55,9 +55,11 @@
 #include "FreeRTOS_IP_Private.h"
 #include "NetworkBufferManagement.h"
 
+#include "NetworkInterface.h"
+
+static void init1588(hdkif_t *hdkif);
+
 /* HALCoGen generated c files */
-#include "HL_emac.c"
-#include "epl.h"
 
 #define EMAC_INT_CORE0_RX_THRESH		(0x0U)		// Acknowledge C0RXTHRESH Interrupt
 #define EMAC_INT_CORE0_MISC				(0x3U)		// Acknowledge C0MISC Interrupt (STATPEND, HOSTPEND, MDIO LINKINT0, MDIO USERINT0)
@@ -777,7 +779,6 @@ static void init1588(hdkif_t *hdkif){
 	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
 	PTPSetTransmitConfig(hdkif->mdio_base, hdkif->phy_addr, 0, 0, 0, 0);
 	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
-	RX_CFG_ITEMS rxCfgItems;
 	memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
 //	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
 	PTPSetReceiveConfig(hdkif->mdio_base, hdkif->phy_addr, 0, &rxCfgItems);
@@ -811,16 +812,18 @@ static void init1588(hdkif_t *hdkif){
 	rxCfgItems.srcIdHash = 0;
 	rxCfgItems.ptpDomain = 0;
 	rxCfgItems.tsSecLen = 3;
-	rxCfgItems.rxTsNanoSecOffset = 0;
-	rxCfgItems.rxTsSecondsOffset = 0;
+	//offset 8 to put timestamp in correction field, with append set to zero
+	rxCfgItems.rxTsSecondsOffset = 8;
+	rxCfgItems.rxTsNanoSecOffset = 12;
 
 //	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
 //			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
 //			RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
 
-	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-			RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
-			RXOPT_RX_SLAVE|RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
+	rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+			RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+			RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
+	//RXOPT_IPV4_UDP_MOD RXOPT_TS_APPEND
 
 	PTPSetReceiveConfig(hdkif->mdio_base, hdkif->phy_addr, rxCfgOpts, &rxCfgItems);
 //	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);

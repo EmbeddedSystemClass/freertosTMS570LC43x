@@ -322,8 +322,6 @@ void PTPGetReceiveTimestamp (
         uint32_t *hashValue);
 
 void PTPGetTimestampFromFrame (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
         uint8_t *receiveFrameData,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds);

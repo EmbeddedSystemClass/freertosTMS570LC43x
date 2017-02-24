@@ -60,10 +60,6 @@ hdkif_t hdkif_data[MAX_EMAC_INSTANCE];
 /*******************************************************************************
 *                       INTERNAL MACRO DEFINITIONS
 *******************************************************************************/
-#define EMAC_CONTROL_RESET             (0x01U)
-#define EMAC_SOFT_RESET                (0x01U)
-#define EMAC_MAX_HEADER_DESC           (8U)
-#define EMAC_UNICAST_DISABLE           (0xFFU)
 
 /*******************************************************************************
 *                        API FUNCTION DEFINITIONS

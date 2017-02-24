@@ -29,14 +29,14 @@
 //#include "epl_tdr.h"		// TDR API definitions/prototypes
 
 #include "epl_1588.h"		// PTP protocol related API definitions/prototypes
-#include "HL_emac.h"
 
 #define PAGESEL_REG		(0x13)
 #define PAGESEL_MASK	(0xE0)
 #define PAGESEL_SHIFT	(5u)
 #define GET_PAGE(x)		((x & PAGESEL_MASK)>> PAGESEL_SHIFT)
 void dp83630_set_page(uint32_t mdio_base, uint32_t phy_addr, uint16_t reg);
-static void init1588(hdkif_t *hdkif);
+extern RX_CFG_ITEMS rxCfgItems;
+extern uint32_t rxCfgOpts;
 
 // Other modules for the DLL
 //#include "ifGenMAC.h"		// Interface for generic MAC - Not filled in/used

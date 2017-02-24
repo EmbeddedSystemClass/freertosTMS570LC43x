@@ -149,6 +149,7 @@ used as defaults. */
 
 /* Include support for LLMNR: Link-local Multicast Name Resolution
 (non-Microsoft) */
+#define ipconfigUSE_PTP1588					( 1 )
 #define ipconfigUSE_LLMNR					( 0 )
 #define mainDEVICE_NICK_NAME				"hercules"
 

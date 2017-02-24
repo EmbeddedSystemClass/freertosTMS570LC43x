@@ -62,6 +62,10 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "os_semphr.h"
 /* USER CODE END */
+#define EMAC_CONTROL_RESET             (0x01U)
+#define EMAC_SOFT_RESET                (0x01U)
+#define EMAC_MAX_HEADER_DESC           (8U)
+#define EMAC_UNICAST_DISABLE           (0xFFU)
 
 /*****************************************************************************/
 /*

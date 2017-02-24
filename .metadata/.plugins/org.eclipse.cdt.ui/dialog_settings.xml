@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <section name="Workbench">
-	<item value="${workspace_loc:/${ProjName}/udp_echo/include}" key="org.eclipse.cdt.utils.ui.controls.FileListControl"/>
+	<item value="${workspace_loc:/${ProjName}/epl_1588/PTPStack/dep}" key="org.eclipse.cdt.utils.ui.controls.FileListControl"/>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
 		<item value="180" key="size.height"/>
 		<item value="603" key="size.width"/>
 	</section>
 	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
+	</section>
+	<section name="PDOMSearchPage">
+		<item value="false" key="caseSensitive"/>
+		<item value="227191" key="searchFlags"/>
+		<list key="previousPatterns">
+			<item value="EPLReadReg"/>
+			<item value="DWORD"/>
+			<item value="STS_PSF_DATA"/>
+			<item value="IFACE_NAME_LENGTH"/>
+			<item value="PTP_CODE_STRING_LENGTH"/>
+			<item value="EMACCoreIntAck"/>
+			<item value="EMAC_CORE_INT"/>
+			<item value="EMAC_CONTROL_RESET"/>
+		</list>
 	</section>
 	<section name="OptionalMessageDialog.hide.">
 		<item value="0" key="askReindex.detail"/>

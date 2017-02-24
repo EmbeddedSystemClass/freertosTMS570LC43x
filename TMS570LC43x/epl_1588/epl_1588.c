@@ -52,12 +52,7 @@ void EPLReadReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t * 
 	MDIOPhyRegRead(mdio_base, phy_addr, reg, data);
 }
 
-//****************************************************************************
-void PTPEnable(
-//        PEPL_PORT_HANDLE baseAddr, phyAddr,
-    		uint32_t baseAddr, uint32_t phyAddr,
-        boolean enableFlag)
-        
+void PTPEnable(uint32_t baseAddr, uint32_t phyAddr, boolean enableFlag)
 //  Enables or disables the PHY's PTP 1588 Clock.
 //
 //  portHandle
@@ -76,9 +71,7 @@ void PTPEnable(
     return;
 }
  
-//****************************************************************************
-void PTPSetTriggerConfig(
-		uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetTriggerConfig(uint32_t baseAddr, uint32_t phyAddr,
         uint32_t trigger,
         uint32_t triggerBehavior,
         uint32_t gpioConnection)
@@ -99,7 +92,7 @@ void PTPSetTriggerConfig(
 //      Nothing
 //****************************************************************************
 {
-uint32_t reg;
+	uint32_t reg;
 
     reg = 0;
     if ( triggerBehavior & TRGOPT_PULSE)        reg |= P640_TRIG_PULSE;
@@ -117,7 +110,6 @@ uint32_t reg;
     return;
 }
  
-//****************************************************************************
 void PTPSetEventConfig (
 		uint32_t baseAddr, uint32_t phyAddr,
         uint32_t event,
@@ -125,7 +117,6 @@ void PTPSetEventConfig (
         boolean eventFallFlag,
         boolean eventSingle,
         uint32_t gpioConnection)
-
 //  Configures the operational behavior of an individual event.
 //  
 //  portHandle
@@ -146,7 +137,7 @@ void PTPSetEventConfig (
 //      Nothing
 //****************************************************************************
 {
-uint32_t reg;
+	uint32_t reg;
 
     reg = 0;
     
@@ -164,9 +155,7 @@ uint32_t reg;
     return;
 }
 
-//****************************************************************************
-void PTPSetTransmitConfig (
-		uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetTransmitConfig (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t txConfigOptions,
         uint32_t ptpVersion,
         uint32_t ptpFirstByteMask,
@@ -196,7 +185,7 @@ void PTPSetTransmitConfig (
 //      Nothing
 //****************************************************************************
 {
-uint32_t reg;
+	uint32_t reg;
 
     reg = 0;
     if ( txConfigOptions & TXOPT_SYNC_1STEP)    reg |= P640_SYNC_1STEP;
@@ -229,9 +218,7 @@ uint32_t PTPReadTransmitConfig (uint32_t baseAddr, uint32_t phyAddr)
     return reg;
 }
 
-//****************************************************************************
-void PTPSetPhyStatusFrameConfig (
-		uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetPhyStatusFrameConfig (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t statusConfigOptions,
         MAC_SRC_ADDRESS_ENUM srcAddrToUse,
         uint32_t minPreamble,
@@ -283,24 +270,24 @@ void PTPSetPhyStatusFrameConfig (
 //      Nothing
 //****************************************************************************
 {
-uint32_t reg;
-uint8_t *ptr;
-static uint8_t srcAddrs[4][6] = \
-                        { {0x08,0x00,0x17,0x0B,0x6B,0x0F},
-                          {0x08,0x00,0x17,0x00,0x00,0x00},
-                          {0x01,0x00,0x00,0x00,0x00,0x00},
-                          {0x00,0x00,0x00,0x00,0x00,0x00} };
+	uint32_t reg;
+	uint8_t *ptr;
+	static uint8_t srcAddrs[4][6] = \
+							{ {0x08,0x00,0x17,0x0B,0x6B,0x0F},
+							  {0x08,0x00,0x17,0x00,0x00,0x00},
+							  {0x01,0x00,0x00,0x00,0x00,0x00},
+							  {0x00,0x00,0x00,0x00,0x00,0x00} };
 
-// NOTE: ocList is packed in little endian order for proper calculation
-uint16_t ocList[6] = { 0x4500, 0x0111, 0xE000, 0x0181, 0x0000, 0x0000 }; // Little Endian
-//uint16_t ocList[6] = { 0x0045, 0x1101, 0x00E0, 0x8101, 0x0000, 0x0000 }; // Big Endian
+	// NOTE: ocList is packed in little endian order for proper calculation
+	uint16_t ocList[6] = { 0x4500, 0x0111, 0xE000, 0x0181, 0x0000, 0x0000 }; // Little Endian
+	//uint16_t ocList[6] = { 0x0045, 0x1101, 0x00E0, 0x8101, 0x0000, 0x0000 }; // Big Endian
 
-uint8_t  i;
-uint32_t ipChecksum, rollover;
+	uint8_t  i;
+	uint32_t ipChecksum, rollover;
 
     ptr = srcAddrs[ srcAddrToUse ];
-//    *(uint32_t*)&portHdl->psfSrcMacAddr[0] = *(uint32_t*)&ptr[0];
-//    *(uint16_t*)&portHdl->psfSrcMacAddr[4] = *(uint16_t*)&ptr[4];
+	//    *(uint32_t*)&portHdl->psfSrcMacAddr[0] = *(uint32_t*)&ptr[0];
+	//    *(uint16_t*)&portHdl->psfSrcMacAddr[4] = *(uint16_t*)&ptr[4];
 
     reg = 0;
     if( statusConfigOptions & STSOPT_LITTLE_ENDIAN ) reg |= P640_PKT_ENDIAN;
@@ -361,11 +348,9 @@ uint32_t ipChecksum, rollover;
     return;
 }
 
-//****************************************************************************
 void PTPSetReceiveConfig (uint32_t baseAddr, uint32_t phyAddr,
 			uint32_t rxConfigOptions,
 			RX_CFG_ITEMS *rxConfigItems)
-
 //  Configures the device's receive operation.
 //  
 //  portHandle
@@ -462,10 +447,7 @@ uint32_t PTPReadReceiveConfig (uint32_t baseAddr, uint32_t phyAddr)
     return reg;
 }
 
-//****************************************************************************
-uint32_t PTPCalcSourceIdHash (
-        uint8_t *tenBytesData)
-        
+uint32_t PTPCalcSourceIdHash (uint8_t *tenBytesData)
 //  Utility function that will calculate a 12-bit CRC-32 (IEEE 802.3, no 
 //  complement) value used to program the RX_CFG_ITEMS.srcIdHash field.
 //  
@@ -503,9 +485,7 @@ uint8_t data;
     return (crc & 0xFFFFFFFF) >> 20;
 }
 
-//****************************************************************************
 void PTPSetTempRateDurationConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t duration)
-
 //  Configures the PTP Temporary Duration.
 //  
 //  portHandle
@@ -529,7 +509,6 @@ void PTPSetTempRateDurationConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t
     return;
 }
 
-//****************************************************************************
 void PTPSetClockConfig (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t clockConfigOptions,
         uint32_t ptpClockDivideByValue,
@@ -570,7 +549,6 @@ void PTPSetClockConfig (uint32_t baseAddr, uint32_t phyAddr,
 //****************************************************************************
 {
 	uint32_t reg;
-
     reg = 0;
     if ( clockConfigOptions & CLKOPT_CLK_OUT_EN) reg |= P640_PTP_CLKOUT_EN;
     if ( clockConfigOptions & CLKOPT_CLK_OUT_SEL) reg |= P640_PTP_CLKOUT_SEL;
@@ -590,11 +568,8 @@ void PTPSetClockConfig (uint32_t baseAddr, uint32_t phyAddr,
     else
         reg |= PHYCR2_CLK_OUT_DIS;
     EPLWriteReg( baseAddr, phyAddr, PHY_PG0_PHYCR2, reg);
-    
-    return;
 }
 
-//****************************************************************************
 void PTPSetGpioInterruptConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t gpioInt)
 //  Configures the GPIO pin to be used for the PTP Interrupt function.
 //  
@@ -611,7 +586,6 @@ void PTPSetGpioInterruptConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t gp
 //****************************************************************************
 {
     EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_INTCTL, gpioInt);
-    return;
 }
 
 void PTPSetMiscConfig (uint32_t baseAddr, uint32_t phyAddr,
@@ -651,14 +625,11 @@ void PTPSetMiscConfig (uint32_t baseAddr, uint32_t phyAddr,
     EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_SFDCFG,
                  (txSfdGpio << P640_TX_SFD_GPIO_SHIFT) | 
                  (rxSfdGpio << P640_RX_SFD_GPIO_SHIFT));
-    return;
 }
 
-void PTPClockReadCurrent (
-		uint32_t baseAddr, uint32_t phyAddr,
+void PTPClockReadCurrent (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds)
-
 //  Returns a snapshot of the current IEEE 1588 clock value.
 //  
 //  portHandle
@@ -693,10 +664,8 @@ void PTPClockReadCurrent (
     *retNumberOfSeconds |= seconds_high << 16;
 
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
 }
 
-//****************************************************************************
 void PTPClockStepAdjustment (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds,
@@ -744,11 +713,8 @@ void PTPClockStepAdjustment (uint32_t baseAddr, uint32_t phyAddr,
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, P640_PTP_STEP_CLK);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
-
 }
 
-//****************************************************************************
 void PTPClockSet (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds)
@@ -774,7 +740,6 @@ void PTPClockSet (uint32_t baseAddr, uint32_t phyAddr,
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, P640_PTP_LOAD_CLK);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
 }
 
 void PTPClockSetRateAdjustment (
@@ -866,7 +831,6 @@ void PTPClockSetRateAdjustment (
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_RATEH, reg);
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_RATEL, rateAdjValue & 0xFFFF);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
 }
 
 uint32_t PTPCheckForEvents (uint32_t baseAddr, uint32_t phyAddr)
@@ -901,9 +865,9 @@ uint32_t PTPCheckForEvents (uint32_t baseAddr, uint32_t phyAddr)
 //  as the other types of events with a single call.
 //****************************************************************************
 {
-uint32_t reg, eventFlags;
+	uint32_t reg, eventFlags;
 
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_STS);
+	//reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_STS);
     EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_STS, &reg);
     eventFlags = 0;
     if ( reg & P640_TXTS_RDY) eventFlags |= PTPEVT_TRANSMIT_TIMESTAMP_BIT;
@@ -971,10 +935,8 @@ void PTPGetTransmitTimestamp (uint32_t baseAddr, uint32_t phyAddr,
     EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS, &seconds_high);
 	*retNumberOfSeconds |= seconds_high << 16;
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
 }
 
-//****************************************************************************
 void PTPGetReceiveTimestamp (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds,
@@ -1076,14 +1038,11 @@ void PTPGetReceiveTimestamp (uint32_t baseAddr, uint32_t phyAddr,
 
     *messageType = reg >> 12;
     *hashValue = reg & 0x0FFF;
-    return;
 }
 
-//****************************************************************************
 void PTPGetTimestampFromFrame (uint8_t *receiveFrameData,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds)
-
 //  Extracts the embedded receive timestamp from a received PTP frame.
 //  
 //  portHandle
@@ -1164,11 +1123,8 @@ void PTPGetTimestampFromFrame (uint8_t *receiveFrameData,
         *retNumberOfSeconds = *(uint32_t*)secField;
         *(uint32_t*)secField = 0;
     }
-
-    return;
 }
 
-//****************************************************************************
 void PTPArmTrigger (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t trigger,
         uint32_t expireTimeSeconds,
@@ -1245,10 +1201,8 @@ void PTPArmTrigger (uint32_t baseAddr, uint32_t phyAddr,
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_EN;
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, reg);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    return;
 }
  
-//****************************************************************************
 boolean PTPHasTriggerExpired (uint32_t baseAddr, uint32_t phyAddr, uint32_t trigger)
 //  Determines if a particular trigger has occurred or if an error has 
 //  occurred. An interrupt mechanism may also be used to detect trigger 
@@ -1274,7 +1228,7 @@ boolean PTPHasTriggerExpired (uint32_t baseAddr, uint32_t phyAddr, uint32_t trig
 //  It is NOT necessary to call PTPCheckForEvents() prior to invocation.
 //****************************************************************************
 {
-uint32_t reg, trgBit;
+	uint32_t reg, trgBit;
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
 //    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TSTS);
@@ -1289,10 +1243,7 @@ uint32_t reg, trgBit;
     return NS_STATUS_SUCCESS;
 }
 
-//****************************************************************************
-void PTPCancelTrigger (uint32_t baseAddr, uint32_t phyAddr,
-        uint32_t trigger)
-
+void PTPCancelTrigger (uint32_t baseAddr, uint32_t phyAddr, uint32_t trigger)
 //  Cancels a previously schedule trigger event (if active).
 //  
 //  portHandle
@@ -1309,26 +1260,19 @@ void PTPCancelTrigger (uint32_t baseAddr, uint32_t phyAddr,
 //  1588 time.
 //****************************************************************************
 {
-uint32_t reg;
-
+	uint32_t reg;
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_DIS;
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
     EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, reg);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
-    
-    return;
 }
 
-//****************************************************************************
-boolean PTPGetEvent (
-//        PEPL_PORT_HANDLE baseAddr, phyAddr,
-    		uint32_t baseAddr, uint32_t phyAddr,
+boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
         uint32_t *eventBits,
         uint32_t *riseFlags,
         uint32_t *eventTimeSeconds,
         uint32_t *eventTimeNanoSeconds,
         uint32_t *eventsMissed)
-        
 //  Returns the available asynchronous event timestamps.
 //  
 //  portHandle
@@ -1365,8 +1309,7 @@ boolean PTPGetEvent (
 //  path and synchronization delays.
 //****************************************************************************
 {
-//PPORT_OBJ portHdl = (PPORT_OBJ)portHandle;
-uint32_t reg, exSts, x;
+	uint32_t reg, exSts, x;
 
     *eventBits = 0;
     *riseFlags = 0;
@@ -1403,10 +1346,22 @@ uint32_t reg, exSts, x;
         *riseFlags |= ((reg & P640_EVNT_RF) ? 1 : 0) << ((reg & P640_EVNT_NUM_MASK) >> P640_EVNT_NUM_SHIFT);
     }
     
+    uint32_t time_high = 0;
+
 //    *eventTimeNanoSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA);
+    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, eventTimeNanoSeconds);
+
 //    *eventTimeNanoSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA) << 16;
+    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, &time_high);
+    *eventTimeNanoSeconds |= time_high << 16;
+
 //    *eventTimeSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA);
+     EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, eventTimeSeconds);
+
 //    *eventTimeSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA) << 16;
+    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, &time_high);
+    *eventTimeSeconds |= time_high << 16;
+
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
     
     // Adj for pin input delay and edge detection time
@@ -1426,11 +1381,7 @@ uint32_t reg, exSts, x;
 	return TRUE;
 }
 
-//****************************************************************************
-uint32_t MonitorGpioSignals (
-//        PEPL_PORT_HANDLE portHandle)
-    		uint32_t baseAddr, uint32_t phyAddr)
-
+uint32_t MonitorGpioSignals (uint32_t baseAddr, uint32_t phyAddr)
 //  Provides a function to read the current status of the device's GPIO 
 //  signals.
 //  
@@ -1443,52 +1394,48 @@ uint32_t MonitorGpioSignals (
 //      GPIO 12 is bit 11, etc.
 //****************************************************************************
 {
-//    return EPLReadReg( baseAddr, phyAddr, PHY_PG6_PTP_GPIOMON);
-	return;
+	uint32_t signal = 0;
+    EPLReadReg( baseAddr, phyAddr, PHY_PG6_PTP_GPIOMON, &signal);
+    return signal;
 }
 
-//****************************************************************************
-//uint8_t *
-//    IsPhyStatusFrame (
-////		PEPL_PORT_HANDLE baseAddr, phyAddr,
-//    		uint32_t baseAddr, uint32_t phyAddr,
-//        uint8_t *frameBuffer,
-//        uint16_t frameLength)
-
-//  Determines if the specified receive frame is a specially formatted IEEE 
+uint8_t * IsPhyStatusFrame (uint32_t baseAddr, uint32_t phyAddr,
+        uint8_t *frameBuffer,
+        uint16_t frameLength)
+//  Determines if the specified receive frame is a specially formatted IEEE
 //  1588 Phy Status Frame (PSF).
-//  
+//
 //  portHandle
-//      Handle that represents a port. This is obtained using the EPLEnumPort 
+//      Handle that represents a port. This is obtained using the EPLEnumPort
 //      function.
 //  frameBuffer
-//      Pointer to a byte array containing a pointer to the incoming IEEE 
-//      1588 frame. Where in the frame this points is defined by the 
+//      Pointer to a byte array containing a pointer to the incoming IEEE
+//      1588 frame. Where in the frame this points is defined by the
 //      offsetLocation parameter. This should point to the start of the
 //      Ethernet frame.
 //  frameLength
 //      The number of bytes pointed to by frameBuffer.
 //
 //  Returns
-//      If a valid message is found a pointer to the Phy message that 
+//      If a valid message is found a pointer to the Phy message that
 //      should be processed will be returned.  Otherwise NULL will be
 //      returned.
-//  
-//  This function used the previously configured values for the IEEE 1588 
-//  header transportSpecific, messageType and versionPTP to determine if the 
+//
+//  This function used the previously configured values for the IEEE 1588
+//  header transportSpecific, messageType and versionPTP to determine if the
 //  frame is a Phy Status Frame. Refer to PTPSetPhyStatusFrameConfig().
-//  
-//  If the frame is a PSF message, the caller should use the 
+//
+//  If the frame is a PSF message, the caller should use the
 //  GetNextPhyMessage() to obtain the message's information.
 //****************************************************************************
-//{
-//PPORT_OBJ portHdl = (PPORT_OBJ)portHandle;
-//static uint8_t ipDestAddr[6] = {0x01,0x00,0x5E,0x00,0x01,0x81};
-//static uint8_t macDestAddr[6] = {0x01,0x1B,0x19,0x00,0x00,0x00};
-//
-//    if ( portHdl->psfConfigOptions & STSOPT_IPV4)
-//    {
-//        // IPv4/UDP Frame
+{
+	static uint8_t ipDestAddr[6] = {0x01,0x00,0x5E,0x00,0x01,0x81};
+	static uint8_t macDestAddr[6] = {0x01,0x1B,0x19,0x00,0x00,0x00};
+
+    if ( /*portHdl->psfConfigOptions & STSOPT_IPV4*/ 1)
+    {
+        // IPv4/UDP Frame
+    	//TODO: implement
 //        if ( frameLength < 50)
 //            return portHdl->psfList;
 //
@@ -1502,12 +1449,13 @@ uint32_t MonitorGpioSignals (
 //
 //        if ( frameBuffer[12] != 0x08 || frameBuffer[13] != 0x00)
 //            return portHdl->psfList;
-//
-//        return &frameBuffer[44];
-//    }
-//    else
-//    {
-//        // Layer 2 Ethernet Frame
+
+        return &frameBuffer[44];
+    }
+    else
+    {
+        // Layer 2 Ethernet Frame
+    	//TODO: implement
 //        if ( frameLength < 22)
 //            return portHdl->psfList;
 //
@@ -1521,17 +1469,14 @@ uint32_t MonitorGpioSignals (
 //
 //        if ( frameBuffer[12] != 0x88 || frameBuffer[13] != 0xF7)
 //            return portHdl->psfList;
-//
-//        return &frameBuffer[16];
-//    }
-//
-//    return NULL;
-//}
-//****************************************************************************
-uint16_t ByteSwap16(
-         uint8_t  lEndian,
-         uint16_t wordIn)
 
+        return &frameBuffer[16];
+    }
+
+    return NULL;
+}
+
+uint16_t ByteSwap16(uint8_t  lEndian, uint16_t wordIn)
 // Helper Functions to handle big vs little endian
 //
 // lEndian
@@ -1550,11 +1495,7 @@ uint16_t ByteSwap16(
         return (((wordIn) >> 8) & 0x00ff) | (((wordIn) << 8) & 0xff00);
 }
 
-//****************************************************************************
-uint32_t ByteSwap32(
-         uint8_t  lEndian,
-         uint32_t dwordIn)
-
+uint32_t ByteSwap32(uint8_t  lEndian, uint32_t dwordIn)
 // Helper Functions to handle big vs little endian
 //
 // lEndian
@@ -1574,191 +1515,185 @@ uint32_t ByteSwap32(
                 (((dwordIn) << 8 ) & 0x00ff0000) | (((dwordIn) << 24) & 0xff000000);
 }
 
+uint8_t * intGetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
+        uint8_t *msgLocation,
+        PHYMSG_MESSAGE_TYPE_ENUM *messageType,
+        PHYMSG_MESSAGE *phyMessageOut,
+        boolean usePSFList)
+//  See below for details of the call.  This is the same as the exported call
+//  except it adds an additional flag usePSFList which controls whether or not
+//  the PSFList is cleared.  This helps in the creation/parsing of the messages
+//  list.
 //****************************************************************************
-//uint8_t *
-//    intGetNextPhyMessage (
-////        PEPL_PORT_HANDLE baseAddr, phyAddr,
-//    		uint32_t baseAddr, uint32_t phyAddr,
-//        uint8_t *msgLocation,
-//        PHYMSG_MESSAGE_TYPE_ENUM *messageType,
-//        PHYMSG_MESSAGE *phyMessageOut,
-//        boolean usePSFList)
-////  See below for details of the call.  This is the same as the exported call
-////  except it adds an additional flag usePSFList which controls whether or not
-////  the PSFList is cleared.  This helps in the creation/parsing of the messages
-////  list.
-////****************************************************************************
-//{
-//uint16_t val, stsType;
-//uint16_t *ptr;
-//uint8_t *msg = msgLocation;
-////PPORT_OBJ portHdl = (PPORT_OBJ)portHandle;
-//PHYMSG_MESSAGE *message = (PHYMSG_MESSAGE *)phyMessageOut;
-//uint8_t nextMsgOffset = 0;
-////uint8_t lEndian = portHdl->psfConfigOptions & STSOPT_LITTLE_ENDIAN;
-//PHYMSG_LIST *psfList;
-//
-//    // Clear out the PSF List first
-//    if( usePSFList && portHdl->psfList ) {
+{
+	uint16_t val, stsType;
+	uint16_t *ptr;
+	uint8_t *msg = msgLocation;
+	PHYMSG_MESSAGE *message = (PHYMSG_MESSAGE *)phyMessageOut;
+	uint8_t nextMsgOffset = 0;
+	//uint8_t lEndian = portHdl->psfConfigOptions & STSOPT_LITTLE_ENDIAN;
+	uint8_t lEndian = false;
+	PHYMSG_LIST *psfList;
+
+    // Clear out the PSF List first
+    //TODO: implement
+    if( usePSFList/* && portHdl->psfList*/ ) {
 //        psfList = (PHYMSG_LIST *)portHdl->psfList;
 //        *messageType = psfList->msgType;
 //        memcpy( phyMessageOut, &psfList->phyMsg, sizeof( PHYMSG_MESSAGE ) );
 //        portHdl->psfList = psfList->nxtMsg;
-////        OAIFree( psfList );
-//        return msgLocation; // Didn't do anything with it, send it back around
-//    } // if( portHdl->psfList )
+//        OAIFree( psfList );
+        return msgLocation; // Didn't do anything with it, send it back around
+    } // if( portHdl->psfList )
+
+    *messageType = 0xFF;
+
+    // First check for termination field (4 zero octets)
+    if ( *(uint32_t*)msg == 0x00000000)
+        return NULL;
+
+    stsType = ByteSwap16( lEndian, *(uint16_t*)msg);
+
+    switch ( stsType & 0xF000)
+    {
+        case 0x1000:
+            // Tx timestamp message
+            *messageType = PHYMSG_STATUS_TX;
+
+            message->TxStatus.txTimestampSecs  = ByteSwap16( lEndian, *(uint16_t*)&msg[6]);
+            message->TxStatus.txTimestampSecs |= ByteSwap16( lEndian, *(uint16_t*)&msg[8]) << 16;
+            val = ByteSwap16( lEndian, *(uint16_t*)&msg[4]);
+            message->TxStatus.txTimestampNanoSecs = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
+            message->TxStatus.txTimestampNanoSecs |= (val & ~0xC000) << 16;
+            message->TxStatus.txOverflowCount = val >> 14;
+            nextMsgOffset = 5 * sizeof( uint16_t);
+            break;
+
+        case 0x2000:
+            // Rx timestamp message
+            *messageType = PHYMSG_STATUS_RX;
+
+            message->RxStatus.rxTimestampSecs  = ByteSwap16( lEndian, *(uint16_t*)&msg[6]);
+            message->RxStatus.rxTimestampSecs |= ByteSwap16( lEndian, *(uint16_t*)&msg[8]) << 16;
+            val = ByteSwap16( lEndian, *(uint16_t*)&msg[4]);
+            message->RxStatus.rxTimestampNanoSecs = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
+            message->RxStatus.rxTimestampNanoSecs |= (val & ~0xC000) << 16;
+            message->RxStatus.rxOverflowCount = val >> 14;
+
+            message->RxStatus.sequenceId = ByteSwap16( lEndian, *(uint16_t*)&msg[10]);
+            val = ByteSwap16( lEndian, *(uint16_t*)&msg[12]);
+            message->RxStatus.messageType = val >> 12;
+            message->RxStatus.sourceHash = val & 0x0FFF;
+            nextMsgOffset = 7 * sizeof( uint16_t);
+            break;
+
+        case 0x3000:
+            // Trigger message
+            *messageType = PHYMSG_STATUS_TRIGGER;
+            message->TriggerStatus.triggerStatus = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
+            nextMsgOffset = 2 * sizeof( uint16_t);
+            break;
+
+        case 0x4000:
+            // Event timestamp message
+            *messageType = PHYMSG_STATUS_EVENT;
+
+            message->EventStatus.ptpEstsRegBits = stsType & 0x0FFF;
+            message->EventStatus.extendedEventStatusFlag = FALSE;
+
+            val = (message->EventStatus.ptpEstsRegBits & P640_EVNTS_TS_LEN_MASK) >> P640_EVNTS_TS_LEN_SHIFT;
+
+            if ( message->EventStatus.ptpEstsRegBits & P640_MULT_EVENT)
+            {
+                ptr = (uint16_t*)&msg[4];
+                message->EventStatus.extendedEventStatusFlag = TRUE;
+                message->EventStatus.extendedEventInfo = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
+            }
+            else
+                ptr = (uint16_t*)&msg[2];
+
+            message->EventStatus.evtTimestampSecs = 0;
+            message->EventStatus.evtTimestampNanoSecs = 0;
+
+            message->EventStatus.evtTimestampNanoSecs = ByteSwap16( lEndian, *ptr++);
+            if ( val == 1) {
+                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
+            } else if ( val == 2) {
+                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
+                message->EventStatus.evtTimestampSecs = ByteSwap16( lEndian, *ptr++);
+            } else if ( val == 3) {
+                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
+                message->EventStatus.evtTimestampSecs = ByteSwap16( lEndian, *ptr++);
+                message->EventStatus.evtTimestampSecs |= ByteSwap16( lEndian, *ptr++) << 16;
+            }
+
+            nextMsgOffset = (NS_UINT8)((uint8_t *)ptr - msg);    // Calculate offset from beginning
+            break;
+
+        case 0x5000:
+            // Status frame error status
+            *messageType = PHYMSG_STATUS_ERROR;
+
+            val = ByteSwap16( lEndian, *(uint16_t*)&msg[0]);
+            message->ErrorStatus.frameBufOverflowFlag     = (val & 0x0FFF) == 0x00 ? TRUE : FALSE;
+            message->ErrorStatus.frameCounterOverflowFlag = (val & 0x0FFF) == 0x01 ? TRUE : FALSE;
+            nextMsgOffset = 1 * sizeof( uint16_t);
+            break;
+
+        case 0x6000:
+            // Register read response
+            *messageType = PHYMSG_STATUS_REG_READ;
+
+            val = ByteSwap16( lEndian, *(uint16_t*)&msg[0]);
+
+            message->RegReadStatus.regIndex = val & 0x001F;         // bits 4:0
+            message->RegReadStatus.regPage  = (val & 0x00E0) >> 5;  // bits 7:5
+            message->RegReadStatus.readRegisterValue = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
+            //message->RegReadStatus.readRegisterValue = *(uint16_t*)&msg[2];
+            nextMsgOffset = 2 * sizeof( uint16_t);
+            break;
+
+        default:
+            // Do nothing will return NULL
+            break;
+    }
+
+    if( !nextMsgOffset ) {
+        // Next message offset still 0 no message processed and nothing
+        // more to process.
+        return NULL;
+    }
+    else {
+        // Return address of the next message to check/process.
+        return &msg[nextMsgOffset];
+    }
+}
+
+uint8_t * GetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
+        uint8_t *msgLocation,
+        PHYMSG_MESSAGE_TYPE_ENUM *messageType,
+        PHYMSG_MESSAGE *phyMessageOut)
+//  Returns information about the next Phy message contained in a list of one
+//  or more Phy message structures.
 //
-//    *messageType = 0xFF;
+//  portHandle
+//      Handle that represents a port. This is obtained using the EPLEnumPort
+//      function.
+//  msgLocation
+//      Pointer to the PHY message to check/process.  This is initially
+//      determined by calling IsPhyStatusFrame().  The caller should treat
+//      this field opaquely.
+//  messageType
+//      Set on return to one of the PHYMSG_MESSAGE_TYPE_ENUM values indicating
+//      the type of message structure returned in the message union buffer.
+//  phyMessageOut
+//      Caller allocated union/structure that will be filled out on return to
+//      contain the relevant message information fields.
 //
-//    // First check for termination field (4 zero octets)
-//    if ( *(uint32_t*)msg == 0x00000000)
-//        return NULL;
-//
-//    stsType = ByteSwap16( lEndian, *(uint16_t*)msg);
-//
-//    switch ( stsType & 0xF000)
-//    {
-//        case 0x1000:
-//            // Tx timestamp message
-//            *messageType = PHYMSG_STATUS_TX;
-//
-//            message->TxStatus.txTimestampSecs  = ByteSwap16( lEndian, *(uint16_t*)&msg[6]);
-//            message->TxStatus.txTimestampSecs |= ByteSwap16( lEndian, *(uint16_t*)&msg[8]) << 16;
-//            val = ByteSwap16( lEndian, *(uint16_t*)&msg[4]);
-//            message->TxStatus.txTimestampNanoSecs = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
-//            message->TxStatus.txTimestampNanoSecs |= (val & ~0xC000) << 16;
-//            message->TxStatus.txOverflowCount = val >> 14;
-//            nextMsgOffset = 5 * sizeof( uint16_t);
-//            break;
-//
-//        case 0x2000:
-//            // Rx timestamp message
-//            *messageType = PHYMSG_STATUS_RX;
-//
-//            message->RxStatus.rxTimestampSecs  = ByteSwap16( lEndian, *(uint16_t*)&msg[6]);
-//            message->RxStatus.rxTimestampSecs |= ByteSwap16( lEndian, *(uint16_t*)&msg[8]) << 16;
-//            val = ByteSwap16( lEndian, *(uint16_t*)&msg[4]);
-//            message->RxStatus.rxTimestampNanoSecs = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
-//            message->RxStatus.rxTimestampNanoSecs |= (val & ~0xC000) << 16;
-//            message->RxStatus.rxOverflowCount = val >> 14;
-//
-//            message->RxStatus.sequenceId = ByteSwap16( lEndian, *(uint16_t*)&msg[10]);
-//            val = ByteSwap16( lEndian, *(uint16_t*)&msg[12]);
-//            message->RxStatus.messageType = val >> 12;
-//            message->RxStatus.sourceHash = val & 0x0FFF;
-//            nextMsgOffset = 7 * sizeof( uint16_t);
-//            break;
-//
-//        case 0x3000:
-//            // Trigger message
-//            *messageType = PHYMSG_STATUS_TRIGGER;
-//            message->TriggerStatus.triggerStatus = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
-//            nextMsgOffset = 2 * sizeof( uint16_t);
-//            break;
-//
-//        case 0x4000:
-//            // Event timestamp message
-//            *messageType = PHYMSG_STATUS_EVENT;
-//
-//            message->EventStatus.ptpEstsRegBits = stsType & 0x0FFF;
-//            message->EventStatus.extendedEventStatusFlag = FALSE;
-//
-//            val = (message->EventStatus.ptpEstsRegBits & P640_EVNTS_TS_LEN_MASK) >> P640_EVNTS_TS_LEN_SHIFT;
-//
-//            if ( message->EventStatus.ptpEstsRegBits & P640_MULT_EVENT)
-//            {
-//                ptr = (uint16_t*)&msg[4];
-//                message->EventStatus.extendedEventStatusFlag = TRUE;
-//                message->EventStatus.extendedEventInfo = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
-//            }
-//            else
-//                ptr = (uint16_t*)&msg[2];
-//
-//            message->EventStatus.evtTimestampSecs = 0;
-//            message->EventStatus.evtTimestampNanoSecs = 0;
-//
-//            message->EventStatus.evtTimestampNanoSecs = ByteSwap16( lEndian, *ptr++);
-//            if ( val == 1) {
-//                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
-//            } else if ( val == 2) {
-//                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
-//                message->EventStatus.evtTimestampSecs = ByteSwap16( lEndian, *ptr++);
-//            } else if ( val == 3) {
-//                message->EventStatus.evtTimestampNanoSecs |= ByteSwap16( lEndian, *ptr++) << 16;
-//                message->EventStatus.evtTimestampSecs = ByteSwap16( lEndian, *ptr++);
-//                message->EventStatus.evtTimestampSecs |= ByteSwap16( lEndian, *ptr++) << 16;
-//            }
-//
-//            nextMsgOffset = (NS_UINT8)((uint8_t *)ptr - msg);    // Calculate offset from beginning
-//            break;
-//
-//        case 0x5000:
-//            // Status frame error status
-//            *messageType = PHYMSG_STATUS_ERROR;
-//
-//            val = ByteSwap16( lEndian, *(uint16_t*)&msg[0]);
-//            message->ErrorStatus.frameBufOverflowFlag     = (val & 0x0FFF) == 0x00 ? TRUE : FALSE;
-//            message->ErrorStatus.frameCounterOverflowFlag = (val & 0x0FFF) == 0x01 ? TRUE : FALSE;
-//            nextMsgOffset = 1 * sizeof( uint16_t);
-//            break;
-//
-//        case 0x6000:
-//            // Register read response
-//            *messageType = PHYMSG_STATUS_REG_READ;
-//
-//            val = ByteSwap16( lEndian, *(uint16_t*)&msg[0]);
-//
-//            message->RegReadStatus.regIndex = val & 0x001F;         // bits 4:0
-//            message->RegReadStatus.regPage  = (val & 0x00E0) >> 5;  // bits 7:5
-//            message->RegReadStatus.readRegisterValue = ByteSwap16( lEndian, *(uint16_t*)&msg[2]);
-//            //message->RegReadStatus.readRegisterValue = *(uint16_t*)&msg[2];
-//            nextMsgOffset = 2 * sizeof( uint16_t);
-//            break;
-//
-//        default:
-//            // Do nothing will return NULL
-//            break;
-//    }
-//
-//    if( !nextMsgOffset ) {
-//        // Next message offset still 0 no message processed and nothing
-//        // more to process.
-//        return NULL;
-//    }
-//    else {
-//        // Return address of the next message to check/process.
-//        return &msg[nextMsgOffset];
-//    }
-//}
+//  Returns
+//      Returns a pointer to the PHY message location to be checked/processed.
+//      Returns NULL if there are no further messages to process.
 //****************************************************************************
-//uint8_t *
-//    GetNextPhyMessage (
-////        PEPL_PORT_HANDLE baseAddr, phyAddr,
-//    		uint32_t baseAddr, uint32_t phyAddr,
-//        uint8_t *msgLocation,
-//        PHYMSG_MESSAGE_TYPE_ENUM *messageType,
-//        PHYMSG_MESSAGE *phyMessageOut)
-////  Returns information about the next Phy message contained in a list of one
-////  or more Phy message structures.
-////
-////  portHandle
-////      Handle that represents a port. This is obtained using the EPLEnumPort
-////      function.
-////  msgLocation
-////      Pointer to the PHY message to check/process.  This is initially
-////      determined by calling IsPhyStatusFrame().  The caller should treat
-////      this field opaquely.
-////  messageType
-////      Set on return to one of the PHYMSG_MESSAGE_TYPE_ENUM values indicating
-////      the type of message structure returned in the message union buffer.
-////  phyMessageOut
-////      Caller allocated union/structure that will be filled out on return to
-////      contain the relevant message information fields.
-////
-////  Returns
-////      Returns a pointer to the PHY message location to be checked/processed.
-////      Returns NULL if there are no further messages to process.
-////****************************************************************************
-//{
-//    return intGetNextPhyMessage( baseAddr, phyAddr, msgLocation, messageType, phyMessageOut, 1 );
-//}
+{
+    return intGetNextPhyMessage( baseAddr, phyAddr, msgLocation, messageType, phyMessageOut, 1 );
+}

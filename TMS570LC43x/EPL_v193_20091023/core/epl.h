@@ -17,7 +17,7 @@
 
 #include "epl_regs.h"		// Device register definitions
 
-//#include "oai.h"			// Needed to "qualify" defs for the specific O/S
+#include "oai.h"			// Needed to "qualify" defs for the specific O/S
 
 // Include all of the sub-module headers
 #include "swig_help.h"		// Macros for SWIG processing
@@ -33,9 +33,9 @@
 
 // Other modules for the DLL
 #include "ifGenMAC.h"		// Interface for generic MAC - Not filled in/used
-//#include "ifCyUSB.h"		// Interface for Cypress USB definitions/prototypes
-//#include "ifLPT.h"			// Interface for MDIO LPT definitions/prototypes
-//#include "okMAC.h"			// Interface/MAC related definitions/prototypes
+#include "ifCyUSB.h"		// Interface for Cypress USB definitions/prototypes
+#include "ifLPT.h"			// Interface for MDIO LPT definitions/prototypes
+#include "okMAC.h"			// Interface/MAC related definitions/prototypes
 
 // PTP definitions
 #include "PTPStack\\ptpd.h"

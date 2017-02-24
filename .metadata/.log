@@ -2339,3 +2339,207 @@ java.nio.channels.ClosedByInterruptException
 
 !ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:19:24.855
 !MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:42:16.159
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:43:35.282
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:43:52.787
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:54:07.216
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 14:55:09.854
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.equinox.event 4 0 2017-02-24 15:04:59.866
+!MESSAGE Exception while dispatching event org.osgi.service.event.Event [topic=org/eclipse/e4/ui/model/application/ApplicationElement/tags/REMOVE] {ChangedElement=org.eclipse.e4.ui.model.application.ui.basic.impl.PartStackImpl@1ce2392 (elementId: left, tags: [], contributorURI: null) (widget: CTabFolder {}, renderer: org.eclipse.e4.ui.workbench.renderers.swt.StackRenderer@48aa1b, toBeRendered: true, onTop: false, visible: true, containerData: 5000, accessibilityPhrase: null), org.eclipse.e4.data={ChangedElement=org.eclipse.e4.ui.model.application.ui.basic.impl.PartStackImpl@1ce2392 (elementId: left, tags: [], contributorURI: null) (widget: CTabFolder {}, renderer: org.eclipse.e4.ui.workbench.renderers.swt.StackRenderer@48aa1b, toBeRendered: true, onTop: false, visible: true, containerData: 5000, accessibilityPhrase: null), AttName=tags, EventType=REMOVE, Position=0, OldValue=Minimized, Widget=CTabFolder {}}, AttName=tags, EventType=REMOVE, Position=0, OldValue=Minimized, Widget=CTabFolder {}} to handler org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler@e1493e
+!STACK 0
+org.eclipse.e4.core.di.InjectionException: java.lang.IllegalArgumentException: 
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:64)
+	at org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler$1.run(UIEventObjectSupplier.java:56)
+	at org.eclipse.swt.widgets.Synchronizer.syncExec(Synchronizer.java:233)
+	at org.eclipse.ui.internal.UISynchronizer.syncExec(UISynchronizer.java:145)
+	at org.eclipse.swt.widgets.Display.syncExec(Display.java:4813)
+	at org.eclipse.e4.ui.internal.workbench.swt.E4Application$1.syncExec(E4Application.java:211)
+	at org.eclipse.e4.ui.internal.di.UIEventObjectSupplier$UIEventHandler.handleEvent(UIEventObjectSupplier.java:53)
+	at org.eclipse.equinox.internal.event.EventHandlerWrapper.handleEvent(EventHandlerWrapper.java:201)
+	at org.eclipse.equinox.internal.event.EventHandlerTracker.dispatchEvent(EventHandlerTracker.java:197)
+	at org.eclipse.equinox.internal.event.EventHandlerTracker.dispatchEvent(EventHandlerTracker.java:1)
+	at org.eclipse.osgi.framework.eventmgr.EventManager.dispatchEvent(EventManager.java:230)
+	at org.eclipse.osgi.framework.eventmgr.ListenerQueue.dispatchEventSynchronous(ListenerQueue.java:148)
+	at org.eclipse.equinox.internal.event.EventAdminImpl.dispatchEvent(EventAdminImpl.java:135)
+	at org.eclipse.equinox.internal.event.EventAdminImpl.sendEvent(EventAdminImpl.java:78)
+	at org.eclipse.equinox.internal.event.EventComponent.sendEvent(EventComponent.java:39)
+	at org.eclipse.e4.ui.services.internal.events.EventBroker.send(EventBroker.java:94)
+	at org.eclipse.e4.ui.internal.workbench.UIEventPublisher.notifyChanged(UIEventPublisher.java:60)
+	at org.eclipse.emf.common.notify.impl.BasicNotifierImpl.eNotify(BasicNotifierImpl.java:374)
+	at org.eclipse.emf.ecore.util.EcoreEList.dispatchNotification(EcoreEList.java:249)
+	at org.eclipse.emf.common.notify.impl.NotifyingListImpl.remove(NotifyingListImpl.java:725)
+	at org.eclipse.emf.common.util.AbstractEList.remove(AbstractEList.java:462)
+	at org.eclipse.e4.ui.workbench.addons.minmax.TrimStack$12.widgetSelected(TrimStack.java:640)
+	at org.eclipse.swt.widgets.TypedListener.handleEvent(TypedListener.java:249)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(EventTable.java:84)
+	at org.eclipse.swt.widgets.Display.sendEvent(Display.java:4410)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Widget.java:1079)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Display.java:4228)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Display.java:3816)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine$4.run(PartRenderingEngine.java:1121)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:336)
+	at org.eclipse.e4.ui.internal.workbench.swt.PartRenderingEngine.run(PartRenderingEngine.java:1022)
+	at org.eclipse.e4.ui.internal.workbench.E4Workbench.createAndRunUI(E4Workbench.java:150)
+	at org.eclipse.ui.internal.Workbench$5.run(Workbench.java:687)
+	at org.eclipse.core.databinding.observable.Realm.runWithDefault(Realm.java:336)
+	at org.eclipse.ui.internal.Workbench.createAndRunWorkbench(Workbench.java:604)
+	at org.eclipse.ui.PlatformUI.createAndRunWorkbench(PlatformUI.java:148)
+	at org.eclipse.ui.internal.ide.application.IDEApplication.start(IDEApplication.java:138)
+	at org.eclipse.equinox.internal.app.EclipseAppHandle.run(EclipseAppHandle.java:196)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.runApplication(EclipseAppLauncher.java:134)
+	at org.eclipse.core.runtime.internal.adaptor.EclipseAppLauncher.start(EclipseAppLauncher.java:104)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:388)
+	at org.eclipse.core.runtime.adaptor.EclipseStarter.run(EclipseStarter.java:243)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.equinox.launcher.Main.invokeFramework(Main.java:673)
+	at org.eclipse.equinox.launcher.Main.basicRun(Main.java:610)
+	at org.eclipse.equinox.launcher.Main.run(Main.java:1519)
+Caused by: java.lang.IllegalArgumentException: 
+	at org.eclipse.core.runtime.Assert.isLegal(Assert.java:63)
+	at org.eclipse.core.runtime.Assert.isLegal(Assert.java:47)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElementsRecursive(ModelServiceImpl.java:145)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElements(ModelServiceImpl.java:394)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.findElements(ModelServiceImpl.java:380)
+	at org.eclipse.e4.ui.internal.workbench.ModelServiceImpl.getActivePerspective(ModelServiceImpl.java:959)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.getElementsToRestore(MinMaxAddon.java:870)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.restore(MinMaxAddon.java:637)
+	at org.eclipse.e4.ui.workbench.addons.minmax.MinMaxAddon.subscribeTopicTagsChanged(MinMaxAddon.java:367)
+	at sun.reflect.GeneratedMethodAccessor25.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.eclipse.e4.core.internal.di.MethodRequestor.execute(MethodRequestor.java:54)
+	... 48 more
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:19.411
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.111
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.124
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.134
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.314
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.323
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.331
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.517
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.524
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.531
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.911
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.919
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.927
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.944
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:23.951
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.585
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.594
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.600
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.698
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.706
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:24.715
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.290
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.297
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.324
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.333
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.341
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.363
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.371
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:25.762
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.243
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.248
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.277
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.343
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.589
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.609
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:26.615
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:28.013
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:28.372
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:31.788
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.
+
+!ENTRY org.eclipse.core.resources 4 568 2017-02-24 15:07:31.795
+!MESSAGE Could not set property: ccs associatedHeaderFiles. Value is too long.

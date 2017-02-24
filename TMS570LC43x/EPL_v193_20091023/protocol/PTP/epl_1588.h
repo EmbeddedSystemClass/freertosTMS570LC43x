@@ -11,8 +11,6 @@
 #ifndef _EPL_1588_INCLUDE
 #define _EPL_1588_INCLUDE
 
-#define EXPORT
-
 // Adj for pin input delay and edge detection time (35ns = 8ns(refclk) * 4 + 3)
 #define	PIN_INPUT_DELAY		35
 

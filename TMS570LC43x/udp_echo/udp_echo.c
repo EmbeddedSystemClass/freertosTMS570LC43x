@@ -135,6 +135,8 @@ struct freertos_sockaddr xClient;
 	parameter.  The strange casting is to remove compiler warnings on 32-bit
 	machines. */
 	xSocket = prvOpenUDPServerSocket( ( uint16_t ) ( ( uint32_t ) pvParameters ) & 0xffffUL );
+	const char return_ip[4] = {224,0,1,129};
+	uint32_t bits_written = 0;
 
 	if( xSocket != FREERTOS_INVALID_SOCKET )
 	{
@@ -145,8 +147,10 @@ struct freertos_sockaddr xClient;
 
 			if( lBytes > 0 )
 			{
-				xClient.sin_port = FreeRTOS_htons(5500);
-				FreeRTOS_sendto( xSocket, cLocalBuffer,  lBytes, 0, &xClient, xClientAddressLength );
+				xClient.sin_port = FreeRTOS_htons(320);
+				xClient.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
+//				memset(cLocalBuffer, 0, sizeof(cLocalBuffer));
+				bits_written = FreeRTOS_sendto( xSocket, cLocalBuffer,  lBytes, 0, &xClient, xClientAddressLength );
 			}
 		}
 	}
@@ -162,7 +166,7 @@ static Socket_t prvOpenUDPServerSocket( uint16_t usPort )
 {
 struct freertos_sockaddr xServer;
 Socket_t xSocket = FREERTOS_INVALID_SOCKET;
-TickType_t xSendTimeOut = 0;
+TickType_t xSendTimeOut = 1;
 TickType_t xRecvTimeOut = 1;
 
 	xSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );

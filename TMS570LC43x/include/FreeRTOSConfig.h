@@ -96,7 +96,7 @@
 #define configUSE_TRACE_FACILITY	  1
 #define configUSE_16_BIT_TICKS		  0
 #define configCPU_CLOCK_HZ			  ( ( unsigned portLONG ) 75000000 ) /* Timer clock. */
-#define configTICK_RATE_HZ			  ( ( TickType_t ) 100000 )
+#define configTICK_RATE_HZ			  ( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES		  ( 10 )
 #define configMINIMAL_STACK_SIZE	  ( ( unsigned portSHORT ) 128 )
 #define configTOTAL_HEAP_SIZE		  ( ( size_t ) 262144 )
@@ -157,7 +157,7 @@
 /* UDP echo server task parameters. */
 #define mainUDP_Echo_TASK_PRIORITY			(4 | portPRIVILEGE_BIT)
 #define mainUDP_Echo_PORT_NUMBER			( 319UL )
-#define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
+#define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 20 )
 
 /* Thread Local Storage - Jelenleg csak a FreeRTOS-plus-FAT csomag használja */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5

@@ -197,6 +197,8 @@ void PTPSetTransmitConfig (
         uint32_t ptpFirstByteMask,
         uint32_t ptpFirstByteData);
 
+uint32_t PTPReadTransmitConfig (uint32_t baseAddr, uint32_t phyAddr);
+
 void PTPSetPhyStatusFrameConfig (
 //        PEPL_PORT_HANDLE portHandle,
     		uint32_t baseAddr, uint32_t phyAddr,
@@ -214,6 +216,8 @@ void PTPSetReceiveConfig (
     		uint32_t baseAddr, uint32_t phyAddr,
         uint32_t rxConfigOptions,
         RX_CFG_ITEMS *rxConfigItems);
+
+uint32_t PTPReadReceiveConfig (uint32_t baseAddr, uint32_t phyAddr);
 
 uint32_t PTPCalcSourceIdHash (
         uint8_t *tenBytesData);

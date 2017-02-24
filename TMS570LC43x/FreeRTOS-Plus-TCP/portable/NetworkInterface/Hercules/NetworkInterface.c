@@ -58,7 +58,6 @@
 /* HALCoGen generated c files */
 #include "HL_emac.c"
 #include "epl.h"
-static void init1588(hdkif_t *hdkif);
 
 #define EMAC_INT_CORE0_RX_THRESH		(0x0U)		// Acknowledge C0RXTHRESH Interrupt
 #define EMAC_INT_CORE0_MISC				(0x3U)		// Acknowledge C0MISC Interrupt (STATPEND, HOSTPEND, MDIO LINKINT0, MDIO USERINT0)
@@ -763,47 +762,68 @@ uint32 xFreeRTOSEMACHWInit(uint8_t macaddr[6U])
 	return xReturn;
 }
 
-static void init1588(hdkif_t *hdkif){
-	PTPEnable(hdkif->emac_base, hdkif->phy_addr, false);
-	PTPClockSetRateAdjustment(hdkif->emac_base, hdkif->phy_addr, 0, false, false);
-	PTPClockSet(hdkif->emac_base, hdkif->phy_addr, 1, 0);
-	PTPSetClockConfig(hdkif->emac_base, hdkif->phy_addr, CLKOPT_CLK_OUT_EN, 0x0A, 0x00, 8);
-	PTPEnable(hdkif->emac_base, hdkif->phy_addr, true);
+void dp83630_set_page(uint32_t mdio_base, uint32_t phy_addr, uint16_t reg){
+	uint32_t page = GET_PAGE(reg);
+	MDIOPhyRegWrite(mdio_base, phy_addr, PAGESEL_REG, page);
+}
 
-	PTPSetTransmitConfig(hdkif->emac_base, hdkif->phy_addr, 0, 0, 0, 0);
+static void init1588(hdkif_t *hdkif){
+	PTPEnable(hdkif->mdio_base, hdkif->phy_addr, false);
+	PTPClockSetRateAdjustment(hdkif->mdio_base, hdkif->phy_addr, 0, false, false);
+	PTPClockSet(hdkif->mdio_base, hdkif->phy_addr, 1, 0);
+	PTPSetClockConfig(hdkif->mdio_base, hdkif->phy_addr, CLKOPT_CLK_OUT_EN, 0x0A, 0x00, 8);
+	PTPEnable(hdkif->mdio_base, hdkif->phy_addr, true);
+
+	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
+	PTPSetTransmitConfig(hdkif->mdio_base, hdkif->phy_addr, 0, 0, 0, 0);
+	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
 	RX_CFG_ITEMS rxCfgItems;
 	memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
-	PTPSetReceiveConfig(hdkif->emac_base, hdkif->phy_addr, 0, &rxCfgItems);
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
+	PTPSetReceiveConfig(hdkif->mdio_base, hdkif->phy_addr, 0, &rxCfgItems);
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
 
-	//TODO: flush tx queue
-	uint32_t events;
-	while((events = PTPCheckForEvents(hdkif->emac_base, hdkif->phy_addr))){
+	//flush tx queue
+	uint32_t seconds =0, nanoseconds=0, overflow_count=0, sequence_id=0, hash_value=0;
+	uint8_t message_type = 0;
+	uint32_t events = 0;
+	while((events = PTPCheckForEvents(hdkif->mdio_base, hdkif->phy_addr))){
 		if(events & PTPEVT_TRANSMIT_TIMESTAMP_BIT){
-			Dp83640GetTimeStamp(hdkif->emac_base, hdkif->phy_addr, 1);
+			PTPGetTransmitTimestamp(hdkif->mdio_base, hdkif->phy_addr,
+					&seconds, &nanoseconds, &overflow_count);
 		} else if(events & PTPEVT_RECEIVE_TIMESTAMP_BIT){
-			Dp83640GetTimeStamp(hdkif->emac_base, hdkif->phy_addr, 0);
+			PTPGetReceiveTimestamp(hdkif->mdio_base, hdkif->phy_addr,
+					&seconds, &nanoseconds, &overflow_count, &sequence_id,
+					&message_type, &hash_value);
 		}
 	}
 
-	PTPSetTransmitConfig(hdkif->emac_base, hdkif->phy_addr,
-			TXOPT_IP1588_EN|TXOPT_IPV4_EN|TXOPT_TS_EN, 1, 0xFF, 0x00);
+	PTPSetTransmitConfig(hdkif->mdio_base, hdkif->phy_addr,
+			TXOPT_L2_EN|TXOPT_IPV4_EN|TXOPT_TS_EN|TXOPT_DR_INSERT, 2, 0x00, 0x00);
+//			TXOPT_IP1588_EN|TXOPT_IPV4_EN|TXOPT_TS_EN, 2, 0xFF, 0x00);
+//	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
 
 	rxCfgItems.ptpVersion = 0x02;
-	rxCfgItems.ptpFirstByteMask = 0xFF;
+	rxCfgItems.ptpFirstByteMask = 0x00;
 	rxCfgItems.ptpFirstByteData = 0x00;
 	rxCfgItems.ipAddrData = 0;
 	rxCfgItems.tsMinIFG = 0x0C;
 	rxCfgItems.srcIdHash = 0;
 	rxCfgItems.ptpDomain = 0;
-	rxCfgItems.tsSecLen = 4;
+	rxCfgItems.tsSecLen = 3;
 	rxCfgItems.rxTsNanoSecOffset = 0;
 	rxCfgItems.rxTsSecondsOffset = 0;
 
-	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
-			RXOPT_TS_INSERT|RXOPT_TS_APPEND;
+//	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+//			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
+//			RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
 
-	PTPSetReceiveConfig(hdkif->emac_base, hdkif->phy_addr, rxCfgOpts, &rxCfgItems);
+	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+			RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+			RXOPT_RX_SLAVE|RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
+
+	PTPSetReceiveConfig(hdkif->mdio_base, hdkif->phy_addr, rxCfgOpts, &rxCfgItems);
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
 }
 
 /** ***************************************************************************************************

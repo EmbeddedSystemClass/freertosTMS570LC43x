@@ -89,7 +89,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="source/main.c|EPL_v193_20091023|source/mainDemo.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|source/HL_sci.c|source/HL_sys_main.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/ff_dev_support.c|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-FAT/portable/avr32_uc3|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="epl_1588/ptpControl.c|epl_1588/PTPStack|EPL_v193_20091023|source/mainDemo.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|source/HL_sci.c|source/HL_sys_main.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/ff_dev_support.c|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-FAT/portable/avr32_uc3|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

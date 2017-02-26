@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -119,7 +119,7 @@ purpose.
 #define EXTERNAL_TIMING   FALSE
 #define BOUNDARY_CLOCK    FALSE
 #define NUMBER_PORTS      1
-#define VERSION_PTP       1
+#define VERSION_PTP       2
 #define VERSION_NETWORK   1
 
 /* spec defined constants  */
@@ -136,7 +136,7 @@ purpose.
 #define IDENTIFIER_DFLT   "DFLT"
 
 /* ptp constants */
-#define PTP_UUID_LENGTH                     6
+#define PTP_UUID_LENGTH                     8
 #define PTP_CODE_STRING_LENGTH              4
 #define PTP_SUBDOMAIN_NAME_LENGTH           16
 #define PTP_MAX_MANAGEMENT_PAYLOAD_SIZE     90

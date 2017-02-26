@@ -96,17 +96,24 @@ RunTimeOpts rtOpts;  /* statically allocated run-time configuration data */
 RX_CFG_ITEMS rxCfgItems;
 uint32_t rxCfgOpts;
 
+void *pvPortCalloc(int value, size_t size){
+	void *p_to_m = malloc(size);
+	memset(p_to_m, value, size);
+	return p_to_m;
+}
+
 int runPtpd(void)
 {
   PtpClock *ptpClock;
   Integer16 ret;
 
-  PEPL_PORT_HANDLE epl_port_handle;
+  PEPL_PORT_HANDLE epl_port_handle = malloc(sizeof(struct PORT_OBJ));
+  epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
+  epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
   hdkif_t *hdkif;
   hdkif = &hdkif_data[0U];
 
   EMACInstConfig(hdkif);
-  RX_CFG_ITEMS rxCfgItems;
   rxCfgItems.ptpVersion = 0x02;
   rxCfgItems.ptpFirstByteMask = 0x00;
   rxCfgItems.ptpFirstByteData = 0x00;
@@ -118,7 +125,7 @@ int runPtpd(void)
   rxCfgItems.rxTsSecondsOffset = 8;
   rxCfgItems.rxTsNanoSecOffset = 12;
 
-  uint32_t rxCfgOpts = 0;
+  rxCfgOpts = 0;
   rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
   		RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
   		RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
@@ -126,9 +133,15 @@ int runPtpd(void)
   epl_port_handle->hdkif = *hdkif;
   epl_port_handle->rxCfgItems = rxCfgItems;
   epl_port_handle->rxCfgOpts = rxCfgOpts;
-  init1588(&epl_port_handle);
+//  init1588(epl_port_handle);
+
+//  epl_port_handle.hdkif = *hdkif;
+//  epl_port_handle.rxCfgItems = rxCfgItems;
+//  epl_port_handle.rxCfgOpts = rxCfgOpts;
+
+  init1588(epl_port_handle);
   
-  rtOpts.eplPortHandle = &epl_port_handle;
+  rtOpts.eplPortHandle = epl_port_handle;
 
   /* initialize run-time options to reasonable values */ 
   rtOpts.syncInterval = DEFAULT_SYNC_INTERVAL;

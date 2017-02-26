@@ -2,9 +2,9 @@
 <section name="Workbench">
 	<item value="${workspace_loc:/${ProjName}/epl_1588/PTPStack/dep}" key="org.eclipse.cdt.utils.ui.controls.FileListControl"/>
 	<section name="org.eclipse.cdt.ui.OPEN_ACTION_SELECTION_DIALOG_SECTION">
-		<item value="657" key="DIALOG_WIDTH"/>
+		<item value="677" key="DIALOG_WIDTH"/>
 		<item value="1|Ubuntu|10.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
-		<item value="454" key="DIALOG_HEIGHT"/>
+		<item value="474" key="DIALOG_HEIGHT"/>
 		<item value="736" key="DIALOG_X_ORIGIN"/>
 		<item value="272" key="DIALOG_Y_ORIGIN"/>
 	</section>
@@ -18,6 +18,9 @@
 		<item value="false" key="caseSensitive"/>
 		<item value="227191" key="searchFlags"/>
 		<list key="previousPatterns">
+			<item value="Malloc"/>
+			<item value="malloc"/>
+			<item value="PEPL_PORT_HANDLE"/>
 			<item value="msghdr"/>
 			<item value="GetTickCount"/>
 			<item value="EPLReadReg"/>

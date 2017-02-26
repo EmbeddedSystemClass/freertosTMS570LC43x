@@ -957,8 +957,10 @@ PHYMSG_MESSAGE phyMsg;
         return 0;
     DBG( "NR2\n" );
 
-    //TODO: implement status frames
-    psfStart = IsPhyStatusFrame( rtOpts->eplPortHandle, rtOpts->rxBuff, length );
+//    psfStart = IsPhyStatusFrame( rtOpts->eplPortHandle, rtOpts->rxBuff, length );
+    //IsPhyStatusFrame assumes raw packet. Using UDP stack assume all packets
+    //received are 1588 packets
+    psfStart = rtOpts->rxBuff;
     while( psfStart ) {
         psfStart = intGetNextPhyMessage( rtOpts->eplPortHandle, psfStart, &msgType, &phyMsg, 0 );
         if( !psfStart ) {
@@ -1038,7 +1040,6 @@ PHYMSG_MESSAGE phyMsg;
 		DBG("[!psfList]");
 		return 0;
     }
-	return 0;
 
 //    x;
 //    DBGV( "DUMP RX PACKET - Length %d\n", length);
@@ -1053,32 +1054,37 @@ PHYMSG_MESSAGE phyMsg;
 //    }
 //    DBGV( "\n\n");
 
-    ethHead = &rtOpts->rxBuff[0];
-    ipHead  = &rtOpts->rxBuff[0x0E];
-    udpHead = &rtOpts->rxBuff[0x22];
-    ptpHead = &rtOpts->rxBuff[0x2A];
+//    ethHead = &rtOpts->rxBuff[0];
+//    ipHead  = &rtOpts->rxBuff[0x0E];
+//    udpHead = &rtOpts->rxBuff[0x22];
+//    ptpHead = &rtOpts->rxBuff[0x2A];
+    ptpHead = &rtOpts->rxBuff[0];
 
-    if ( length < 48)
-        return 0;
-
-    if ( *(NS_UINT16*)&ethHead[0x0C] != 0x0008)     // IP packet?
-        return 0;
-    if ( ipHead[0x09] != 0x11)                      // UDP packet?
-        return 0;
-    destPort = *(NS_UINT16*)&udpHead[0x02];
-    if ( destPort != 0x3F01 && destPort != 0x4001)  // PTP Event or general msg?
-        return 0;
-    if ( *(NS_UINT16*)&ptpHead[0] != 0x0100)        // PTP Version
+    if ( length < 44)
         return 0;
 
-    memcpy( buf, ptpHead, length-0x2A);
+//    if ( *(NS_UINT16*)&ethHead[0x0C] != 0x0008)     // IP packet?
+//        return 0;
+//    if ( ipHead[0x09] != 0x11)                      // UDP packet?
+//        return 0;
+//    destPort = *(NS_UINT16*)&udpHead[0x02];
+//    if ( destPort != 0x3F01 && destPort != 0x4001)  // PTP Event or general msg?
+//        return 0;
+//    if ( *(NS_UINT16*)&ptpHead[0] != 0x0100)        // PTP Version
+//        return 0;
+    if ( ptpHead[1] != 0x02)        // PTP Version
+        return 0;
 
-    if ( destPort == 0x3F01)
-    {
+//    memcpy( buf, ptpHead, length-0x2A);
+    memcpy( buf, ptpHead, length);
+
+//    if ( destPort == 0x3F01)
+//    {
         if ( !rtOpts->revA1SiliconFlag)
         {
-            time->nanoseconds = flip32( *(NS_UINT32*)&ptpHead[126]);
-            time->seconds = flip32( *(NS_UINT32*)&ptpHead[130]);
+//            time->nanoseconds = flip32( *(NS_UINT32*)&ptpHead[126]);
+//            time->seconds = flip32( *(NS_UINT32*)&ptpHead[130]);
+        	PTPGetTimestampFromFrame(ptpHead, &(time->seconds), &(time->nanoseconds));
 
             // Discard sync msgs if we did a rate adj and are waiting for it to complete.
 
@@ -1120,21 +1126,26 @@ PHYMSG_MESSAGE phyMsg;
             }
         }
         return 3;
-    }
-    return 2;
+//    }
+//    return 2;
 
 #endif
   
 }
 
-uint32_t MACReceivePacket(NetPath * net_path, Octet * rxbuff, uint32_t *rxbuff_len){
+uint32_t MACReceivePacket(NetPath * net_path, Octet * rxbuff, uint32_t *rx_len){
 	socklen_t xClientAddressLength = 0;
+	int received_data_length =0;
 	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
 	{
 		struct freertos_sockaddr client;
-		return FreeRTOS_recvfrom( net_path->eventSock, ( void * ) rxbuff, (uint32_t)rxbuff_len, 0, &client, &xClientAddressLength );
+		received_data_length = FreeRTOS_recvfrom( net_path->eventSock, ( void * ) rxbuff,  2048, 0, &client, &xClientAddressLength );
+		if(!(received_data_length >= 0)){
+			received_data_length = 0;
+		}
 	}
-    return 0;
+	*rx_len = received_data_length;
+    return received_data_length;
 }
 
 uint32_t MACSendPacket(NetPath * net_path, Octet * txbuff, uint32_t txbuff_len){

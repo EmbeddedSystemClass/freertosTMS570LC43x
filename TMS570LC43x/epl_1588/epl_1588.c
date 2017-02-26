@@ -37,23 +37,28 @@
 //****************************************************************************
 
 #include "epl.h"
+#include "NetworkInterface.h"
+extern RX_CFG_ITEMS rxCfgItems;
+extern uint32_t rxCfgOpts;
 
-void EPLWriteReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t data);
+void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data);
 
-void EPLWriteReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t data){
-	dp83630_set_page(mdio_base, phy_addr, reg);
-	MDIOPhyRegWrite(mdio_base, phy_addr, reg, data);
+void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data){
+	dp83630_set_page(&(epl_port_handle->hdkif), reg);
+	MDIOPhyRegWrite(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg, data);
 }
 
-void EPLReadReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t * data);
+uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg);
 
-void EPLReadReg(uint32_t mdio_base, uint32_t phy_addr, uint32_t reg, uint32_t * data){
+uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg){
 	//TODO: return data to be consistent with original API
-	dp83630_set_page(mdio_base, phy_addr, reg);
-	MDIOPhyRegRead(mdio_base, phy_addr, reg, data);
+	dp83630_set_page(&(epl_port_handle->hdkif), reg);
+	uint32_t data = 0;
+	MDIOPhyRegRead(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg, &data);
+	return data;
 }
 
-void PTPEnable(uint32_t baseAddr, uint32_t phyAddr, boolean enableFlag)
+void PTPEnable(PEPL_PORT_HANDLE epl_port_handle, boolean enableFlag)
 //  Enables or disables the PHY's PTP 1588 Clock.
 //
 //  portHandle
@@ -67,12 +72,11 @@ void PTPEnable(uint32_t baseAddr, uint32_t phyAddr, boolean enableFlag)
 //      Nothing
 //****************************************************************************
 {
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, (enableFlag) ? P640_PTP_ENABLE : P640_PTP_DISABLE);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG4_PTP_CTL, (enableFlag) ? P640_PTP_ENABLE : P640_PTP_DISABLE);
+	EPLWriteReg(epl_port_handle, PHY_PG4_PTP_CTL, (enableFlag) ? P640_PTP_ENABLE : P640_PTP_DISABLE);
     return;
 }
  
-void PTPSetTriggerConfig(uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetTriggerConfig(PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger,
         uint32_t triggerBehavior,
         uint32_t gpioConnection)
@@ -106,12 +110,12 @@ void PTPSetTriggerConfig(uint32_t baseAddr, uint32_t phyAddr,
     reg |= trigger << P640_TRIG_CSEL_SHIFT;
     reg |= P640_TRIG_WR;
     
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_TRIG, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_TRIG, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_TRIG, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TRIG, reg);
     return;
 }
  
-void PTPSetEventConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetEventConfig (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t event,
         boolean eventRiseFlag,
         boolean eventFallFlag,
@@ -144,18 +148,16 @@ void PTPSetEventConfig (uint32_t baseAddr, uint32_t phyAddr,
     reg |= gpioConnection << P640_EVNT_GPIO_SHIFT;
     reg |= event << P640_EVNT_SEL_SHIFT;
     reg |= P640_EVNT_WR;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_EVNT, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_EVNT, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_EVNT, reg);
     
     if ( eventRiseFlag) reg |= P640_EVNT_RISE;
     if ( eventFallFlag) reg |= P640_EVNT_FALL;
     if ( eventSingle) reg |= P640_EVNT_SINGLE;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_EVNT, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_EVNT, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_EVNT, reg);
     return;
 }
 
-void PTPSetTransmitConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetTransmitConfig (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t txConfigOptions,
         uint32_t ptpVersion,
         uint32_t ptpFirstByteMask,
@@ -201,24 +203,24 @@ void PTPSetTransmitConfig (uint32_t baseAddr, uint32_t phyAddr,
     if ( txConfigOptions & TXOPT_TS_EN)         reg |= P640_TX_TS_EN;
 
     reg |= ptpVersion << P640_TX_PTP_VER_SHIFT;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_TXCFG0, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_TXCFG0, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_TXCFG0, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TXCFG0, reg);
 
     reg = (ptpFirstByteMask << P640_BYTE0_MASK_SHIFT) | (ptpFirstByteData << P640_BYTE0_DATA_SHIFT);
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_TXCFG1, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_TXCFG1, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_TXCFG1, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TXCFG1, reg);
     return;
 }
 
-uint32_t PTPReadTransmitConfig (uint32_t baseAddr, uint32_t phyAddr)
+uint32_t PTPReadTransmitConfig (PEPL_PORT_HANDLE epl_port_handle)
 {
 	uint32_t reg = 0;
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_TXCFG0, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_TXCFG1, &reg);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG0);
+	reg |= EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG1) << 16;
     return reg;
 }
 
-void PTPSetPhyStatusFrameConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetPhyStatusFrameConfig (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t statusConfigOptions,
         MAC_SRC_ADDRESS_ENUM srcAddrToUse,
         uint32_t minPreamble,
@@ -286,8 +288,8 @@ void PTPSetPhyStatusFrameConfig (uint32_t baseAddr, uint32_t phyAddr,
 	uint32_t ipChecksum, rollover;
 
     ptr = srcAddrs[ srcAddrToUse ];
-	//    *(uint32_t*)&portHdl->psfSrcMacAddr[0] = *(uint32_t*)&ptr[0];
-	//    *(uint16_t*)&portHdl->psfSrcMacAddr[4] = *(uint16_t*)&ptr[4];
+	*(uint32_t*)&epl_port_handle->psfSrcMacAddr[0] = *(uint32_t*)&ptr[0];
+	*(uint16_t*)&epl_port_handle->psfSrcMacAddr[4] = *(uint16_t*)&ptr[4];
 
     reg = 0;
     if( statusConfigOptions & STSOPT_LITTLE_ENDIAN ) reg |= P640_PKT_ENDIAN;
@@ -306,22 +308,22 @@ void PTPSetPhyStatusFrameConfig (uint32_t baseAddr, uint32_t phyAddr,
 
     reg |= srcAddrToUse << P640_MAC_SRC_ADD_SHIFT;
     reg |= minPreamble << P640_MIN_PRE_SHIFT;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PSF_CFG0, reg );
+    EPLWriteReg( epl_port_handle, PHY_PG5_PSF_CFG0, reg );
 
     reg = ptpReserved << P640_PTP_RESERVED_SHIFT;
     reg |= ptpVersion << P640_VERSION_PTP_SHIFT;
     reg |= transportSpecific << P640_TRANSP_SPEC_SHIFT;
     reg |= messageType << P640_MESSAGE_TYPE_SHIFT;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PSF_CFG1, reg );
+    EPLWriteReg( epl_port_handle, PHY_PG6_PSF_CFG1, reg );
 
 	// sourceIpAddress is given in network (big endian) order
     reg  =  (sourceIpAddress & 0x000000FF)        << P640_IP_SA_BYTE0_SHIFT;
 	reg |= ((sourceIpAddress & 0x0000FF00) >>  8) << P640_IP_SA_BYTE1_SHIFT;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PSF_CFG2, reg );
+    EPLWriteReg( epl_port_handle, PHY_PG6_PSF_CFG2, reg );
 
     reg  = ((sourceIpAddress & 0x00FF0000) >> 16) << P640_IP_SA_BYTE2_SHIFT;
     reg |= ((sourceIpAddress & 0xFF000000) >> 24) << P640_IP_SA_BYTE3_SHIFT;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PSF_CFG3, reg );
+    EPLWriteReg( epl_port_handle, PHY_PG6_PSF_CFG3, reg );
 
     // Calculate the checksum
 #if 1
@@ -342,13 +344,13 @@ void PTPSetPhyStatusFrameConfig (uint32_t baseAddr, uint32_t phyAddr,
         ipChecksum = (ipChecksum & 0xFFFF) + rollover;
     }
 
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PSF_CFG4, ipChecksum );
+    EPLWriteReg( epl_port_handle, PHY_PG6_PSF_CFG4, ipChecksum );
 
-//    portHdl->psfConfigOptions = statusConfigOptions;
+    epl_port_handle->psfConfigOptions = statusConfigOptions;
     return;
 }
 
-void PTPSetReceiveConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetReceiveConfig (PEPL_PORT_HANDLE epl_port_handle,
 			uint32_t rxConfigOptions,
 			RX_CFG_ITEMS *rxConfigItems)
 //  Configures the device's receive operation.
@@ -383,26 +385,26 @@ void PTPSetReceiveConfig (uint32_t baseAddr, uint32_t phyAddr,
    
     reg |= rxConfigItems->ptpVersion << P640_RX_PTP_VER_SHIFT;
 
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG0, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG0, reg);
 
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData >> 16);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData >> 16);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData >> 16);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData >> 16);
 
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg | P640_USER_IP_SEL);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg | P640_USER_IP_SEL);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG0, reg | P640_USER_IP_SEL);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG0, reg | P640_USER_IP_SEL);
 
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData & 0x0000FFFF);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData & 0x0000FFFF);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData & 0x0000FFFF);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData & 0x0000FFFF);
 
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG0, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG0, reg);
 
     reg = rxConfigItems->ptpFirstByteMask << P640_BYTE0_MASK_SHIFT;
     reg |= rxConfigItems->ptpFirstByteData << P640_BYTE0_DATA_SHIFT;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG1, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG1, reg);
-//    portHdl->rxConfigOptions = rxConfigOptions;
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG1, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG1, reg);
+    epl_port_handle->rxConfigOptions = rxConfigOptions;
     reg = 0;    
     if ( rxConfigOptions & RXOPT_ACC_UDP)        reg |= P640_ACC_UDP;
     if ( rxConfigOptions & RXOPT_ACC_CRC)        reg |= P640_ACC_CRC;
@@ -411,39 +413,39 @@ void PTPSetReceiveConfig (uint32_t baseAddr, uint32_t phyAddr,
     
     reg |= rxConfigItems->tsMinIFG << P640_TS_MIN_IFG_SHIFT;
     reg |= rxConfigItems->ptpDomain << P640_PTP_DOMAIN_SHIFT;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG3, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG3, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG3, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG3, reg);
     
     reg = 0;
     if ( rxConfigOptions & RXOPT_IPV4_UDP_MOD) reg |= P640_IPV4_UDP_MOD;
     if ( rxConfigOptions & RXOPT_TS_SEC_EN)    reg |= P640_TS_SEC_EN;
 
-//    portHdl->tsSecondsLen = rxConfigItems->tsSecLen;
-//    portHdl->rxTsNanoSecOffset = rxConfigItems->rxTsNanoSecOffset;
-//    portHdl->rxTsSecondsOffset = rxConfigItems->rxTsSecondsOffset;
+    epl_port_handle->tsSecondsLen = rxConfigItems->tsSecLen;
+    epl_port_handle->rxTsNanoSecOffset = rxConfigItems->rxTsNanoSecOffset;
+    epl_port_handle->rxTsSecondsOffset = rxConfigItems->rxTsSecondsOffset;
     
     reg |= rxConfigItems->tsSecLen << P640_TS_SEC_LEN_SHIFT;
     reg |= rxConfigItems->rxTsNanoSecOffset << P640_RXTS_NS_OFF_SHIFT;
     reg |= rxConfigItems->rxTsSecondsOffset << P640_RXTS_SEC_OFF_SHIFT;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG5_PTP_RXCFG4, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG4, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG4, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG4, reg);
 
     reg = rxConfigItems->srcIdHash << P640_PTP_RX_HASH_SHIFT;
     if ( rxConfigOptions & RXOPT_SRC_ID_HASH_EN) reg |= P640_RX_HASH_EN;
-//    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_RXHASH, reg);
-	EPLWriteReg(baseAddr, phyAddr, PHY_PG6_PTP_RXHASH, reg);
+//    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG6_PTP_RXHASH, reg);
+	EPLWriteReg(epl_port_handle, PHY_PG6_PTP_RXHASH, reg);
     return;
 }
 
-uint32_t PTPReadReceiveConfig (uint32_t baseAddr, uint32_t phyAddr)
+uint32_t PTPReadReceiveConfig (PEPL_PORT_HANDLE epl_port_handle)
 {
 	uint32_t reg = 0;
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG0, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG1, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG2, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG3, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG5_PTP_RXCFG4, &reg);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG6_PTP_RXHASH, &reg);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG0);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG1);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG2);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG3);
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG4);
+	reg = EPLReadReg(epl_port_handle, PHY_PG6_PTP_RXHASH);
     return reg;
 }
 
@@ -485,7 +487,7 @@ uint8_t data;
     return (crc & 0xFFFFFFFF) >> 20;
 }
 
-void PTPSetTempRateDurationConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t duration)
+void PTPSetTempRateDurationConfig (PEPL_PORT_HANDLE epl_port_handle, uint32_t duration)
 //  Configures the PTP Temporary Duration.
 //  
 //  portHandle
@@ -504,12 +506,12 @@ void PTPSetTempRateDurationConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t
 //  remains constant.
 //****************************************************************************
 {
-    EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_TRDH, duration >> P640_PTP_RATE_HI_SHIFT);
-    EPLWriteReg(baseAddr, phyAddr, PHY_PG5_PTP_TRDL, duration & 0xFFFF);
+    EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TRDH, duration >> P640_PTP_RATE_HI_SHIFT);
+    EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TRDL, duration & 0xFFFF);
     return;
 }
 
-void PTPSetClockConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetClockConfig (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t clockConfigOptions,
         uint32_t ptpClockDivideByValue,
         uint32_t ptpClockSource,
@@ -555,22 +557,21 @@ void PTPSetClockConfig (uint32_t baseAddr, uint32_t phyAddr,
     if ( clockConfigOptions & CLKOPT_CLK_OUT_SPEED_SEL) reg |= P640_PTP_CLKOUT_SPSEL;
     
     reg |= ptpClockDivideByValue << P640_PTP_CLKDIV_SHIFT;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_COC, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_COC, reg);
 
     reg = (ptpClockSource << P640_CLK_SRC_SHIFT) | (ptpClockSourcePeriod << P640_CLK_SRC_PER_SHIFT);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_CLKSRC, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_CLKSRC, reg);
     
     // Enable the output clock if requested
-//    reg = EPLReadReg( baseAddr, phyAddr, );
-	EPLReadReg(baseAddr, phyAddr, PHY_PG0_PHYCR2, & reg);
+	reg = EPLReadReg(epl_port_handle, PHY_PG0_PHYCR2);
     if ( clockConfigOptions & CLKOPT_CLK_OUT_EN)
         reg &= ~PHYCR2_CLK_OUT_DIS;
     else
         reg |= PHYCR2_CLK_OUT_DIS;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG0_PHYCR2, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG0_PHYCR2, reg);
 }
 
-void PTPSetGpioInterruptConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t gpioInt)
+void PTPSetGpioInterruptConfig (PEPL_PORT_HANDLE epl_port_handle, uint32_t gpioInt)
 //  Configures the GPIO pin to be used for the PTP Interrupt function.
 //  
 //  portHandle
@@ -585,10 +586,10 @@ void PTPSetGpioInterruptConfig (uint32_t baseAddr, uint32_t phyAddr, uint32_t gp
 //      Nothing
 //****************************************************************************
 {
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_INTCTL, gpioInt);
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_INTCTL, gpioInt);
 }
 
-void PTPSetMiscConfig (uint32_t baseAddr, uint32_t phyAddr,
+void PTPSetMiscConfig (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t ptpEtherType,
         uint32_t ptpOffset,
         uint32_t txSfdGpio,
@@ -620,14 +621,14 @@ void PTPSetMiscConfig (uint32_t baseAddr, uint32_t phyAddr,
 //      Nothing
 //****************************************************************************
 {
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_ETR, ptpEtherType);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_OFF, ptpOffset);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG6_PTP_SFDCFG,
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_ETR, ptpEtherType);
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_OFF, ptpOffset);
+    EPLWriteReg( epl_port_handle, PHY_PG6_PTP_SFDCFG,
                  (txSfdGpio << P640_TX_SFD_GPIO_SHIFT) | 
                  (rxSfdGpio << P640_RX_SFD_GPIO_SHIFT));
 }
 
-void PTPClockReadCurrent (uint32_t baseAddr, uint32_t phyAddr,
+void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds)
 //  Returns a snapshot of the current IEEE 1588 clock value.
@@ -648,25 +649,18 @@ void PTPClockReadCurrent (uint32_t baseAddr, uint32_t phyAddr,
 {
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
     
-//    *retNumberOfNanoSeconds  = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, retNumberOfNanoSeconds);
+    *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
 
-//    *retNumberOfNanoSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR) << 16;
-    uint32_t seconds_high = 0;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, &seconds_high);
-    *retNumberOfNanoSeconds |= seconds_high << 16;
+    *retNumberOfNanoSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) << 16;
 
-//    *retNumberOfSeconds  = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, retNumberOfSeconds);
+    *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
 
-//    *retNumberOfSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR) << 16;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, &seconds_high);
-    *retNumberOfSeconds |= seconds_high << 16;
+    *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) << 16;
 
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
-void PTPClockStepAdjustment (uint32_t baseAddr, uint32_t phyAddr,
+void PTPClockStepAdjustment (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds,
         boolean negativeAdj)
@@ -707,15 +701,15 @@ void PTPClockStepAdjustment (uint32_t baseAddr, uint32_t phyAddr,
     }
         
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, P640_PTP_STEP_CLK);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, P640_PTP_STEP_CLK);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
-void PTPClockSet (uint32_t baseAddr, uint32_t phyAddr,
+void PTPClockSet (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds)
 //  Sets the IEEE 1588 hardware clock equal to the specified time value.
@@ -734,16 +728,16 @@ void PTPClockSet (uint32_t baseAddr, uint32_t phyAddr,
 //****************************************************************************
 {
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, P640_PTP_LOAD_CLK);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, P640_PTP_LOAD_CLK);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
 void PTPClockSetRateAdjustment (
-		uint32_t baseAddr, uint32_t phyAddr,
+		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t rateAdjValue,
         boolean tempAdjFlag,
         boolean adjDirectionFlag)
@@ -828,12 +822,12 @@ void PTPClockSetRateAdjustment (
     if ( adjDirectionFlag) reg |= P640_PTP_RATE_DIR;
     
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_RATEH, reg);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_RATEL, rateAdjValue & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEH, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEL, rateAdjValue & 0xFFFF);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
-uint32_t PTPCheckForEvents (uint32_t baseAddr, uint32_t phyAddr)
+uint32_t PTPCheckForEvents (PEPL_PORT_HANDLE epl_port_handle)
 //  Checks to determine if any of the following hardware events are 
 //  outstanding: Transmit timestamp, receive timestamp, trigger done and event 
 //  timestamp.
@@ -867,8 +861,7 @@ uint32_t PTPCheckForEvents (uint32_t baseAddr, uint32_t phyAddr)
 {
 	uint32_t reg, eventFlags;
 
-	//reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_STS);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_STS, &reg);
+	reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_STS);
     eventFlags = 0;
     if ( reg & P640_TXTS_RDY) eventFlags |= PTPEVT_TRANSMIT_TIMESTAMP_BIT;
     if ( reg & P640_RXTS_RDY) eventFlags |= PTPEVT_RECEIVE_TIMESTAMP_BIT;
@@ -877,7 +870,7 @@ uint32_t PTPCheckForEvents (uint32_t baseAddr, uint32_t phyAddr)
     return eventFlags;
 }
 
-void PTPGetTransmitTimestamp (uint32_t baseAddr, uint32_t phyAddr,
+void PTPGetTransmitTimestamp (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds,
         uint32_t *overflowCount)
@@ -919,25 +912,19 @@ void PTPGetTransmitTimestamp (uint32_t baseAddr, uint32_t phyAddr,
 	uint32_t reg;
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-//    *retNumberOfNanoSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS, retNumberOfNanoSeconds);
+    *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
 
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS, &reg);
+    reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
     *overflowCount = (reg & 0xC000) >> 14;
     *retNumberOfNanoSeconds |= (reg & 0x3FFF) << 16;
 
-//    *retNumberOfSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS, retNumberOfSeconds);
+    *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
 
-	uint32_t seconds_high = 0;
-//    *retNumberOfSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS) << 16;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TXTS, &seconds_high);
-	*retNumberOfSeconds |= seconds_high << 16;
+    *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS) << 16;
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
-void PTPGetReceiveTimestamp (uint32_t baseAddr, uint32_t phyAddr,
+void PTPGetReceiveTimestamp (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds,
         uint32_t *overflowCount,
@@ -1011,28 +998,18 @@ void PTPGetReceiveTimestamp (uint32_t baseAddr, uint32_t phyAddr,
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
 
-//    *retNumberOfNanoSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS, retNumberOfNanoSeconds);
+    *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
 
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS);
-//    *overflowCount = (reg & 0xC000) >> 14;
-//    *retNumberOfNanoSeconds |= (reg & 0x3FFF) << 16;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS, &reg);
+    reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
     *overflowCount = (reg & 0xC000) >> 14;
     *retNumberOfNanoSeconds |= (reg & 0x3FFF) << 16;
 
-//    *retNumberOfSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_RXTS, retNumberOfSeconds);
+    *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
 
-//    *retNumberOfSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS) << 16;
-	uint32_t seconds_high = 0;
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_RXTS, &seconds_high);
-	*retNumberOfSeconds |= seconds_high;
+    *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS) << 16;
 
-//    *sequenceId = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_RXTS, sequenceId);
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_RXTS);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_RXTS, &reg);
+    *sequenceId = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
+    reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
 
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 
@@ -1125,7 +1102,7 @@ void PTPGetTimestampFromFrame (uint8_t *receiveFrameData,
     }
 }
 
-void PTPArmTrigger (uint32_t baseAddr, uint32_t phyAddr,
+void PTPArmTrigger (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger,
         uint32_t expireTimeSeconds,
         uint32_t expireTimeNanoSeconds,
@@ -1180,30 +1157,30 @@ void PTPArmTrigger (uint32_t baseAddr, uint32_t phyAddr,
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_LOAD;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
     
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, expireTimeNanoSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, expireTimeNanoSeconds & 0xFFFF);
     
     reg = (expireTimeNanoSeconds >> 16) | (initialStateFlag ? 0x80000000 : 0) |
           (waitForRolloverFlag ? 0x40000000 : 0);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, reg);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, expireTimeSeconds & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, expireTimeSeconds >> 16);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, pulseWidth & 0xFFFF);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, pulseWidth >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, expireTimeSeconds & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, expireTimeSeconds >> 16);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, pulseWidth & 0xFFFF);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, pulseWidth >> 16);
     
     if ( trigger <= 1)
     {
-        EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, pulseWidth2 & 0xFFFF);
-        EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_TDR, pulseWidth2 >> 16);
+        EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, pulseWidth2 & 0xFFFF);
+        EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, pulseWidth2 >> 16);
     }
     
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_EN;
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
  
-boolean PTPHasTriggerExpired (uint32_t baseAddr, uint32_t phyAddr, uint32_t trigger)
+boolean PTPHasTriggerExpired (PEPL_PORT_HANDLE epl_port_handle, uint32_t trigger)
 //  Determines if a particular trigger has occurred or if an error has 
 //  occurred. An interrupt mechanism may also be used to detect trigger 
 //  expiration.
@@ -1231,8 +1208,7 @@ boolean PTPHasTriggerExpired (uint32_t baseAddr, uint32_t phyAddr, uint32_t trig
 	uint32_t reg, trgBit;
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_TSTS);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_TSTS, & reg);
+    reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TSTS);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
     
     trgBit = 1 << (trigger * 2);
@@ -1243,7 +1219,7 @@ boolean PTPHasTriggerExpired (uint32_t baseAddr, uint32_t phyAddr, uint32_t trig
     return NS_STATUS_SUCCESS;
 }
 
-void PTPCancelTrigger (uint32_t baseAddr, uint32_t phyAddr, uint32_t trigger)
+void PTPCancelTrigger (PEPL_PORT_HANDLE epl_port_handle, uint32_t trigger)
 //  Cancels a previously schedule trigger event (if active).
 //  
 //  portHandle
@@ -1263,11 +1239,11 @@ void PTPCancelTrigger (uint32_t baseAddr, uint32_t phyAddr, uint32_t trigger)
 	uint32_t reg;
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_DIS;
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-    EPLWriteReg( baseAddr, phyAddr, PHY_PG4_PTP_CTL, reg);
+    EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }
 
-boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
+boolean PTPGetEvent (PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *eventBits,
         uint32_t *riseFlags,
         uint32_t *eventTimeSeconds,
@@ -1315,8 +1291,7 @@ boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
     *riseFlags = 0;
 
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
-	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_TSTS, & reg);
-//    reg = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_ESTS);
+    reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_ESTS);
     
     *eventsMissed = (reg & P640_EVNTS_MISSED_MASK) >> P640_EVNTS_MISSED_SHIFT;
     
@@ -1328,8 +1303,7 @@ boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
         
     if ( reg & P640_MULT_EVENT)
     {
-//        exSts = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA);
-    	EPLReadReg(baseAddr, phyAddr, PHY_PG4_PTP_EDATA, & exSts);
+        exSts = EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA);
         
         for ( x = 8; x; x--)
         {
@@ -1346,21 +1320,13 @@ boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
         *riseFlags |= ((reg & P640_EVNT_RF) ? 1 : 0) << ((reg & P640_EVNT_NUM_MASK) >> P640_EVNT_NUM_SHIFT);
     }
     
-    uint32_t time_high = 0;
+    *eventTimeNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA);
 
-//    *eventTimeNanoSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA);
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, eventTimeNanoSeconds);
+    *eventTimeNanoSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA) << 16;
 
-//    *eventTimeNanoSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA) << 16;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, &time_high);
-    *eventTimeNanoSeconds |= time_high << 16;
+    *eventTimeSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA);
 
-//    *eventTimeSeconds = EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA);
-     EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, eventTimeSeconds);
-
-//    *eventTimeSeconds |= EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA) << 16;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG4_PTP_EDATA, &time_high);
-    *eventTimeSeconds |= time_high << 16;
+    *eventTimeSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA) << 16;
 
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
     
@@ -1381,7 +1347,7 @@ boolean PTPGetEvent (uint32_t baseAddr, uint32_t phyAddr,
 	return TRUE;
 }
 
-uint32_t MonitorGpioSignals (uint32_t baseAddr, uint32_t phyAddr)
+uint32_t MonitorGpioSignals (PEPL_PORT_HANDLE epl_port_handle)
 //  Provides a function to read the current status of the device's GPIO 
 //  signals.
 //  
@@ -1394,12 +1360,10 @@ uint32_t MonitorGpioSignals (uint32_t baseAddr, uint32_t phyAddr)
 //      GPIO 12 is bit 11, etc.
 //****************************************************************************
 {
-	uint32_t signal = 0;
-    EPLReadReg( baseAddr, phyAddr, PHY_PG6_PTP_GPIOMON, &signal);
-    return signal;
+    return EPLReadReg( epl_port_handle, PHY_PG6_PTP_GPIOMON);
 }
 
-uint8_t * IsPhyStatusFrame (uint32_t baseAddr, uint32_t phyAddr,
+uint8_t * IsPhyStatusFrame (PEPL_PORT_HANDLE epl_port_handle,
         uint8_t *frameBuffer,
         uint16_t frameLength)
 //  Determines if the specified receive frame is a specially formatted IEEE
@@ -1432,48 +1396,44 @@ uint8_t * IsPhyStatusFrame (uint32_t baseAddr, uint32_t phyAddr,
 	static uint8_t ipDestAddr[6] = {0x01,0x00,0x5E,0x00,0x01,0x81};
 	static uint8_t macDestAddr[6] = {0x01,0x1B,0x19,0x00,0x00,0x00};
 
-    if ( /*portHdl->psfConfigOptions & STSOPT_IPV4*/ 1)
+    if ( epl_port_handle->psfConfigOptions & STSOPT_IPV4)
     {
-        // IPv4/UDP Frame
-    	//TODO: implement
-//        if ( frameLength < 50)
-//            return portHdl->psfList;
-//
-//        if ( *(uint32_t*)&frameBuffer[0] != *(uint32_t*)&ipDestAddr[0] ||
-//             *(uint16_t*)&frameBuffer[4] != *(uint16_t*)&ipDestAddr[4])
-//            return portHdl->psfList;
-//
-//        if ( *(uint32_t*)&frameBuffer[6] != *(uint32_t*)&portHdl->psfSrcMacAddr[0] ||
-//             *(uint16_t*)&frameBuffer[10] != *(uint16_t*)&portHdl->psfSrcMacAddr[4])
-//            return portHdl->psfList;
-//
-//        if ( frameBuffer[12] != 0x08 || frameBuffer[13] != 0x00)
-//            return portHdl->psfList;
+//         IPv4/UDP Frame
+        if ( frameLength < 50)
+            return epl_port_handle->psfList;
+
+        if ( *(uint32_t*)&frameBuffer[0] != *(uint32_t*)&ipDestAddr[0] ||
+             *(uint16_t*)&frameBuffer[4] != *(uint16_t*)&ipDestAddr[4])
+            return epl_port_handle->psfList;
+
+        if ( *(uint32_t*)&frameBuffer[6] != *(uint32_t*)&epl_port_handle->psfSrcMacAddr[0] ||
+             *(uint16_t*)&frameBuffer[10] != *(uint16_t*)&epl_port_handle->psfSrcMacAddr[4])
+            return epl_port_handle->psfList;
+
+        if ( frameBuffer[12] != 0x08 || frameBuffer[13] != 0x00)
+            return epl_port_handle->psfList;
 
         return &frameBuffer[44];
     }
     else
     {
         // Layer 2 Ethernet Frame
-    	//TODO: implement
-//        if ( frameLength < 22)
-//            return portHdl->psfList;
-//
-//        if ( *(uint32_t*)&frameBuffer[0] != *(uint32_t*)&macDestAddr[0] ||
-//             *(uint16_t*)&frameBuffer[4] != *(uint16_t*)&macDestAddr[4])
-//            return portHdl->psfList;
-//
-//        if ( *(uint32_t*)&frameBuffer[6]  != *(uint32_t*)&portHdl->psfSrcMacAddr[0] ||
-//             *(uint16_t*)&frameBuffer[10] != *(uint16_t*)&portHdl->psfSrcMacAddr[4])
-//            return portHdl->psfList;
-//
-//        if ( frameBuffer[12] != 0x88 || frameBuffer[13] != 0xF7)
-//            return portHdl->psfList;
+        if ( frameLength < 22)
+            return epl_port_handle->psfList;
+
+        if ( *(uint32_t*)&frameBuffer[0] != *(uint32_t*)&macDestAddr[0] ||
+             *(uint16_t*)&frameBuffer[4] != *(uint16_t*)&macDestAddr[4])
+            return epl_port_handle->psfList;
+
+        if ( *(uint32_t*)&frameBuffer[6]  != *(uint32_t*)&epl_port_handle->psfSrcMacAddr[0] ||
+             *(uint16_t*)&frameBuffer[10] != *(uint16_t*)&epl_port_handle->psfSrcMacAddr[4])
+            return epl_port_handle->psfList;
+
+        if ( frameBuffer[12] != 0x88 || frameBuffer[13] != 0xF7)
+            return epl_port_handle->psfList;
 
         return &frameBuffer[16];
     }
-
-    return NULL;
 }
 
 uint16_t ByteSwap16(uint8_t  lEndian, uint16_t wordIn)
@@ -1515,7 +1475,7 @@ uint32_t ByteSwap32(uint8_t  lEndian, uint32_t dwordIn)
                 (((dwordIn) << 8 ) & 0x00ff0000) | (((dwordIn) << 24) & 0xff000000);
 }
 
-uint8_t * intGetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
+uint8_t * intGetNextPhyMessage (PEPL_PORT_HANDLE epl_port_handle,
         uint8_t *msgLocation,
         PHYMSG_MESSAGE_TYPE_ENUM *messageType,
         PHYMSG_MESSAGE *phyMessageOut,
@@ -1531,18 +1491,17 @@ uint8_t * intGetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
 	uint8_t *msg = msgLocation;
 	PHYMSG_MESSAGE *message = (PHYMSG_MESSAGE *)phyMessageOut;
 	uint8_t nextMsgOffset = 0;
-	//uint8_t lEndian = portHdl->psfConfigOptions & STSOPT_LITTLE_ENDIAN;
-	uint8_t lEndian = false;
+	uint8_t lEndian = epl_port_handle->psfConfigOptions & STSOPT_LITTLE_ENDIAN;
 	PHYMSG_LIST *psfList;
 
     // Clear out the PSF List first
-    //TODO: implement
-    if( usePSFList/* && portHdl->psfList*/ ) {
-//        psfList = (PHYMSG_LIST *)portHdl->psfList;
-//        *messageType = psfList->msgType;
-//        memcpy( phyMessageOut, &psfList->phyMsg, sizeof( PHYMSG_MESSAGE ) );
-//        portHdl->psfList = psfList->nxtMsg;
+    if( usePSFList && epl_port_handle->psfList ) {
+        psfList = (PHYMSG_LIST *)epl_port_handle->psfList;
+        *messageType = psfList->msgType;
+        memcpy( phyMessageOut, &psfList->phyMsg, sizeof( PHYMSG_MESSAGE ) );
+        epl_port_handle->psfList = psfList->nxtMsg;
 //        OAIFree( psfList );
+        free( psfList );
         return msgLocation; // Didn't do anything with it, send it back around
     } // if( portHdl->psfList )
 
@@ -1669,7 +1628,7 @@ uint8_t * intGetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
     }
 }
 
-uint8_t * GetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
+uint8_t * GetNextPhyMessage (PEPL_PORT_HANDLE epl_port_handle,
         uint8_t *msgLocation,
         PHYMSG_MESSAGE_TYPE_ENUM *messageType,
         PHYMSG_MESSAGE *phyMessageOut)
@@ -1695,5 +1654,5 @@ uint8_t * GetNextPhyMessage (uint32_t baseAddr, uint32_t phyAddr,
 //      Returns NULL if there are no further messages to process.
 //****************************************************************************
 {
-    return intGetNextPhyMessage( baseAddr, phyAddr, msgLocation, messageType, phyMessageOut, 1 );
+    return intGetNextPhyMessage( epl_port_handle, msgLocation, messageType, phyMessageOut, 1 );
 }

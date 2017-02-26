@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -89,6 +89,34 @@ purpose.
 
 //#include "epl.h"
 #include "ptpd.h"
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#include "os_task.h"
+#include "os_semphr.h"
+
+/* FreeRTOS+CLI includes. */
+#include "FreeRTOS_CLI.h"
+
+/* FreeRTOS+TCP includes. */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+#include "udp_echo.h"
+
+#define socket FreeRTOS_socket
+#define SOCK_DGRAM FREERTOS_SOCK_DGRAM
+#define IPPROTO_UDP FREERTOS_IPPROTO_UDP
+#define AF_INET 		FREERTOS_AF_INET
+#define PF_INET 		FREERTOS_AF_INET
+#define htons(x)		FreeRTOS_htons(x)
+#define htonl(x)			FreeRTOS_htonl(x)
+#define bind(x,y,z) 	FreeRTOS_bind(x,y,z)
+uint32_t MACReceivePacket(NetPath * netPath, Octet * rxbuff, uint32_t *rxbuff_len);
+
+/* Demo app includes. */
+#include "udp_echo.h"
+#include "NetworkInterface.h"
+
+#define freertos		1
 
 NS_UINT8 *
     intGetNextPhyMessage (
@@ -157,6 +185,10 @@ UInteger8 lookupCommunicationTechnology(UInteger8 communicationTechnology)
 #ifdef _WIN32
     return PTP_ETHER;
 #endif // _WIN32
+
+#ifdef freertos
+    return PTP_ETHER;
+#endif
   
   return PTP_DEFAULT;
 }
@@ -318,6 +350,9 @@ UInteger32 findIface(Octet *ifaceName, UInteger8 *communicationTechnology,
   return ((struct sockaddr_in *)ifv4->ifa_addr)->sin_addr.s_addr;
   
 #elif defined(_WIN32)
+  return FALSE;
+
+#elif defined(freertos)
   return FALSE;
 
 #endif
@@ -495,7 +530,46 @@ Boolean netInit(NetPath *netPath, RunTimeOpts *rtOpts, PtpClock *ptpClock)
     netPath->ptpClock = ptpClock;
     rtOpts->haveLoopbackedSend = FALSE;
     return TRUE;
+#elif defined(freertos)
+  /* set general and port address */
+  *(Integer16*)ptpClock->event_port_address = PTP_EVENT_PORT;
+  *(Integer16*)ptpClock->general_port_address = PTP_GENERAL_PORT;
+
+  netPath->rtOpts = rtOpts;
+  netPath->ptpClock = ptpClock;
+
+    *(Integer16*)ptpClock->event_port_address = PTP_EVENT_PORT;
+    *(Integer16*)ptpClock->general_port_address = PTP_GENERAL_PORT;
+
+    ptpClock->port_communication_technology = PTP_ETHER;
+
+    memcpy( ptpClock->port_uuid_field, rtOpts->localMACAddress, PTP_UUID_LENGTH);
+
+    /* resolve PTP subdomain */
+    if(!lookupSubdomainAddress(rtOpts->subdomainName, addrStr))
+        return FALSE;
+
+    s = addrStr;
+    for(i = 0; i < SUBDOMAIN_ADDRESS_LENGTH; ++i)
+    {
+        ptpClock->subdomain_address[i] = (Octet)strtol(s, &s, 0);
+        netPath->bcastAddr.sin_addr = (netPath->bcastAddr.sin_addr << 8) | (ptpClock->subdomain_address[i] & 0xFF);
+        if( !s) break;
+        ++s;
+    }
+
+//    netPath->eventSock = 0xC000;
+//    netPath->generalSock = 0xC001;
+    netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
+    netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
+    netPath->rtOpts = rtOpts;
+    netPath->ptpClock = ptpClock;
+    rtOpts->haveLoopbackedSend = FALSE;
+    return TRUE;
+
 #endif
+
+  return TRUE;
 }
 
 /* shut down the UDP stuff */
@@ -546,9 +620,11 @@ Boolean netSelect(TimeInternal *timeout, NetPath *netPath)
   
   return select(nfds + 1, &readfds, 0, 0, &tv) > 0;
   
+
 #elif defined(_WIN32)
   return FALSE;
-
+#elif defined(freertos)
+  return FALSE;
 #endif
 }
 
@@ -832,8 +908,253 @@ PHYMSG_MESSAGE phyMsg;
     }
     return 2;
 
+#elif defined(freertos)
+	RunTimeOpts *rtOpts = (RunTimeOpts*)netPath->rtOpts;
+	PtpClock *ptpClock = (PtpClock*)netPath->ptpClock;
+	NS_UINT8 *ethHead, *ipHead, *udpHead, *ptpHead;
+	NS_UINT length, destPort;
+	NS_UINT overflowCount, sequenceId, hashValue;
+	NS_UINT8 messageType;
+	NS_UINT8 *psfStart;
+	PHYMSG_LIST *psfList;
+	PHYMSG_MESSAGE_TYPE_ENUM msgType;
+	PHYMSG_MESSAGE phyMsg;
+
+    if ( rtOpts->haveLoopbackedSend ) {
+        ethHead = &rtOpts->txBuff[0];
+        ipHead  = &rtOpts->txBuff[0x0E];
+        udpHead = &rtOpts->txBuff[0x22];
+        ptpHead = &rtOpts->txBuff[0x2A];
+        memcpy( buf, ptpHead, rtOpts->lastSendLength-0x2A);
+
+        rtOpts->haveLoopbackedSend = FALSE;
+
+        destPort = *(NS_UINT16*)&udpHead[0x02];
+        if ( destPort == 0x3F01 && !rtOpts->useOneStepFlag) {
+            if( !(((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfConfigOptions & STSOPT_TXTS_EN) ) {
+                if ( PTPCheckForEvents( rtOpts->eplPortHandle) & PTPEVT_TRANSMIT_TIMESTAMP_BIT) {
+                    PTPGetTransmitTimestamp( rtOpts->eplPortHandle, &time->seconds, &time->nanoseconds,
+                                             &overflowCount);
+                    DBG( "Got PTP looped back event message and timestamp - %d sec, %d nanosec\n",
+                          time->seconds, time->nanoseconds);
+                }
+                else {
+                    ERROR( "NO TIMESTAMP AVAILABLE FOR LOOPED BACK TX EVENT PACKET!\n");
+                }
+                return 1;
+            }
+            else {
+                // Reset flag to allow it to pick up the operation below
+                rtOpts->haveLoopbackedSend = TRUE;
+            }
+        }
+        else {
+            return 2;
+        }
+    }
+
+    if ( !MACReceivePacket(netPath, rtOpts->rxBuff, &length))
+        return 0;
+    DBG( "NR2\n" );
+
+    //TODO: implement status frames
+    psfStart = IsPhyStatusFrame( rtOpts->eplPortHandle, rtOpts->rxBuff, length );
+    while( psfStart ) {
+        psfStart = intGetNextPhyMessage( rtOpts->eplPortHandle, psfStart, &msgType, &phyMsg, 0 );
+        if( !psfStart ) {
+            continue;
+        }
+#if 1
+        // Debug help
+        switch( msgType ) {
+        case PHYMSG_STATUS_TX:
+            DBG( "netRecv: PSF : PHYMSG_STATUS_TX:   %ds %dns  %d\n",
+                        phyMsg.TxStatus.txTimestampSecs,
+                        phyMsg.TxStatus.txTimestampNanoSecs,
+                        phyMsg.TxStatus.txOverflowCount );
+            break;
+        case PHYMSG_STATUS_RX:
+            DBG( "netRecv: PSF : PHYMSG_STATUS_RX:   %ds %dns  %d   #%d   %d  %d\n",
+                        phyMsg.RxStatus.rxTimestampSecs,
+                        phyMsg.RxStatus.rxTimestampNanoSecs,
+                        phyMsg.RxStatus.rxOverflowCount,
+                        phyMsg.RxStatus.sequenceId,
+                        phyMsg.RxStatus.messageType,
+                        phyMsg.RxStatus.sourceHash );
+            break;
+        case PHYMSG_STATUS_TRIGGER:
+            DBG( "netRecv: PSF : PHYMSG_STATUS_TRIGGER:   %d\n", phyMsg.TriggerStatus.triggerStatus );
+            break;
+        case PHYMSG_STATUS_EVENT:
+            DBG( "netRecv: PSF : PHYMSG_STATUS_EVENT: \n" );
+            break;
+        case PHYMSG_STATUS_ERROR:
+            DBG( "netRecv: PSF : PHYMSG_STATUS_ERROR: \n" );
+            break;
+        case PHYMSG_STATUS_REG_READ:
+            // Should never get this, but just in case!
+            DBG( "netRecv: PSF : PHYMSG_STATUS_REG_READ: \n" );
+            break;
+        default:
+            DBG( "netRecv: PSF : PSF %04X\n", msgType );
+            break;
+        }
+#endif
+
+        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+        if( psfList ) {
+            // Already have a list add to the end of it
+            while( psfList->nxtMsg )
+                psfList = psfList->nxtMsg;
+            psfList = psfList->nxtMsg = malloc( sizeof(PHYMSG_LIST) );
+        }
+        else {
+            // No list yet, start it.
+//            psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = OAIAlloc( sizeof(PHYMSG_LIST) );
+           ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = (PHYMSG_LIST *)malloc(sizeof(PHYMSG_LIST));
+           psfList =  ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+        }
+        psfList->nxtMsg = NULL;
+        psfList->msgType = msgType;
+        memcpy( &psfList->phyMsg, &phyMsg, sizeof(PHYMSG_MESSAGE) );
+    }  // while( psfStart )
+
+    if( rtOpts->haveLoopbackedSend && (((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfConfigOptions & STSOPT_TXTS_EN) ) {
+        // Look for TX Timestamp PSF
+        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+        if( psfList ) {
+            do {
+                if( psfList->msgType == PHYMSG_STATUS_TX ) {
+                    time->seconds = psfList->phyMsg.TxStatus.txTimestampSecs;
+                    time->nanoseconds = psfList->phyMsg.TxStatus.txTimestampNanoSecs;
+                    DBG( "PSF timestamp - %d sec, %d nanosec\n",
+                          time->seconds, time->nanoseconds);
+                }
+                psfList = psfList->nxtMsg;
+            } while( psfList );
+			rtOpts->haveLoopbackedSend = FALSE;
+			return 1;
+		}
+		DBG("[!psfList]");
+		return 0;
+    }
+	return 0;
+
+//    x;
+//    DBGV( "DUMP RX PACKET - Length %d\n", length);
+//    for ( x = 0; x < length; x++)
+//    {
+//        if ( (x % 16) == 0)
+//        {
+//            DBGV( "\n");
+//        }
+//
+//        DBGV( "%02X ", rtOpts->rxBuff[x] & 0xFF);
+//    }
+//    DBGV( "\n\n");
+
+    ethHead = &rtOpts->rxBuff[0];
+    ipHead  = &rtOpts->rxBuff[0x0E];
+    udpHead = &rtOpts->rxBuff[0x22];
+    ptpHead = &rtOpts->rxBuff[0x2A];
+
+    if ( length < 48)
+        return 0;
+
+    if ( *(NS_UINT16*)&ethHead[0x0C] != 0x0008)     // IP packet?
+        return 0;
+    if ( ipHead[0x09] != 0x11)                      // UDP packet?
+        return 0;
+    destPort = *(NS_UINT16*)&udpHead[0x02];
+    if ( destPort != 0x3F01 && destPort != 0x4001)  // PTP Event or general msg?
+        return 0;
+    if ( *(NS_UINT16*)&ptpHead[0] != 0x0100)        // PTP Version
+        return 0;
+
+    memcpy( buf, ptpHead, length-0x2A);
+
+    if ( destPort == 0x3F01)
+    {
+        if ( !rtOpts->revA1SiliconFlag)
+        {
+            time->nanoseconds = flip32( *(NS_UINT32*)&ptpHead[126]);
+            time->seconds = flip32( *(NS_UINT32*)&ptpHead[130]);
+
+            // Discard sync msgs if we did a rate adj and are waiting for it to complete.
+
+            DBG( "waitingForAdjAck %s, adjDoneAckRxed %s\n", ptpClock->waitingForAdjFlag ? "Yes":"No",
+                 time->nanoseconds & 0x80000000 ? "Yes":"No");
+
+            if ( ptpClock->waitingForAdjFlag && !(time->nanoseconds & 0x80000000))
+            {
+                // We could lose the rate adj complete bit if the sync packet was
+                // dropped, so use a counter to recover.
+                if ( ptpClock->ignoreSyncCount != 0)
+                {
+                    ptpClock->ignoreSyncCount--;
+                    DBG( "Ignoring Sync msg, previous time adj hasn't finished.\n");
+                    return 0;
+                }
+            }
+
+            ptpClock->ignoreSyncCount = 8;
+            time->nanoseconds &= ~0x80000000;
+            ptpClock->waitingForAdjFlag = FALSE;
+        }
+        else
+        {
+            time->seconds = 0;
+            time->nanoseconds = 0;
+
+            if ( PTPCheckForEvents( rtOpts->eplPortHandle) & PTPEVT_RECEIVE_TIMESTAMP_BIT)
+            {
+                PTPGetReceiveTimestamp( rtOpts->eplPortHandle, &time->seconds, &time->nanoseconds,
+                                        &overflowCount, &sequenceId, &messageType, &hashValue);
+                DBG( "Got PTP RX Timestamp event message and timestamp - %d sec, %d nanosec\n",
+                      time->seconds, time->nanoseconds);
+            }
+            else
+            {
+                ERROR( "TIMEOUT - NO TIMESTAMP AVAILABLE FOR RECEIVED EVENT PACKET!\n");
+                return 0;
+            }
+        }
+        return 3;
+    }
+    return 2;
+
 #endif
   
+}
+
+uint32_t MACReceivePacket(NetPath * net_path, Octet * rxbuff, uint32_t *rxbuff_len){
+	socklen_t xClientAddressLength = 0;
+	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
+	{
+		struct freertos_sockaddr client;
+		return FreeRTOS_recvfrom( net_path->eventSock, ( void * ) rxbuff, (uint32_t)rxbuff_len, 0, &client, &xClientAddressLength );
+	}
+    return 0;
+}
+
+uint32_t MACSendPacket(NetPath * net_path, Octet * txbuff, uint32_t txbuff_len){
+	struct freertos_sockaddr destination;
+	socklen_t destination_address_length = 0;
+	uint32_t bits_written = 0;
+
+	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
+	{
+		destination.sin_port = FreeRTOS_htons(320);
+		destination.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
+		bits_written = FreeRTOS_sendto( net_path->eventSock, txbuff,  txbuff_len, 0, &destination, destination_address_length);
+	}
+	else
+	{
+		/* The socket could not be opened. */
+		//TODO: something about this
+//		vTaskDelete( NULL );
+	}
+	return bits_written;
 }
 
 Boolean netRecvGeneral(Octet *address, Octet *buf, NetPath *netPath)
@@ -854,9 +1175,11 @@ Boolean netRecvGeneral(Octet *address, Octet *buf, NetPath *netPath)
 #elif defined(_WIN32)
   
   return FALSE;
+#elif defined(freertos)
+
+  return FALSE;
 #endif
 }
-
 
 #ifdef _WIN32
 
@@ -918,6 +1241,68 @@ int x;
 
 #endif // _WIN32
 
+#ifdef freertos
+
+void SendAPacket( Octet *buf, UInteger16 length, NetPath *netPath, UInteger16 srcPort, UInteger16 destPort)
+{
+	RunTimeOpts *rtOpts = (RunTimeOpts*)netPath->rtOpts;
+	Octet *txBuf = rtOpts->txBuff;
+	Octet *txBufPtr = txBuf;
+
+	// using sockets so no need to build full packet
+//	int x;
+//
+//    // Build the Ethernet header
+//    memcpy( txBufPtr, rtOpts->destMACAddress, 6);
+//    memcpy( txBufPtr+6, rtOpts->localMACAddress, 6);
+//    *(NS_UINT16*)&txBufPtr[12] = 0x0008;
+//    txBufPtr += 14;
+//
+//    // Build the IP header
+//    txBufPtr[0] = (0x04 << 4) | 0x05;                       // Version & header length
+//    txBufPtr[1] = 0x00;                                     // Type of Service
+//    *(NS_UINT16*)&txBufPtr[2] = htons( 20 + 8 + length);    // Total datagram length
+//    *(NS_UINT16*)&txBufPtr[4] = 0x0000;                     // Frag id
+//    *(NS_UINT16*)&txBufPtr[6] = 0x0000;                     // Frag offset & flags
+//    txBufPtr[8] = 8;                                        // Time to live hops
+//    txBufPtr[9] = 17;                                       // Protocol - UDP
+//    memcpy( &txBufPtr[12], rtOpts->srcIPAddress, 4);
+//    *(NS_UINT32*)&txBufPtr[16] = htonl( netPath->bcastAddr.sin_addr);
+//    txBufPtr += 20;
+//
+//    // Build the UDP header
+//    *(NS_UINT16*)&txBufPtr[0] = htons( srcPort);
+//    *(NS_UINT16*)&txBufPtr[2] = htons( destPort);
+//    *(NS_UINT16*)&txBufPtr[4] = htons( 8 + length);
+//    txBufPtr += 8;
+//
+    // Copy over the PTP packet data
+    memcpy( txBufPtr, buf, length);
+
+//    DBGV( "DUMP PACKET\n");
+//    for ( x = 0; x < length; x++)
+//    {
+//        if ( (x % 16) == 0)
+//        {
+//            DBGV( "\n");
+//        }
+//
+//        DBGV( "%02X ", txBuf[x] & 0xFF);
+//    }
+//    DBGV( "\n\n");
+
+    // Send the packet
+    MACSendPacket( rtOpts->eplPortHandle, txBuf, (NS_UINT)(txBufPtr-txBuf) + length);
+
+    // Need to loop the packet back into the receive engine
+    rtOpts->lastSendLength = (NS_UINT)(txBufPtr-txBuf) + length;
+    rtOpts->haveLoopbackedSend = TRUE;
+    return;
+}
+
+#endif // freertos
+
+
 Boolean netSendEvent(Octet *address, Octet *buf, UInteger16 length, NetPath *netPath)
 {
 #if defined(linux)
@@ -941,6 +1326,12 @@ Boolean netSendEvent(Octet *address, Octet *buf, UInteger16 length, NetPath *net
 #elif defined(_WIN32)
     DBG( "***Sending event message\n");
     SendAPacket( buf, length, netPath, netPath->eventSock, PTP_EVENT_PORT);
+    return TRUE;
+#elif defined(freertos)
+    DBG( "***Sending event message\n");
+    UInteger16 null_src = 0;
+//    SendAPacket( buf, length, netPath, netPath->eventSock, PTP_EVENT_PORT);
+    SendAPacket( buf, length, netPath, null_src, PTP_EVENT_PORT);
     return TRUE;
 #endif
 }
@@ -968,6 +1359,12 @@ Boolean netSendGeneral(Octet *address, Octet *buf, UInteger16 length, NetPath *n
 #elif defined(_WIN32)
     DBG( "***Sending general message\n");
     SendAPacket( buf, length, netPath, netPath->generalSock, PTP_GENERAL_PORT);
+    return TRUE;
+#elif defined(freertos)
+    DBG( "***Sending general message\n");
+    UInteger16 null_src = 0;
+//    SendAPacket( buf, length, netPath, netPath->generalSock, PTP_GENERAL_PORT);
+    SendAPacket( buf, length, netPath, null_src, PTP_GENERAL_PORT);
     return TRUE;
 #endif
 }

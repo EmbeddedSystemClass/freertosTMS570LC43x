@@ -71,5 +71,6 @@
 #define UDP_ECHO_H
 
 void vStartUDPEchoTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPriority );
+Socket_t prvOpenUDPServerSocket( uint16_t usPort );
 
 #endif /* UDP_COMMAND_INTERPRETER_H */

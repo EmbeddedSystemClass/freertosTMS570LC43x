@@ -154,7 +154,7 @@ NS_UINT phaseError, clkOutPeriod;
 NS_UINT8 nTimeout1, nTimeout2;
 TimeInternal ts;
 
-    ptpStackCfg->revA1SiliconFlag = FALSE;
+//    ptpStackCfg->revA1SiliconFlag = FALSE;
 //    if ( (EPLReadReg( portHandle, 0x0003) & 0x000F) == 0)
 //        ptpStackCfg->revA1SiliconFlag = TRUE;
     

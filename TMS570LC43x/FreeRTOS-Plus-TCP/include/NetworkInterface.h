@@ -65,8 +65,6 @@ extern "C" {
 #include "epl.h"
 
 /* NOTE PUBLIC API FUNCTIONS. */
-RX_CFG_ITEMS rxCfgItems;
-uint32_t rxCfgOpts;
 
 #define ipPTP1588_IP_ADDRESS	0xE0000181UL
 BaseType_t xNetworkInterfaceInitialise( void );

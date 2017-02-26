@@ -143,7 +143,7 @@
 /* USER CODE BEGIN (0) */
 #define configUSE_PERCEPIO_TRACE 			0
 
-/* UART CLI paraméterek */
+/* UART CLI paramï¿½terek */
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE 400
 #define configUART_COMMAND_CONSOLE_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
 //#define configUART_COMMAND_CONSOLE_TASK_PRIORITY	( 6U )
@@ -159,7 +159,12 @@
 #define mainUDP_Echo_PORT_NUMBER			( 319UL )
 #define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 20 )
 
-/* Thread Local Storage - Jelenleg csak a FreeRTOS-plus-FAT csomag használja */
+/* PTPD task parameters. */
+#define mainPTP1588_TASK_PRIORITY			(4 | portPRIVILEGE_BIT)
+#define mainPTP1588_PORT_NUMBER			( 319UL )
+#define mainPTP1588_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 20 )
+
+/* Thread Local Storage - Jelenleg csak a FreeRTOS-plus-FAT csomag hasznï¿½lja */
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 
 #define INCLUDE_xSemaphoreGetMutexHolder	1

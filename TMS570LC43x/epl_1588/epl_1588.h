@@ -11,7 +11,7 @@
 #ifndef _EPL_1588_INCLUDE
 #define _EPL_1588_INCLUDE
 
-#include "HL_hal_stdtypes.h"
+#include "epl.h"
 
 #define EXPORT
 #define IN
@@ -75,20 +75,6 @@ typedef enum
     STS_SRC_ADDR_USE_MC = 0x00000002
 } MAC_SRC_ADDRESS_ENUM;
 
-
-typedef struct RX_CFG_ITEMS
-{
-    uint32_t ptpVersion;
-    uint32_t ptpFirstByteMask;
-    uint32_t ptpFirstByteData;
-    uint32_t ipAddrData;
-    uint32_t tsMinIFG;
-    uint32_t srcIdHash;
-    uint32_t ptpDomain;
-    uint32_t tsSecLen;
-    uint32_t rxTsNanoSecOffset;
-    uint32_t rxTsSecondsOffset;
-} RX_CFG_ITEMS;
 
 #define CLKOPT_CLK_OUT_EN           0x00000001
 #define CLKOPT_CLK_OUT_SEL          0x00000002
@@ -162,27 +148,23 @@ extern "C" {
 #endif
 
 void PTPEnable(
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         boolean enableFlag);
 
 void PTPSetTriggerConfig(
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger,
         uint32_t triggerBehavior,
         uint32_t gpioConnection);
 
 void PTPSetTriggerConfig(
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger,
         uint32_t triggerBehavior,
         uint32_t gpioConnection);
 
 void PTPSetEventConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t event,
         boolean eventRiseFlag,
         boolean eventFallFlag,
@@ -190,18 +172,16 @@ void PTPSetEventConfig (
         uint32_t gpioConnection);
 
 void PTPSetTransmitConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t txConfigOptions,
         uint32_t ptpVersion,
         uint32_t ptpFirstByteMask,
         uint32_t ptpFirstByteData);
 
-uint32_t PTPReadTransmitConfig (uint32_t baseAddr, uint32_t phyAddr);
+uint32_t PTPReadTransmitConfig (PEPL_PORT_HANDLE epl_port_handle);
 
 void PTPSetPhyStatusFrameConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t statusConfigOptions,
         MAC_SRC_ADDRESS_ENUM srcAddrToUse,
         uint32_t minPreamble,
@@ -212,69 +192,59 @@ void PTPSetPhyStatusFrameConfig (
         uint32_t sourceIpAddress);
 
 void PTPSetReceiveConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t rxConfigOptions,
         RX_CFG_ITEMS *rxConfigItems);
 
-uint32_t PTPReadReceiveConfig (uint32_t baseAddr, uint32_t phyAddr);
+uint32_t PTPReadReceiveConfig (PEPL_PORT_HANDLE epl_port_handle);
 
 uint32_t PTPCalcSourceIdHash (
         uint8_t *tenBytesData);
 
 void PTPSetTempRateDurationConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t duration);
 
 void PTPSetClockConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t clockConfigOptions,
         uint32_t ptpClockDivideByValue,
         uint32_t ptpClockSource,
         uint32_t ptpClockSourcePeriod);
 
 void PTPSetGpioInterruptConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t gpioInt);
 
 void PTPSetMiscConfig (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t ptpEtherType,
         uint32_t ptpOffset,
         uint32_t txSfdGpio,
         uint32_t rxSfdGpio);
 
 void PTPClockStepAdjustment (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds,
         boolean negativeAdj);
 
 void PTPClockSet (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t numberOfSeconds,
         uint32_t numberOfNanoSeconds);
 
 void PTPClockSetRateAdjustment (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t rateAdjValue,
         boolean tempAdjFlag,
         boolean adjDirectionFlag);
 
 uint32_t PTPCheckForEvents (
-//        PEPL_PORT_HANDLE portHandle);
-    		uint32_t baseAddr, uint32_t phyAddr);
+    		PEPL_PORT_HANDLE epl_port_handle);
 
 void PTPArmTrigger (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger,
         uint32_t expireTimeSeconds,
         uint32_t expireTimeNanoSeconds,
@@ -284,36 +254,30 @@ void PTPArmTrigger (
         uint32_t pulseWidth2);
 
 boolean PTPHasTriggerExpired (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger);
 
 void PTPCancelTrigger (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t trigger);
 
 uint32_t MonitorGpioSignals (
-//        PEPL_PORT_HANDLE portHandle
-    		uint32_t baseAddr, uint32_t phyAddr
+    		PEPL_PORT_HANDLE epl_port_handle
 		);
 
 void PTPClockReadCurrent (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds);
 
 void PTPGetTransmitTimestamp (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds,
         uint32_t   *overflowCount);
 
 void PTPGetReceiveTimestamp (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t *retNumberOfSeconds,
         uint32_t *retNumberOfNanoSeconds,
         uint32_t *overflowCount,
@@ -327,8 +291,7 @@ void PTPGetTimestampFromFrame (
         uint32_t *retNumberOfNanoSeconds);
 
 boolean PTPGetEvent (
-//        PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint32_t   *eventBits,
         uint32_t   *riseFlags,
         uint32_t *eventTimeSeconds,
@@ -336,14 +299,12 @@ boolean PTPGetEvent (
         uint32_t   *eventsMissed);
 
 uint8_t * IsPhyStatusFrame (
-//		PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint8_t *frameBuffer,
         uint16_t frameLength);
 
 uint8_t * GetNextPhyMessage (
-//		PEPL_PORT_HANDLE portHandle,
-    		uint32_t baseAddr, uint32_t phyAddr,
+    		PEPL_PORT_HANDLE epl_port_handle,
         uint8_t *msgLocation,
         PHYMSG_MESSAGE_TYPE_ENUM *messageType,
         PHYMSG_MESSAGE *message);

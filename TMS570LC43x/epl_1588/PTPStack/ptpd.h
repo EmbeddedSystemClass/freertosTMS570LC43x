@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -97,6 +97,11 @@ purpose.
 #include "dep/datatypes_dep.h"
 #include "datatypes.h"
 #include "dep/ptpd_dep.h"
+
+void init1588(PEPL_PORT_HANDLE epl_port_handle);
+int runPtpd(void);
+
+#define EXPORT
 
 #define STS_PSF_DATA    1
 #define STS_OFFSET_DATA 2

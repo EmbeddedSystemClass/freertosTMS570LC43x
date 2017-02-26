@@ -10,7 +10,8 @@
 #ifndef _EPL_TYPES_INCLUDE
 #define _EPL_TYPES_INCLUDE
 
-#include "epl.h"
+#include "HL_emac.h"
+//#include "epl_1588.h"
 
 // Note: On platforms where the natural integer size is less then 32-bits
 // in size (eg 16-bit platforms), NS_UINT and NS_SINT must be defined as a 
@@ -42,6 +43,21 @@ typedef unsigned char       NS_BOOL;    // TRUE or FALSE
 #ifndef NULL
 #define NULL ((void*)0)
 #endif
+
+typedef struct RX_CFG_ITEMS
+{
+    uint32_t ptpVersion;
+    uint32_t ptpFirstByteMask;
+    uint32_t ptpFirstByteData;
+    uint32_t ipAddrData;
+    uint32_t tsMinIFG;
+    uint32_t srcIdHash;
+    uint32_t ptpDomain;
+    uint32_t tsSecLen;
+    uint32_t rxTsNanoSecOffset;
+    uint32_t rxTsSecondsOffset;
+} RX_CFG_ITEMS;
+
 
 // EPL return codes
 typedef enum NS_STATUS {
@@ -111,6 +127,10 @@ typedef struct PORT_OBJ {
     void *psfList;
     NS_UINT8 psfSrcMacAddr[6];
     void *pktList;
+
+	hdkif_t hdkif;
+	RX_CFG_ITEMS rxCfgItems;
+	uint32_t rxCfgOpts;
 }PORT_OBJ,*PPORT_OBJ;
 
 #define PEPL_DEV_HANDLE     PDEVICE_OBJ

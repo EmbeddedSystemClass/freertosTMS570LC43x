@@ -5,7 +5,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="${build_artifact:TMS570LC43x}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.SEGGER J-Link Emulator/CortexR5" value="TMS570LC43x"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:TMS570LC43x}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="C:/Users\scott\repos\code\freertosTMS570LC43x\TMS570LC43x\Debug\TMS570LC43x.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="/home/scott/repos/code/freertosTMS570LC43x/TMS570LC43x/Debug/TMS570LC43x.out"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/TMS570LC43x"/>
 </listAttribute>

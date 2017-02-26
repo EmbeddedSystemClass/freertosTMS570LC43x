@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -90,6 +90,17 @@ purpose.
 #ifndef DATATYPES_DEP_H
 #define DATATYPES_DEP_H
 
+#include "FreeRTOS.h"
+#include "os_task.h"
+#include "os_semphr.h"
+
+/* FreeRTOS+CLI includes. */
+#include "FreeRTOS_CLI.h"
+
+/* FreeRTOS+TCP includes. */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -118,7 +129,8 @@ typedef struct {
 } one_way_delay_filter;
 
 typedef struct {
-  Integer32 eventSock, generalSock, bcastAddr;
+  Socket_t eventSock, generalSock;
+  struct freertos_sockaddr bcastAddr;
   void *rtOpts;
   void *ptpClock;
 } NetPath;

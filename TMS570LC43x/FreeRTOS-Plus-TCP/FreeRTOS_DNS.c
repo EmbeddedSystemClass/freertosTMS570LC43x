@@ -180,7 +180,7 @@ struct xDNSMessage
 	uint16_t usAnswers;
 	uint16_t usAuthorityRRs;
 	uint16_t usAdditionalRRs;
-}
+};
 #include "pack_struct_end.h"
 typedef struct xDNSMessage DNSMessage_t;
 
@@ -193,7 +193,7 @@ struct xDNSTail
 {
 	uint16_t usType;
 	uint16_t usClass;
-}
+};
 #include "pack_struct_end.h"
 typedef struct xDNSTail DNSTail_t;
 

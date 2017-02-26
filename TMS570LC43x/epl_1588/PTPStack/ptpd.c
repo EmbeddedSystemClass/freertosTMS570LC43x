@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -88,14 +88,48 @@ purpose.
 
 
 #include "ptpd.h"
+#include "NetworkInterface.h"
+#include "HL_emac.h"
+extern hdkif_t hdkif_data[];
 
 RunTimeOpts rtOpts;  /* statically allocated run-time configuration data */
+RX_CFG_ITEMS rxCfgItems;
+uint32_t rxCfgOpts;
 
-int main(int argc, char **argv)
+int runPtpd(void)
 {
   PtpClock *ptpClock;
   Integer16 ret;
+
+  PEPL_PORT_HANDLE epl_port_handle;
+  hdkif_t *hdkif;
+  hdkif = &hdkif_data[0U];
+
+  EMACInstConfig(hdkif);
+  RX_CFG_ITEMS rxCfgItems;
+  rxCfgItems.ptpVersion = 0x02;
+  rxCfgItems.ptpFirstByteMask = 0x00;
+  rxCfgItems.ptpFirstByteData = 0x00;
+  rxCfgItems.ipAddrData = 0;
+  rxCfgItems.tsMinIFG = 0x0C;
+  rxCfgItems.srcIdHash = 0;
+  rxCfgItems.ptpDomain = 0;
+  rxCfgItems.tsSecLen = 3;
+  rxCfgItems.rxTsSecondsOffset = 8;
+  rxCfgItems.rxTsNanoSecOffset = 12;
+
+  uint32_t rxCfgOpts = 0;
+  rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+  		RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+  		RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
+
+  epl_port_handle->hdkif = *hdkif;
+  epl_port_handle->rxCfgItems = rxCfgItems;
+  epl_port_handle->rxCfgOpts = rxCfgOpts;
+  init1588(&epl_port_handle);
   
+  rtOpts.eplPortHandle = &epl_port_handle;
+
   /* initialize run-time options to reasonable values */ 
   rtOpts.syncInterval = DEFAULT_SYNC_INTERVAL;
   memcpy(rtOpts.subdomainName, DEFAULT_PTP_DOMAIN_NAME, PTP_SUBDOMAIN_NAME_LENGTH);
@@ -112,6 +146,8 @@ int main(int argc, char **argv)
   rtOpts.max_foreign_records = DEFUALT_MAX_FOREIGN_RECORDS;
   rtOpts.currentUtcOffset = DEFAULT_UTC_OFFSET;
   
+  int argc = 0;
+  char ** argv = {0};
   if( !(ptpClock = ptpdStartup(argc, argv, &ret, &rtOpts)) )
     return ret;
   
@@ -131,3 +167,63 @@ int main(int argc, char **argv)
   return 1;
 }
 
+
+void init1588(PEPL_PORT_HANDLE  epl_port_handle){
+	PTPEnable(epl_port_handle, false);
+	PTPClockSetRateAdjustment(epl_port_handle, 0, false, false);
+	PTPClockSet(epl_port_handle, 1, 0);
+	PTPSetClockConfig(epl_port_handle, CLKOPT_CLK_OUT_EN, 0x0A, 0x00, 8);
+	PTPEnable(epl_port_handle, true);
+
+	PTPReadTransmitConfig(epl_port_handle);
+	PTPSetTransmitConfig(epl_port_handle, 0, 0, 0, 0);
+	PTPReadTransmitConfig(epl_port_handle);
+	memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
+	PTPSetReceiveConfig(epl_port_handle, 0, &rxCfgItems);
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
+
+	//flush tx queue
+	uint32_t seconds =0, nanoseconds=0, overflow_count=0, sequence_id=0, hash_value=0;
+	uint8_t message_type = 0;
+	uint32_t events = 0;
+	while((events = PTPCheckForEvents(epl_port_handle))){
+		if(events & PTPEVT_TRANSMIT_TIMESTAMP_BIT){
+			PTPGetTransmitTimestamp(epl_port_handle,
+					&seconds, &nanoseconds, &overflow_count);
+		} else if(events & PTPEVT_RECEIVE_TIMESTAMP_BIT){
+			PTPGetReceiveTimestamp(epl_port_handle,
+					&seconds, &nanoseconds, &overflow_count, &sequence_id,
+					&message_type, &hash_value);
+		}
+	}
+
+	PTPSetTransmitConfig(epl_port_handle,
+			TXOPT_L2_EN|TXOPT_IPV4_EN|TXOPT_TS_EN|TXOPT_DR_INSERT, 2, 0x00, 0x00);
+//			TXOPT_IP1588_EN|TXOPT_IPV4_EN|TXOPT_TS_EN, 2, 0xFF, 0x00);
+//	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
+
+	rxCfgItems.ptpVersion = 0x02;
+	rxCfgItems.ptpFirstByteMask = 0x00;
+	rxCfgItems.ptpFirstByteData = 0x00;
+	rxCfgItems.ipAddrData = 0;
+	rxCfgItems.tsMinIFG = 0x0C;
+	rxCfgItems.srcIdHash = 0;
+	rxCfgItems.ptpDomain = 0;
+	rxCfgItems.tsSecLen = 3;
+	//offset 8 to put timestamp in correction field, with append set to zero
+	rxCfgItems.rxTsSecondsOffset = 8;
+	rxCfgItems.rxTsNanoSecOffset = 12;
+
+//	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+//			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
+//			RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
+
+	rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+			RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+			RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
+	//RXOPT_IPV4_UDP_MOD RXOPT_TS_APPEND
+
+	PTPSetReceiveConfig(epl_port_handle, rxCfgOpts, &rxCfgItems);
+//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
+}

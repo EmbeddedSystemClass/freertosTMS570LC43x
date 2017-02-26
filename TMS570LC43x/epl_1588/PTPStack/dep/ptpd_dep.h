@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -108,7 +108,7 @@ purpose.
 //#include<arpa/inet.h>
 //#endif //WIN32
 //
-//#include "ptpControl.h"
+#include "ptpControl.h"
 
 /* system messages */
 #ifdef ERROR
@@ -145,12 +145,11 @@ purpose.
 #define shift16(x,y)      ( (x) << ((y)<<4) )
 #endif
 
-#define flip16(x)         htons(x)
-#define flip32(x)         htonl(x)
+//#define flip16(x)         htons(x)
+//#define flip32(x)         htonl(x)
 
 /* i don't know any target platforms that do not have htons and htonl,
    but here are generic funtions just in case */
-/*
 #if defined(PTPD_MSBF)
 #define flip16(x)         (x)
 #define flip32(x)         (x)
@@ -166,7 +165,6 @@ static inline Integer32 flip32(x)
          (((x) << 8 ) & 0x00ff0000) | (((x) << 24) & 0xff000000);
 }
 #endif
-*/
 
 /* bit array manipulation */
 #define getFlag(x,y)      !!(*(UInteger8*)((x)+((y)<8?1:0)) & ( 1<<((y)<8?(y):(y)-8) ))

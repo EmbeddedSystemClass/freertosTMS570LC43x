@@ -5,7 +5,7 @@
    <string>defaultSolution</string>
    <void method="set">
     <object idref="SolutionManager$PersistState0"/>
-    <string>/opt/ti/ccsv7/ccs_base/dvt_4.1.0.201612061750/CodeGen/solutions/CodeGenCoverage</string>
+    <string>/home/slee/ti/ccsv7/ccs_base/dvt_4.1.0.201612061750/CodeGen/solutions/CodeGenCoverage</string>
    </void>
   </void>
  </object>
@@ -14,10 +14,10 @@
  <void id="ArrayList0" method="get">
   <object idref="SolutionManager$PersistState0"/>
   <void method="add">
-   <string>/home/scott/repos/code/freertosTMS570LC43x/dvt/AnalysisSolutionsTemp/AnalysisSolution1488090128943/null</string>
+   <string>/home/slee/repos/code/freertosTMS570LC43x/dvt/AnalysisSolutionsTemp/AnalysisSolution1488200237339/null</string>
   </void>
   <void method="add">
-   <string>/opt/ti/ccsv7/ccs_base/dvt_4.1.0.201612061750/CodeGen/solutions/CodeGenCoverage</string>
+   <string>/home/slee/ti/ccsv7/ccs_base/dvt_4.1.0.201612061750/CodeGen/solutions/CodeGenCoverage</string>
   </void>
  </void>
 </void>

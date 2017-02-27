@@ -133,9 +133,11 @@ void msgUnpackHeader(UInteger8* buf, MsgHeader *header)
 
 void msgUnpackSync(UInteger8 *buf, MsgSync *sync)
 {
-  sync->originTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+//  sync->originTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  sync->originTimestamp.seconds = *(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET);
   DBGVV("msgUnpackSync: originTimestamp.seconds %u\n", sync->originTimestamp.seconds);
-  sync->originTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+//  sync->originTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  sync->originTimestamp.nanoseconds = *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET);
   DBGVV("msgUnpackSync: originTimestamp.nanoseconds %d\n", sync->originTimestamp.nanoseconds);
 //  sync->epochNumber = flip16(*(UInteger16*)(buf + 48));
 //  DBGVV("msgUnpackSync: epochNumber %d\n", sync->epochNumber);
@@ -197,17 +199,21 @@ void msgUnpackFollowUp(UInteger8 *buf, MsgFollowUp *follow)
 {
   follow->associatedSequenceId = *(UInteger16*)(buf + PTPV2_SEQUENCE_ID_OFFSET);
   DBGVV("msgUnpackFollowUp: associatedSequenceId %u\n", follow->associatedSequenceId);
-  follow->preciseOriginTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+//  follow->preciseOriginTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  follow->preciseOriginTimestamp.seconds = *(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET);
   DBGVV("msgUnpackFollowUp: preciseOriginTimestamp.seconds %u\n", follow->preciseOriginTimestamp.seconds);
-  follow->preciseOriginTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+//  follow->preciseOriginTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  follow->preciseOriginTimestamp.nanoseconds = *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET);
   DBGVV("msgUnpackFollowUp: preciseOriginTimestamp.nanoseconds %d\n", follow->preciseOriginTimestamp.nanoseconds);
 }
 
 void msgUnpackDelayResp(UInteger8 *buf, MsgDelayResp *resp)
 {
-  resp->delayReceiptTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+//  resp->delayReceiptTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  resp->delayReceiptTimestamp.seconds = *(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET);
   DBGVV("msgUnpackDelayResp: delayReceiptTimestamp.seconds %u\n", resp->delayReceiptTimestamp.seconds);
-  resp->delayReceiptTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+//  resp->delayReceiptTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  resp->delayReceiptTimestamp.nanoseconds = *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET);
   DBGVV("msgUnpackDelayResp: delayReceiptTimestamp.nanoseconds %d\n", resp->delayReceiptTimestamp.nanoseconds);
 //  resp->requestingSourceCommunicationTechnology = *(UInteger8*)(buf + 49);
 //  DBGVV("msgUnpackDelayResp: requestingSourceCommunicationTechnology %d\n", resp->requestingSourceCommunicationTechnology);
@@ -548,8 +554,10 @@ UInteger16 pow2Val;
 //  else
 //    clearFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
   
-  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(originTimestamp->seconds);
-  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(originTimestamp->nanoseconds);
+//  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(originTimestamp->seconds);
+//  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(originTimestamp->nanoseconds);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = originTimestamp->seconds;
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = originTimestamp->nanoseconds;
 //  *(Integer32*)(buf + 48) = shift16(flip16(ptpClock->epoch_number), 0) | shift16(flip16(ptpClock->current_utc_offset), 1);
 //  *(Integer32*)(buf + 52) = shift8(ptpClock->grandmaster_communication_technology, 1);
 //  memcpy((buf + PTPV2_CLOCK_ID_OFFSET), ptpClock->grandmaster_uuid_field, PTPV2_CLOCK_ID_LENGTH);

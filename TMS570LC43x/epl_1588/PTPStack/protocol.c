@@ -523,7 +523,8 @@ void handleSync(MsgHeader *header, Octet *msgIbuf, TimeInternal *time, Boolean i
 
       ptpClock->sync_receive_time.seconds = time->seconds;
       ptpClock->sync_receive_time.nanoseconds = time->nanoseconds;
-      if(!getFlag(header->flags, PTP_ASSIST))
+//      if(!getFlag(header->flags, PTP_ASSIST))
+      if(0)
       {
         ptpClock->waitingForFollow = FALSE;
         
@@ -604,7 +605,7 @@ void handleFollowUp(MsgHeader *header, Octet *msgIbuf, Boolean isFromSelf, RunTi
     
     if( ptpClock->waitingForFollow
       && follow->associatedSequenceId == ptpClock->parent_last_sync_sequence_number
-      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
+//      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
       && header->sourcePortId == ptpClock->parent_port_id
       && !memcmp(header->sourceUuid, ptpClock->parent_uuid, PTP_UUID_LENGTH) )
     {
@@ -704,10 +705,10 @@ void handleDelayResp(MsgHeader *header, Octet *msgIbuf, Boolean isFromSelf, RunT
     
     if( ptpClock->sentDelayReq
       && resp->requestingSourceSequenceId == ptpClock->sentDelayReqSequenceId
-      && resp->requestingSourceCommunicationTechnology == ptpClock->port_communication_technology
-      && resp->requestingSourcePortId == ptpClock->port_id_field
-      && !memcmp(resp->requestingSourceUuid, ptpClock->port_uuid_field, PTP_UUID_LENGTH)
-      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
+//      && resp->requestingSourceCommunicationTechnology == ptpClock->port_communication_technology
+//      && resp->requestingSourcePortId == ptpClock->port_id_field
+//      && !memcmp(resp->requestingSourceUuid, ptpClock->port_uuid_field, PTP_UUID_LENGTH)
+//      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
       && header->sourcePortId == ptpClock->parent_port_id
       && !memcmp(header->sourceUuid, ptpClock->parent_uuid, PTP_UUID_LENGTH) )
     {

@@ -165,7 +165,7 @@ purpose.
 #define IFACE_NAME_LENGTH         50
 #define PTPD_LSBF
 
-#define INT_MAX POW_2_32
+#define INT_MAX		(POW_2_32/2 - 1)
 
 #define ADJ_FREQ_MAX  512000
 

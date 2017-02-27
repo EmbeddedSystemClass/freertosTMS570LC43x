@@ -102,6 +102,35 @@ purpose.
 #include "FreeRTOS_Sockets.h"
 #include "udp_echo.h"
 
+UInteger32 crc_algorithm(Octet *buf, Integer16 length)
+{
+  Integer16 i;
+  UInteger8 data;
+  UInteger32 polynomial = 0xedb88320, crc = 0xffffffff;
+
+  while(length-- > 0)
+  {
+    data = *(UInteger8 *)(buf++);
+
+    for(i=0; i<8; i++)
+    {
+      if((crc^data)&1)
+      {
+        crc = (crc>>1);
+        crc ^= polynomial;
+      }
+      else
+      {
+        crc = (crc>>1);
+      }
+      data >>= 1;
+    }
+  }
+
+  return crc^0xffffffff;
+}
+
+
 #define socket FreeRTOS_socket
 #define SOCK_DGRAM FREERTOS_SOCK_DGRAM
 #define IPPROTO_UDP FREERTOS_IPPROTO_UDP
@@ -543,7 +572,9 @@ Boolean netInit(NetPath *netPath, RunTimeOpts *rtOpts, PtpClock *ptpClock)
 
     ptpClock->port_communication_technology = PTP_ETHER;
 
-    memcpy( ptpClock->port_uuid_field, rtOpts->localMACAddress, PTP_UUID_LENGTH);
+//    memcpy( ptpClock->port_uuid_field, rtOpts->localMACAddress, PTP_UUID_LENGTH);
+  uint8_t clock_id[8] = {0x00, 0x1E, 0x06, 0x0FF, 0xFE, 0x32, 0x4D, 0x8E};
+  memcpy(&(ptpClock->port_uuid_field),  clock_id, 8);
 
     /* resolve PTP subdomain */
     if(!lookupSubdomainAddress(rtOpts->subdomainName, addrStr))
@@ -1082,9 +1113,9 @@ PHYMSG_MESSAGE phyMsg;
 //    {
         if ( !rtOpts->revA1SiliconFlag)
         {
-//            time->nanoseconds = flip32( *(NS_UINT32*)&ptpHead[126]);
-//            time->seconds = flip32( *(NS_UINT32*)&ptpHead[130]);
-        	PTPGetTimestampFromFrame(ptpHead, &(time->seconds), &(time->nanoseconds));
+            time->nanoseconds =  *(NS_UINT32*)&ptpHead[PTPV2_ORIGIN_TS_NSEC_OFFSET];
+            time->seconds =  *(NS_UINT32*)&ptpHead[PTPV2_ORIGIN_TS_SEC_OFFSET];
+//        	PTPGetTimestampFromFrame(ptpHead, &(time->seconds), &(time->nanoseconds));
 
             // Discard sync msgs if we did a rate adj and are waiting for it to complete.
 
@@ -1160,20 +1191,22 @@ uint32_t MACReceivePacket(NetPath * net_path, Octet * rxbuff, uint32_t *rx_len){
 
 uint32_t MACSendPacket(NetPath * net_path, Octet * txbuff, uint32_t txbuff_len){
 	struct freertos_sockaddr destination;
+	Socket_t send_socket;
 	socklen_t destination_address_length = 0;
 	uint32_t bits_written = 0;
+	uint8_t message_type = txbuff[0];
+	if(message_type == PTPV2_DELAY_RESPONSE_TYPE || message_type == PTPV2_FOLLOWUP_TYPE){
+		destination.sin_port = FreeRTOS_htons(320);
+		send_socket = net_path->generalSock;
+	}else if(message_type == PTPV2_SYNC_TYPE || message_type == PTPV2_DELAY_REQUEST_TYPE ){
+		send_socket = net_path->eventSock;
+		destination.sin_port = FreeRTOS_htons(319);
+	}
+	destination.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
 
 	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
 	{
-		if(	txbuff[0] == PTPV2_SYNC_TYPE ||
-			txbuff[0] == PTPV2_DELAY_REQUEST_TYPE	){
-			destination.sin_port = FreeRTOS_htons(320);
-		}else if(txbuff[0] == PTPV2_DELAY_RESPONSE_TYPE ||
-				     txbuff[0] == PTPV2_FOLLOWUP_TYPE){
-			destination.sin_port = FreeRTOS_htons(319);
-		}
-		destination.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
-		bits_written = FreeRTOS_sendto( net_path->eventSock, txbuff,  txbuff_len, 0, &destination, destination_address_length);
+		bits_written = FreeRTOS_sendto( send_socket, txbuff,  txbuff_len, 0, &destination, destination_address_length);
 	}
 	else
 	{

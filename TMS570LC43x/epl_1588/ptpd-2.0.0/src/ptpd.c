@@ -6,7 +6,7 @@
 
 #define PTPD_THREAD_PRIO    (tskIDLE_PRIORITY + 2)
 
-static sys_mbox_t ptp_alert_queue;
+//static sys_mbox_t ptp_alert_queue;
 
 // Statically allocated run-time configuration data.
 RunTimeOpts rtOpts;
@@ -73,26 +73,26 @@ static void ptpd_thread(void *arg)
 		while (netSelect(&ptpClock.netPath, 0) > 0);
 		
 		// Wait up to 100ms for something to do, then do something anyway.
-		sys_arch_mbox_fetch(&ptp_alert_queue, &msg, 100);
+//		sys_arch_mbox_fetch(&ptp_alert_queue, &msg, 100);
 	}
 }
 
-// Notify the PTP thread of a pending operation.
-void ptpd_alert(void)
-{
-	// Send a message to the alert queue to wake up the PTP thread.
-	sys_mbox_trypost(&ptp_alert_queue, NULL);
-}
-
-void ptpd_init(void)
-{
-	// Create the alert queue mailbox.
-  if (sys_mbox_new(&ptp_alert_queue, 8) != ERR_OK)
-	{
-    printf("PTPD: failed to create ptp_alert_queue mbox");
-  }
-
-	// Create the PTP daemon thread.
-	sys_thread_new("PTPD", ptpd_thread, NULL, DEFAULT_THREAD_STACKSIZE * 2, osPriorityAboveNormal);
-}
-
+//// Notify the PTP thread of a pending operation.
+//void ptpd_alert(void)
+//{
+//	// Send a message to the alert queue to wake up the PTP thread.
+//	sys_mbox_trypost(&ptp_alert_queue, NULL);
+//}
+//
+//void ptpd_init(void)
+//{
+//	// Create the alert queue mailbox.
+//  if (sys_mbox_new(&ptp_alert_queue, 8) != ERR_OK)
+//	{
+//    printf("PTPD: failed to create ptp_alert_queue mbox");
+//  }
+//
+//	// Create the PTP daemon thread.
+//	sys_thread_new("PTPD", ptpd_thread, NULL, DEFAULT_THREAD_STACKSIZE * 2, osPriorityAboveNormal);
+//}
+//

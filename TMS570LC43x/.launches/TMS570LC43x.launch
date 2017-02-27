@@ -5,7 +5,7 @@
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="${build_artifact:TMS570LC43x}"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_PROJECT.SEGGER J-Link Emulator/CortexR5" value="TMS570LC43x"/>
 <stringAttribute key="com.ti.ccstudio.debug.debugModel.ATTR_TARGET_CONFIG" value="${target_config_active_default:TMS570LC43x}"/>
-<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="/home/scott/repos/code/freertosTMS570LC43x/TMS570LC43x/Debug/TMS570LC43x.out"/>
+<stringAttribute key="com.ti.ccstudio.debug.debugModel.MRU_PROGRAM.SEGGER J-Link Emulator/CortexR5" value="/home/slee/repos/code/freertosTMS570LC43x/TMS570LC43x/Debug/TMS570LC43x.out"/>
 <mapAttribute key="com.ti.ccstudio.debug.ui.displayFormats">
 <mapEntry key="SEGGER J-Link Emulator/CortexR5@##separator##@0" value="32-Bit Hex - TI Style"/>
 </mapAttribute>

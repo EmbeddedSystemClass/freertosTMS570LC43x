@@ -3,6 +3,13 @@
 
 #include "os_semphr.h"
 
+typedef int32_t s32_t ;
+
+struct ptptime_t {
+  s32_t tv_sec;
+  s32_t tv_nsec;
+};
+
 typedef SemaphoreHandle_t sys_mutex_t;
 
 // Implementation specific datatypes

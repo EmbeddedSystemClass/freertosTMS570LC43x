@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -124,6 +124,9 @@ void initData(RunTimeOpts *rtOpts, PtpClock *ptpClock)
   /* Global time properties data set */
   ptpClock->current_utc_offset = rtOpts->currentUtcOffset;
   ptpClock->epoch_number = rtOpts->epochNumber;
+
+  uint8_t clock_id[8] = {0x00, 0x1E, 0x06, 0x0FF, 0xFE, 0x32, 0x4D, 0x8E};
+  memcpy(&(ptpClock->clock_uuid_field),  clock_id, 8);
   
   /* other stuff */
   ptpClock->random_seed = ptpClock->port_uuid_field[PTP_UUID_LENGTH-1];

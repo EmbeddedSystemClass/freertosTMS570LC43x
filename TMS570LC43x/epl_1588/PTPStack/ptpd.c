@@ -116,6 +116,8 @@ int runPtpd(void)
   hdkif = &hdkif_data[0U];
 
   EMACInstConfig(hdkif);
+
+  memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
   rxCfgItems.ptpVersion = 0x02;
   rxCfgItems.ptpFirstByteMask = 0x00;
   rxCfgItems.ptpFirstByteData = 0x00;
@@ -195,10 +197,10 @@ void init1588(PEPL_PORT_HANDLE  epl_port_handle){
 	PTPReadTransmitConfig(epl_port_handle);
 	PTPSetTransmitConfig(epl_port_handle, 0, 0, 0, 0);
 	PTPReadTransmitConfig(epl_port_handle);
-	memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
-//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
-	PTPSetReceiveConfig(epl_port_handle, 0, &rxCfgItems);
-//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
+
+	PTPReadReceiveConfig(epl_port_handle);
+	PTPSetReceiveConfig(epl_port_handle, 0, &(epl_port_handle->rxCfgItems));
+	PTPReadReceiveConfig(epl_port_handle);
 
 	//flush tx queue
 	uint32_t seconds =0, nanoseconds=0, overflow_count=0, sequence_id=0, hash_value=0;
@@ -215,32 +217,10 @@ void init1588(PEPL_PORT_HANDLE  epl_port_handle){
 		}
 	}
 
-	PTPSetTransmitConfig(epl_port_handle,
-			TXOPT_L2_EN|TXOPT_IPV4_EN|TXOPT_TS_EN|TXOPT_DR_INSERT, 2, 0x00, 0x00);
-//			TXOPT_IP1588_EN|TXOPT_IPV4_EN|TXOPT_TS_EN, 2, 0xFF, 0x00);
-//	PTPReadTransmitConfig(hdkif->mdio_base, hdkif->phy_addr);
+	PTPSetTransmitConfig(epl_port_handle, TXOPT_L2_EN|TXOPT_IPV4_EN|TXOPT_TS_EN|TXOPT_DR_INSERT, 2, 0x00, 0x00);
+	PTPReadTransmitConfig(epl_port_handle);
 
-	rxCfgItems.ptpVersion = 0x02;
-	rxCfgItems.ptpFirstByteMask = 0x00;
-	rxCfgItems.ptpFirstByteData = 0x00;
-	rxCfgItems.ipAddrData = 0;
-	rxCfgItems.tsMinIFG = 0x0C;
-	rxCfgItems.srcIdHash = 0;
-	rxCfgItems.ptpDomain = 0;
-	rxCfgItems.tsSecLen = 3;
-	//offset 8 to put timestamp in correction field, with append set to zero
-	rxCfgItems.rxTsSecondsOffset = 8;
-	rxCfgItems.rxTsNanoSecOffset = 12;
+	PTPSetReceiveConfig(epl_port_handle, epl_port_handle->rxCfgOpts, &(epl_port_handle->rxCfgItems));
+	PTPReadReceiveConfig(epl_port_handle);
 
-//	uint32_t rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-//			RXOPT_RX_IPV4_EN|RXOPT_RX_TS_EN|RXOPT_ACC_UDP|RXOPT_RX_SLAVE|
-//			RXOPT_TS_INSERT|RXOPT_TS_APPEND|RXOPT_RX_TS_EN;
-
-	rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-			RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
-			RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
-	//RXOPT_IPV4_UDP_MOD RXOPT_TS_APPEND
-
-	PTPSetReceiveConfig(epl_port_handle, rxCfgOpts, &rxCfgItems);
-//	PTPReadReceiveConfig(hdkif->mdio_base, hdkif->phy_addr);
 }

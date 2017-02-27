@@ -45,7 +45,7 @@ void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data);
 
 void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data){
 	dp83630_set_page(&(epl_port_handle->hdkif), reg);
-	MDIOPhyRegWrite(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg, data);
+	MDIOPhyRegWrite(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg&(~0xE0), data);
 }
 
 uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg);
@@ -54,7 +54,7 @@ uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg){
 	//TODO: return data to be consistent with original API
 	dp83630_set_page(&(epl_port_handle->hdkif), reg);
 	uint32_t data = 0;
-	MDIOPhyRegRead(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg, &data);
+	MDIOPhyRegRead(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg&(~0xE0), &data);
 	return data;
 }
 
@@ -216,7 +216,7 @@ uint32_t PTPReadTransmitConfig (PEPL_PORT_HANDLE epl_port_handle)
 {
 	uint32_t reg = 0;
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG0);
-	reg |= EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG1) << 16;
+	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG1) << 16;
     return reg;
 }
 
@@ -648,14 +648,18 @@ void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
 //      Nothing
 {
 //    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+	uint32_t ptp_control_reg = EPLReadReg(epl_port_handle, PHY_PG4_PTP_CTL);
+	ptp_control_reg = ptp_control_reg >> 16;
+	ptp_control_reg |= 1<<5;
+	EPLWriteReg(epl_port_handle, PHY_PG4_PTP_CTL, ptp_control_reg);
     
-    *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
+    *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) >> 16;
 
-    *retNumberOfNanoSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) << 16;
+    *retNumberOfNanoSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
 
-    *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
+    *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) >> 16;
 
-    *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR) << 16;
+    *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
 
 //    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
 }

@@ -561,7 +561,7 @@ Boolean netInit(NetPath *netPath, RunTimeOpts *rtOpts, PtpClock *ptpClock)
 //    netPath->eventSock = 0xC000;
 //    netPath->generalSock = 0xC001;
     netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
-//    netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
+    netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
     netPath->rtOpts = rtOpts;
     netPath->ptpClock = ptpClock;
     rtOpts->haveLoopbackedSend = FALSE;
@@ -1142,6 +1142,16 @@ uint32_t MACReceivePacket(NetPath * net_path, Octet * rxbuff, uint32_t *rx_len){
 		received_data_length = FreeRTOS_recvfrom( net_path->eventSock, ( void * ) rxbuff,  2048, 0, &client, &xClientAddressLength );
 		if(!(received_data_length >= 0)){
 			received_data_length = 0;
+		}
+	}
+	if(!received_data_length){
+		if( net_path->generalSock!= FREERTOS_INVALID_SOCKET )
+		{
+			struct freertos_sockaddr client;
+			received_data_length = FreeRTOS_recvfrom( net_path->generalSock, ( void * ) rxbuff,  2048, 0, &client, &xClientAddressLength );
+			if(!(received_data_length >= 0)){
+				received_data_length = 0;
+			}
 		}
 	}
 	*rx_len = received_data_length;

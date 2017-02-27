@@ -93,10 +93,42 @@ purpose.
 #include "epl.h"
 
 #include "constants.h"
-#include "datatypes.old.h"
+#include "datatypes.h"
 #include "dep/constants_dep.h"
 #include "dep/datatypes_dep.h"
 #include "dep/ptpd_dep.h"
+
+#define PTPV2_FLAG_OFFSET							6
+#define PTPV2_FLAG_LENGTH							2
+#define PTPV2_SRC_PORT_ID_OFFSET				28
+#define PTPV2_SEQUENCE_ID_OFFSET				30
+#define PTPV2_CONTROL_OFFSET					32
+#define PTPV2_ORIGIN_TS_SEC_OFFSET			26
+#define PTPV2_ORIGIN_TS_NSEC_OFFSET 		30
+#define PTPV2_CLOCK_ID_OFFSET 					20
+#define PTPV2_CLOCK_ID_LENGTH					8
+#define PTPV2_MESSAGE_TYPE_OFFSET			0
+#define PTPV2_VERSION_OFFSET						1
+#define PTPV2_SUBDOMAIN_OFFSET				4
+#define PTPV2_SUBDOMAIN_LENGTH				1
+#define PTPV2_MESSAGE_LENGTH_OFFSET		3
+
+#define PTPV2_SYNC_TYPE								0
+#define PTPV2_SYNC_CONTROL						0
+#define PTPV2_SYNC_LENGTH							0x2C
+
+#define PTPV2_DELAY_REQUEST_TYPE			1
+#define PTPV2_DELAY_REQUEST_LENGTH		0x2C
+#define PTPV2_DELAY_REQUEST_CONTROL		0
+
+#define PTPV2_DELAY_RESPONSE_TYPE			9
+#define PTPV2_DELAY_RESPONSE_CONTROL	3
+#define PTPV2_DELAY_RESPONSE_LENGTH		0x36
+
+#define PTPV2_FOLLOWUP_TYPE						8
+#define PTPV2_FOLLOWUP_CONTROL				2
+#define PTPV2_FOLLOWUP_LENGTH				0x2C
+
 
 void init1588(PEPL_PORT_HANDLE epl_port_handle);
 int runPtpd(void);

@@ -1,290 +1,811 @@
 /* msg.c */
+/* see spec annex d */
+/*****************************************************************************
+COPYRIGHT NOTICE
+
+PTP Notice for PTPd Software
+
+The following copyright notice applies to all files which compose the original
+PTPd Software. This notice applies as if the text was explicitly included each
+file.
+
+Copyright (c) 2006 Aidan Williams
+Copyright (c) 2005-2007 Kendall Correll
+
+Permission is hereby granted to use, copy, modify, and distribute this software
+for any purpose and without fee, provided that this notice appears in all
+copies. The authors make no representations about the suitability of this
+software for any purpose. This software is provided "as is" without express or
+implied warranty.
+
+National Semiconductor Notice for Modified Software
+
+The following copyright notice applies Modifications of the PTPd Software 
+developed by National Semiconductor Corporation, and distributed by 
+National Semiconductor as a Modified Version of the PTPd Software.  
+
+Copyright (c) 2008 National Semiconductor
+
+The associated Modified Software is distributed by National Semiconductor under 
+the above PTPd Notice and Permission, and under the following License, 
+Restrictions, Disclaimers and Limitations:
+
+LICENSE:  Permission is granted to copy, use, modify and/or distribute the 
+Software in Source and/or Binary form, including as an FPGA or other hardware 
+implementation of the Software, subject to the Restrictions, Disclaimers and 
+Limitations.  NSC and/or its licensors retain ownership of all copyright, 
+patent and other intellectual property rights in the Software, and COMPANY 
+shall not remove or alter any copyright or other notices associated with the 
+Software
+
+RESTRICTIONS: The Software may be distributed only in connection the 
+distribution of COMPANY�s Products, and only subject to the following 
+additional Restrictions:  (a) NSC Components:  The Software may be used 
+only in connection with Components that are incorporated into COMPANY's 
+Products; (b) Sublicensing Source:  The Software may be sublicensed in 
+Source form, without any right to grant further downstream sublicenses, 
+solely in accordance with this Agreement including these Restrictions;  
+(c) Confidentiality.  The Source form of the Software is confidential, 
+and unauthorized use or disclosure is prohibited; and (d) Export Compliance.  
+The Software is subject to United States export control laws and regulations, 
+and any product, software or technical data acquired from NSC, or any direct 
+product thereof, shall not be, directly or indirectly, exported, re-exported, 
+or released to any destination without first obtaining any export license or 
+other approval required by the U.S. government, or other applicable non-U.S. 
+governments.  This provision shall survive any termination of this Agreement.
+
+DISCLAIMERS:   The Software is provided "AS IS" without warranty of any kind, 
+including any warranty as to the design or manufacture of COMPANY Products 
+incorporating Components.  NSC and its licensors expressly disclaim all 
+warranties, expressed, implied or otherwise, including without limitation, 
+warranties of merchantability, fitness for a particular purpose and 
+non-infringement of intellectual property rights.  
+Any COMPANY Product incorporating any Software (or any FPGA or other hardware 
+implementation) and associated Components should not be released to production 
+without full test, verification, and qualification, including verification of 
+the selection, configuration and performance of any Software (or any FPGA or 
+other hardware implementation) and/or Components, and including verification 
+that the product design meets functional, performance, reliability and any 
+applicable export or other regulatory requirements.
+
+LIMITATIONS ON LIABILITY.  NSC or its licensors shall not be liable for any 
+direct or indirect or punitive damages of any kind, including but not limited 
+to any special, consequential or incidental damages, including any costs of 
+labor, delay, requalification, or replacement, and any lost business 
+opportunity, profits, or goodwill, whether arising out of the use or 
+inability to use the Software (or the use or inability to use any COMPANY 
+Product incorporating the Software), even if NSC is advised of the 
+possibility of such damages.  In no event shall NSC's aggregate liability from 
+any obligation arising out of or in connection with the license or use of the 
+Software, under any theory of liability including but not limited to contract, 
+tort or promissory fraud, exceed the consideration received by NSC, if any, 
+for the license to the Software.  The foregoing limitation shall not apply to 
+damages resulting directly from NSC's willful and wanton conduct.  To the 
+maximum extent permitted under law, the limitations in this paragraph shall 
+apply even if this limited remedy is found to have failed of its essential 
+purpose.
+
+******************************************************************************/
+
 
 #include "../ptpd.h"
 
-/* Unpack header message */
-void msgUnpackHeader(const octet_t *buf, MsgHeader *header)
-{
-	int32_t msb;
-	uint32_t lsb;
+#define DBGVV
 
-	header->transportSpecific = (*(nibble_t*)(buf + 0)) >> 4;
-	header->messageType = (*(enum4bit_t*)(buf + 0)) & 0x0F;
-	header->versionPTP = (*(uint4bit_t*)(buf  + 1)) & 0x0F; //force reserved bit to zero if not
-	header->messageLength = flip16(*(int16_t*)(buf  + 2));
-	header->domainNumber = (*(uint8_t*)(buf + 4));
-	memcpy(header->flagField, (buf + 6), FLAG_FIELD_LENGTH);
-	memcpy(&msb, (buf + 8), 4);
-	memcpy(&lsb, (buf + 12), 4);
-	header->correctionfield = flip32(msb);
-	header->correctionfield <<= 32;
-	header->correctionfield += flip32(lsb);
-	memcpy(header->sourcePortIdentity.clockIdentity, (buf + 20), CLOCK_IDENTITY_LENGTH);
-	header->sourcePortIdentity.portNumber = flip16(*(int16_t*)(buf  + 28));
-	header->sequenceId = flip16(*(int16_t*)(buf + 30));
-	header->controlField = (*(uint8_t*)(buf + 32));
-	header->logMessageInterval = (*(int8_t*)(buf + 33));
+Boolean msgPeek(void *buf)
+{
+  /* not imlpemented yet */
+  return TRUE;
 }
 
-/* Pack header message */
-void msgPackHeader(const PtpClock *ptpClock, octet_t *buf)
+void msgUnpackHeader(UInteger8* buf, MsgHeader *header)
 {
-	nibble_t transport = 0x80; //(spec annex D)
-	*(uint8_t*)(buf + 0) = transport;
-	*(uint4bit_t*)(buf  + 1) = ptpClock->portDS.versionNumber;
-	*(uint8_t*)(buf + 4) = ptpClock->defaultDS.domainNumber;
-	if (ptpClock->defaultDS.twoStepFlag)
-	{
-			*(uint8_t*)(buf + 6) = FLAG0_TWO_STEP;
-	}
-	memset((buf + 8), 0, 8);
-	memcpy((buf + 20), ptpClock->portDS.portIdentity.clockIdentity, CLOCK_IDENTITY_LENGTH);
-	*(int16_t*)(buf + 28) = flip16(ptpClock->portDS.portIdentity.portNumber);
-	*(uint8_t*)(buf + 33) = 0x7F; //Default value (spec Table 24)
+//  header->versionPTP = flip16(*(UInteger16*)(buf + 0));
+  header->versionPTP = *(buf + PTPV2_VERSION_OFFSET);
+  DBGVV("msgUnpackHeader: versionPTP %d\n", header->versionPTP);
+//  header->versionNetwork = flip16(*(UInteger16*)(buf + 2));
+//  DBGVV("msgUnpackHeader: versionNetwork %d\n", header->versionNetwork);
+  
+  memcpy(header->subdomain, (buf + PTPV2_SUBDOMAIN_OFFSET), PTPV2_SUBDOMAIN_LENGTH);
+  DBGVV("msgUnpackHeader: subdomain %s\n", header->subdomain);
+  
+  header->messageType =*(buf + PTPV2_MESSAGE_TYPE_OFFSET);
+  DBGVV("msgUnpackHeader: messageType %d\n", header->messageType);
+//  header->sourceCommunicationTechnology = *(UInteger8*)(buf + 21);
+//  DBGVV("msgUnpackHeader: sourceCommunicationTechnology %d\n", header->sourceCommunicationTechnology);
+  
+  memcpy(header->sourceUuid, (buf + PTPV2_CLOCK_ID_OFFSET), PTPV2_CLOCK_ID_LENGTH);
+  DBGVV("msgUnpackHeader: sourceUuid %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
+    header->sourceUuid[0], header->sourceUuid[1], header->sourceUuid[2],  header->sourceUuid[3],
+	header->sourceUuid[4], header->sourceUuid[5], header->sourceUuid[6], header->sourceUuid[7]);
+  
+  header->sourcePortId = flip16(*(UInteger16*)(buf + PTPV2_SRC_PORT_ID_OFFSET));
+  header->sequenceId = flip16(*(UInteger16*)(buf + PTPV2_SEQUENCE_ID_OFFSET));
+  DBGVV("msgUnpackHeader: sourcePortId %d\n", header->sourcePortId);
+  DBGVV("msgUnpackHeader: sequenceId %d\n", header->sequenceId);
+  
+  header->control = *(UInteger8*)(buf + PTPV2_CONTROL_OFFSET);
+  DBGVV("msgUnpackHeader: control %d\n", header->control);
+  
+  memcpy(header->flags, (buf + PTPV2_FLAG_OFFSET), PTPV2_FLAG_LENGTH);
+  DBGVV("msgUnpackHeader: flags %02hhx %02hhx\n", header->flags[0], header->flags[1]);
 }
 
-/* Pack Announce message */
-void msgPackAnnounce(const PtpClock *ptpClock, octet_t *buf)
+void msgUnpackSync(UInteger8 *buf, MsgSync *sync)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | ANNOUNCE; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(ANNOUNCE_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(ptpClock->sentAnnounceSequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_OTHER; /* Table 23 - controlField */
-	*(int8_t*)(buf + 33) = ptpClock->portDS.logAnnounceInterval;
-
-	/* Announce message */
-	memset((buf + 34), 0, 10); /* originTimestamp */
-	*(int16_t*)(buf + 44) = flip16(ptpClock->timePropertiesDS.currentUtcOffset);
-	*(uint8_t*)(buf + 47) = ptpClock->parentDS.grandmasterPriority1;
-	*(uint8_t*)(buf + 48) = ptpClock->defaultDS.clockQuality.clockClass;
-	*(enum8bit_t*)(buf + 49) = ptpClock->defaultDS.clockQuality.clockAccuracy;
-	*(int16_t*)(buf + 50) = flip16(ptpClock->defaultDS.clockQuality.offsetScaledLogVariance);
-	*(uint8_t*)(buf + 52) = ptpClock->parentDS.grandmasterPriority2;
-	memcpy((buf + 53), ptpClock->parentDS.grandmasterIdentity, CLOCK_IDENTITY_LENGTH);
-	*(int16_t*)(buf + 61) = flip16(ptpClock->currentDS.stepsRemoved);
-	*(enum8bit_t*)(buf + 63) = ptpClock->timePropertiesDS.timeSource;
+  sync->originTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  DBGVV("msgUnpackSync: originTimestamp.seconds %u\n", sync->originTimestamp.seconds);
+  sync->originTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  DBGVV("msgUnpackSync: originTimestamp.nanoseconds %d\n", sync->originTimestamp.nanoseconds);
+//  sync->epochNumber = flip16(*(UInteger16*)(buf + 48));
+//  DBGVV("msgUnpackSync: epochNumber %d\n", sync->epochNumber);
+//  sync->currentUTCOffset = flip16(*(Integer16*)(buf + 50));
+//  DBGVV("msgUnpackSync: currentUTCOffset %d\n", sync->currentUTCOffset);
+//  sync->grandmasterCommunicationTechnology = *(UInteger8*)(buf + 53);
+//  DBGVV("msgUnpackSync: grandmasterCommunicationTechnology %d\n", sync->grandmasterCommunicationTechnology);
+  memcpy(sync->grandmasterClockUuid, (buf + PTPV2_CLOCK_ID_OFFSET), PTPV2_CLOCK_ID_LENGTH);
+  DBGVV("msgUnpackSync: grandmasterClockUuid %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
+    sync->grandmasterClockUuid[0], sync->grandmasterClockUuid[1], sync->grandmasterClockUuid[2],  sync->grandmasterClockUuid[3],
+	sync->grandmasterClockUuid[4], sync->grandmasterClockUuid[5], sync->grandmasterClockUuid[6], sync->grandmasterClockUuid[7]);
+  sync->grandmasterPortId = flip16(*(UInteger16*)(buf + PTPV2_SRC_PORT_ID_OFFSET));
+  DBGVV("msgUnpackSync: grandmasterPortId %d\n", sync->grandmasterPortId);
+  sync->grandmasterSequenceId = flip16(*(UInteger16*)(buf + PTPV2_SEQUENCE_ID_OFFSET));
+  DBGVV("msgUnpackSync: grandmasterSequenceId %d\n", sync->grandmasterSequenceId);
+//  sync->grandmasterClockStratum = *(UInteger8*)(buf + 67);
+//  DBGVV("msgUnpackSync: grandmasterClockStratum %d\n", sync->grandmasterClockStratum);
+//  memcpy(sync->grandmasterClockIdentifier, (buf + 68), 4);
+//  DBGVV("msgUnpackSync: grandmasterClockIdentifier %c%c%c%c\n",
+//    sync->grandmasterClockIdentifier[0], sync->grandmasterClockIdentifier[1],
+//    sync->grandmasterClockIdentifier[2], sync->grandmasterClockIdentifier[3]);
+//  sync->grandmasterClockVariance = flip16(*(Integer16*)(buf + 74));
+//  DBGVV("msgUnpackSync: grandmasterClockVariance %d\n", sync->grandmasterClockVariance);
+//  sync->grandmasterPreferred = *(UInteger8*)(buf + 77);
+//  DBGVV("msgUnpackSync: grandmasterPreferred %d\n", sync->grandmasterPreferred);
+//  sync->grandmasterIsBoundaryClock = *(UInteger8*)(buf + 79);
+//  DBGVV("msgUnpackSync: grandmasterIsBoundaryClock %d\n", sync->grandmasterIsBoundaryClock);
+//  sync->syncInterval = *(Integer8*)(buf + 83);
+//  DBGVV("msgUnpackSync: syncInterval %d\n", sync->syncInterval);
+//  sync->localClockVariance = flip16(*(Integer16*)(buf + 86));
+//  DBGVV("msgUnpackSync: localClockVariance %d\n", sync->localClockVariance);
+//  sync->localStepsRemoved = flip16(*(UInteger16*)(buf + 90));
+//  DBGVV("msgUnpackSync: localStepsRemoved %d\n", sync->localStepsRemoved);
+//  sync->localClockStratum = *(UInteger8*)(buf + 95);
+//  DBGVV("msgUnpackSync: localClockStratum %d\n", sync->localClockStratum);
+//  memcpy(sync->localClockIdentifer, (buf + 96), PTP_CODE_STRING_LENGTH);
+//  DBGVV("msgUnpackSync: localClockIdentifer %c%c%c%c\n",
+//    sync->localClockIdentifer[0], sync->localClockIdentifer[1],
+//    sync->localClockIdentifer[2], sync->localClockIdentifer[3]);
+//  sync->parentCommunicationTechnology = *(UInteger8*)(buf + 101);
+//  DBGVV("msgUnpackSync: parentCommunicationTechnology %d\n", sync->parentCommunicationTechnology);
+//  memcpy(sync->parentUuid, (buf + 102), PTP_UUID_LENGTH);
+//  DBGVV("msgUnpackSync: parentUuid %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
+//    sync->parentUuid[0], sync->parentUuid[1], sync->parentUuid[2],
+//    sync->parentUuid[3], sync->parentUuid[4], sync->parentUuid[5]);
+//  sync->parentPortField = flip16(*(UInteger16*)(buf + 110));
+//  DBGVV("msgUnpackSync: parentPortField %d\n", sync->parentPortField);
+//  sync->estimatedMasterVariance = flip16(*(Integer16*)(buf + 114));
+//  DBGVV("msgUnpackSync: estimatedMasterVariance %d\n", sync->estimatedMasterVariance);
+//  sync->estimatedMasterDrift = flip32(*(Integer32*)(buf + 116));
+//  DBGVV("msgUnpackSync: estimatedMasterDrift %d\n", sync->estimatedMasterDrift);
+//  sync->utcReasonable = *(UInteger8*)(buf + 123);
+//  DBGVV("msgUnpackSync: utcReasonable %d\n", sync->utcReasonable);
 }
 
-/* Unpack Announce message */
-void msgUnpackAnnounce(const octet_t *buf, MsgAnnounce *announce)
+void msgUnpackDelayReq(UInteger8 *buf, MsgDelayReq *req) {}
+
+void msgUnpackFollowUp(UInteger8 *buf, MsgFollowUp *follow)
 {
-	announce->originTimestamp.secondsField.msb = flip16(*(int16_t*)(buf + 34));
-	announce->originTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	announce->originTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
-	announce->currentUtcOffset = flip16(*(int16_t*)(buf + 44));
-	announce->grandmasterPriority1 = *(uint8_t*)(buf + 47);
-	announce->grandmasterClockQuality.clockClass = *(uint8_t*)(buf + 48);
-	announce->grandmasterClockQuality.clockAccuracy = *(enum8bit_t*)(buf + 49);
-	announce->grandmasterClockQuality.offsetScaledLogVariance = flip16(*(int16_t*)(buf  + 50));
-	announce->grandmasterPriority2 = *(uint8_t*)(buf + 52);
-	memcpy(announce->grandmasterIdentity, (buf + 53), CLOCK_IDENTITY_LENGTH);
-	announce->stepsRemoved = flip16(*(int16_t*)(buf + 61));
-	announce->timeSource = *(enum8bit_t*)(buf + 63);
+  follow->associatedSequenceId = flip16(*(UInteger16*)(buf + PTPV2_SEQUENCE_ID_OFFSET));
+  DBGVV("msgUnpackFollowUp: associatedSequenceId %u\n", follow->associatedSequenceId);
+  follow->preciseOriginTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  DBGVV("msgUnpackFollowUp: preciseOriginTimestamp.seconds %u\n", follow->preciseOriginTimestamp.seconds);
+  follow->preciseOriginTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  DBGVV("msgUnpackFollowUp: preciseOriginTimestamp.nanoseconds %d\n", follow->preciseOriginTimestamp.nanoseconds);
 }
 
-/* Pack SYNC message */
-void msgPackSync(const PtpClock *ptpClock, octet_t *buf, const Timestamp *originTimestamp)
+void msgUnpackDelayResp(UInteger8 *buf, MsgDelayResp *resp)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | SYNC; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(SYNC_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(ptpClock->sentSyncSequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_SYNC; //Table 23
-	*(int8_t*)(buf + 33) = ptpClock->portDS.logSyncInterval;
-	memset((buf + 8), 0, 8); /* correction field */
-
-	/* Sync message */
-	*(int16_t*)(buf + 34) = flip16(originTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(originTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(originTimestamp->nanosecondsField);
+  resp->delayReceiptTimestamp.seconds = flip32(*(UInteger32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET));
+  DBGVV("msgUnpackDelayResp: delayReceiptTimestamp.seconds %u\n", resp->delayReceiptTimestamp.seconds);
+  resp->delayReceiptTimestamp.nanoseconds = flip32(*(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET));
+  DBGVV("msgUnpackDelayResp: delayReceiptTimestamp.nanoseconds %d\n", resp->delayReceiptTimestamp.nanoseconds);
+//  resp->requestingSourceCommunicationTechnology = *(UInteger8*)(buf + 49);
+//  DBGVV("msgUnpackDelayResp: requestingSourceCommunicationTechnology %d\n", resp->requestingSourceCommunicationTechnology);
+  memcpy(resp->requestingSourceUuid, (buf + PTPV2_CLOCK_ID_OFFSET), PTPV2_CLOCK_ID_LENGTH);
+  DBGVV("msgUnpackDelayResp: requestingSourceUuid %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
+    resp->requestingSourceUuid[0], resp->requestingSourceUuid[1], resp->requestingSourceUuid[2], resp->requestingSourceUuid[3],
+	resp->requestingSourceUuid[4], resp->requestingSourceUuid[5], resp->requestingSourceUuid[6], resp->requestingSourceUuid[7]);
+  resp->requestingSourcePortId = flip16(*(UInteger16*)(buf + PTPV2_SRC_PORT_ID_OFFSET));
+  DBGVV("msgUnpackDelayResp: requestingSourcePortId %d\n", resp->requestingSourcePortId);
+  resp->requestingSourceSequenceId = flip16(*(UInteger16*)(buf + PTPV2_SEQUENCE_ID_OFFSET));
+  DBGVV("msgUnpackDelayResp: requestingSourceSequenceId %d\n", resp->requestingSourceSequenceId);
 }
 
-/* Unpack Sync message */
-void msgUnpackSync(const octet_t *buf, MsgSync *sync)
+void msgUnpackManagement(UInteger8 *buf, MsgManagement *manage)
 {
-	sync->originTimestamp.secondsField.msb = flip16(*(int16_t*)(buf + 34));
-	sync->originTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	sync->originTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
+//  manage->targetCommunicationTechnology = *(UInteger8*)(buf + 41);
+//  DBGVV("msgUnpackManagement: targetCommunicationTechnology %d\n", manage->targetCommunicationTechnology);
+//  memcpy(manage->targetUuid, (buf + 42), 6);
+//  DBGVV("msgUnpackManagement: targetUuid %02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx\n",
+//    manage->targetUuid[0], manage->targetUuid[1], manage->targetUuid[2],
+//    manage->targetUuid[3], manage->targetUuid[4], manage->targetUuid[5]);
+//  manage->targetPortId = flip16(*(UInteger16*)(buf + 48));
+//  DBGVV("msgUnpackManagement: targetPortId %d\n", manage->targetPortId);
+//  manage->startingBoundaryHops = flip16(*(Integer16*)(buf + 50));
+//  DBGVV("msgUnpackManagement: startingBoundaryHops %d\n", manage->startingBoundaryHops);
+//  manage->boundaryHops = flip16(*(Integer16*)(buf + 52));
+//  DBGVV("msgUnpackManagement: boundaryHops %d\n", manage->boundaryHops);
+//  manage->managementMessageKey = *(UInteger8*)(buf + 55);
+//  DBGVV("msgUnpackManagement: managementMessageKey %d\n", manage->managementMessageKey);
+//  manage->parameterLength = flip16(*(UInteger16*)(buf + 58));
+//  DBGVV("msgUnpackManagement: parameterLength %d\n", manage->parameterLength);
+//
+//  if(manage->managementMessageKey == PTP_MM_GET_FOREIGN_DATA_SET)
+//    manage->recordKey = flip16(*(UInteger16*)(buf + 62));
 }
 
-/* Pack delayReq message */
-void msgPackDelayReq(const PtpClock *ptpClock, octet_t *buf, const Timestamp *originTimestamp)
+UInteger8 msgUnloadManagement(UInteger8 *buf, MsgManagement *manage,
+  PtpClock *ptpClock, RunTimeOpts *rtOpts)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | DELAY_REQ; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(DELAY_REQ_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(ptpClock->sentDelayReqSequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_DELAY_REQ; //Table 23
-	*(int8_t*)(buf + 33) = 0x7F; //Table 24
-	memset((buf + 8), 0, 8);
-
-	/* delay_req message */
-	*(int16_t*)(buf + 34) = flip16(originTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(originTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(originTimestamp->nanosecondsField);
+//  TimeInternal internalTime;
+//  TimeRepresentation externalTime;
+//
+//  switch(manage->managementMessageKey)
+//  {
+//  case PTP_MM_INITIALIZE_CLOCK:
+//    if(ptpClock->initializable)
+//      return PTP_INITIALIZING;
+//    break;
+//
+//  case PTP_MM_GOTO_FAULTY_STATE:
+//    DBG("event FAULT_DETECTED (forced by management message)\n");
+//    return PTP_FAULTY;
+//    break;
+//
+//  case PTP_MM_DISABLE_PORT:
+//    if(manage->targetPortId == 1)
+//    {
+//      DBG("event DESIGNATED_DISABLED\n");
+//      return PTP_DISABLED;
+//    }
+//    break;
+//
+//  case PTP_MM_ENABLE_PORT:
+//    if(manage->targetPortId == 1)
+//    {
+//      DBG("event DESIGNATED_ENABLED\n");
+//      return PTP_INITIALIZING;
+//    }
+//    break;
+//
+//  case PTP_MM_CLEAR_DESIGNATED_PREFERRED_MASTER:
+//    ptpClock->preferred = FALSE;
+//    break;
+//
+//  case PTP_MM_SET_DESIGNATED_PREFERRED_MASTER:
+//    ptpClock->preferred = TRUE;
+//    break;
+//
+//  case PTP_MM_DISABLE_BURST:
+//    break;
+//
+//  case PTP_MM_ENABLE_BURST:
+//    break;
+//
+//  case PTP_MM_SET_SYNC_INTERVAL:
+//    rtOpts->syncInterval = (*(Integer8*)(buf + 63)+1) * 1000;
+//    break;
+//
+//  case PTP_MM_SET_SUBDOMAIN:
+//    memcpy(rtOpts->subdomainName, buf + 60, 16);
+//    DBG("set subdomain to %s\n", rtOpts->subdomainName);
+//    break;
+//
+//  case PTP_MM_SET_TIME:
+//    externalTime.seconds = flip32(*(UInteger32*)(buf + 60));
+//    externalTime.nanoseconds = flip32(*(Integer32*)(buf + 64));
+//    toInternalTime(&internalTime, &externalTime, &ptpClock->halfEpoch);
+//    setTime(rtOpts, &internalTime);
+//    break;
+//
+//  case PTP_MM_UPDATE_DEFAULT_DATA_SET:
+//    if(!rtOpts->slaveOnly)
+//      ptpClock->clock_stratum = *(UInteger8*)(buf + 63);
+//    memcpy(ptpClock->clock_identifier, buf + 64, 4);
+//    ptpClock->clock_variance = flip16(*(Integer16*)(buf + 70));
+//    ptpClock->preferred = *(UInteger8*)(buf + 75);
+//    rtOpts->syncInterval = (*(UInteger8*)(buf + 79) + 1) * 1000;
+//    memcpy(rtOpts->subdomainName, buf + 80, 16);
+//    break;
+//
+//  case PTP_MM_UPDATE_GLOBAL_TIME_PROPERTIES:
+//    ptpClock->current_utc_offset = flip16(*(Integer16*)(buf + 62));
+//    ptpClock->leap_59 = *(UInteger8*)(buf + 67);
+//    ptpClock->leap_61 = *(UInteger8*)(buf + 71);
+//    ptpClock->epoch_number = flip16(*(UInteger16*)(buf + 74));
+//    break;
+//
+//  default:
+//    break;
+//  }
+//
+  return ptpClock->port_state;
 }
 
-/* Unpack delayReq message */
-void msgUnpackDelayReq(const octet_t *buf, MsgDelayReq *delayreq)
+void msgUnpackManagementPayload(UInteger8 *buf, MsgManagement *manage)
 {
-	delayreq->originTimestamp.secondsField.msb = flip16(*(int16_t*)(buf + 34));
-	delayreq->originTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	delayreq->originTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
+//  switch(manage->managementMessageKey)
+//  {
+//  case PTP_MM_CLOCK_IDENTITY:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_CLOCK_IDENTITY\n");
+//    manage->payload.clockIdentity.clockCommunicationTechnology = *(UInteger8*)(buf + 63);
+//    memcpy(manage->payload.clockIdentity.clockUuidField, buf + 64, PTP_UUID_LENGTH);
+//    manage->payload.clockIdentity.clockPortField = flip16(*(UInteger16*)(buf + 74));
+//    memcpy(manage->payload.clockIdentity.manufacturerIdentity, buf + 76, MANUFACTURER_ID_LENGTH);
+//    break;
+//
+//  case PTP_MM_DEFAULT_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_DEFAULT_DATA_SET\n");
+//    manage->payload.defaultData.clockCommunicationTechnology = *(UInteger8*)(buf + 63);
+//    memcpy(manage->payload.defaultData.clockUuidField, buf + 64, PTP_UUID_LENGTH);
+//    manage->payload.defaultData.clockPortField = flip16(*(UInteger16*)(buf + 74));
+//    manage->payload.defaultData.clockStratum = *(UInteger8*)(buf + 79);
+//    memcpy(manage->payload.defaultData.clockIdentifier, buf + 80, PTP_CODE_STRING_LENGTH);
+//    manage->payload.defaultData.clockVariance = flip16(*(UInteger16*)(buf + 86));
+//    manage->payload.defaultData.clockFollowupCapable = *(UInteger8*)(buf + 91);
+//    manage->payload.defaultData.preferred = *(UInteger8*)(buf + 95);
+//    manage->payload.defaultData.initializable = *(UInteger8*)(buf + 99);
+//    manage->payload.defaultData.externalTiming = *(UInteger8*)(buf + 103);
+//    manage->payload.defaultData.isBoundaryClock = *(UInteger8*)(buf + 107);
+//    manage->payload.defaultData.syncInterval = *(UInteger8*)(buf + 111);
+//    memcpy(manage->payload.defaultData.subdomainName, buf + 112, PTP_SUBDOMAIN_NAME_LENGTH);
+//    manage->payload.defaultData.numberPorts = flip16(*(UInteger16*)(buf + 130));
+//    manage->payload.defaultData.numberForeignRecords = flip16(*(UInteger16*)(buf + 134));
+//    break;
+//
+//  case PTP_MM_CURRENT_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_CURRENT_DATA_SET\n");
+//    manage->payload.current.stepsRemoved = flip16(*(UInteger16*)(buf + 62));
+//    manage->payload.current.offsetFromMaster.seconds = flip32(*(UInteger32*)(buf + 64));
+//    manage->payload.current.offsetFromMaster.nanoseconds = flip32(*(UInteger32*)(buf + 68));
+//    manage->payload.current.oneWayDelay.seconds = flip32(*(UInteger32*)(buf + 72));
+//    manage->payload.current.oneWayDelay.nanoseconds = flip32(*(Integer32*)(buf + 76));
+//    break;
+//
+//  case PTP_MM_PARENT_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_PORT_DATA_SET\n");
+//    manage->payload.parent.parentCommunicationTechnology = *(UInteger8*)(buf + 63);
+//    memcpy(manage->payload.parent.parentUuid, buf + 64, PTP_UUID_LENGTH);
+//    manage->payload.parent.parentPortId = flip16(*(UInteger16*)(buf + 74));
+//    manage->payload.parent.parentLastSyncSequenceNumber = flip16(*(UInteger16*)(buf + 74));
+//    manage->payload.parent.parentFollowupCapable = *(UInteger8*)(buf + 83);
+//    manage->payload.parent.parentExternalTiming = *(UInteger8*)(buf + 87);
+//    manage->payload.parent.parentVariance = flip16(*(UInteger16*)(buf + 90));
+//    manage->payload.parent.parentStats = *(UInteger8*)(buf + 85);
+//    manage->payload.parent.observedVariance = flip16(*(Integer16*)(buf + 98));
+//    manage->payload.parent.observedDrift = flip32(*(Integer32*)(buf + 100));
+//    manage->payload.parent.utcReasonable = *(UInteger8*)(buf + 107);
+//    manage->payload.parent.grandmasterCommunicationTechnology = *(UInteger8*)(buf + 111);
+//    memcpy(manage->payload.parent.grandmasterUuidField, buf + 112, PTP_UUID_LENGTH);
+//    manage->payload.parent.grandmasterPortIdField = flip16(*(UInteger16*)(buf + 122));
+//    manage->payload.parent.grandmasterStratum = *(UInteger8*)(buf + 127);
+//    memcpy(manage->payload.parent.grandmasterIdentifier, buf + 128, PTP_CODE_STRING_LENGTH);
+//    manage->payload.parent.grandmasterVariance = flip16(*(Integer16*)(buf + 134));
+//    manage->payload.parent.grandmasterPreferred = *(UInteger8*)(buf + 139);
+//    manage->payload.parent.grandmasterIsBoundaryClock = *(UInteger8*)(buf + 144);
+//    manage->payload.parent.grandmasterSequenceNumber = flip16(*(UInteger16*)(buf + 146));
+//    break;
+//
+//  case PTP_MM_PORT_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_FOREIGN_DATA_SET\n");
+//    manage->payload.port.returnedPortNumber = flip16(*(UInteger16*)(buf + 62));
+//    manage->payload.port.portState = *(UInteger8*)(buf + 67);
+//    manage->payload.port.lastSyncEventSequenceNumber = flip16(*(UInteger16*)(buf + 70));
+//    manage->payload.port.lastGeneralEventSequenceNumber = flip16(*(UInteger16*)(buf + 74));
+//    manage->payload.port.portCommunicationTechnology = *(UInteger8*)(buf + 79);
+//    memcpy(manage->payload.port.portUuidField, buf + 80, PTP_UUID_LENGTH);
+//    manage->payload.port.portIdField = flip16(*(UInteger16*)(buf + 90));
+//    manage->payload.port.burstEnabled = *(UInteger8*)(buf + 95);
+//    manage->payload.port.subdomainAddressOctets = *(UInteger8*)(buf + 97);
+//    manage->payload.port.eventPortAddressOctets = *(UInteger8*)(buf + 98);
+//    manage->payload.port.generalPortAddressOctets = *(UInteger8*)(buf + 99);
+//    memcpy(manage->payload.port.subdomainAddress, buf + 100, SUBDOMAIN_ADDRESS_LENGTH);
+//    memcpy(manage->payload.port.eventPortAddress, buf + 106, PORT_ADDRESS_LENGTH);
+//    memcpy(manage->payload.port.generalPortAddress, buf + 110, PORT_ADDRESS_LENGTH);
+//    break;
+//
+//  case PTP_MM_GLOBAL_TIME_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_GLOBAL_TIME_DATA_SET\n");
+//    manage->payload.globalTime.localTime.seconds = flip32(*(UInteger32*)(buf + 60));
+//    manage->payload.globalTime.localTime.nanoseconds = flip32(*(Integer32*)(buf + 64));
+//    manage->payload.globalTime.currentUtcOffset = flip16(*(Integer16*)(buf + 70));
+//    manage->payload.globalTime.leap59 = *(UInteger8*)(buf + 75);
+//    manage->payload.globalTime.leap61 = *(UInteger8*)(buf + 79);
+//    manage->payload.globalTime.epochNumber = flip16(*(UInteger16*)(buf + 82));
+//    break;
+//
+//
+//  case PTP_MM_FOREIGN_DATA_SET:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey PTP_MM_FOREIGN_DATA_SET\n");
+//    manage->payload.foreign.returnedPortNumber = flip16(*(UInteger16*)(buf + 62));
+//    manage->payload.foreign.returnedRecordNumber = flip16(*(UInteger16*)(buf + 68));
+//    manage->payload.foreign.foreignMasterCommunicationTechnology = *(UInteger8*)(buf + 71);
+//    memcpy(manage->payload.foreign.foreignMasterUuid, buf + 72, PTP_UUID_LENGTH);
+//    manage->payload.foreign.foreignMasterPortId = flip16(*(UInteger16*)(buf + 82));
+//    manage->payload.foreign.foreignMasterSyncs = flip16(*(UInteger16*)(buf + 66));
+//    break;
+//
+//  case PTP_MM_NULL:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey NULL\n");
+//    break;
+//
+//  default:
+//    DBGVV("msgUnloadManagementPayload: managementMessageKey ?\n");
+//    break;
+//  }
+//
+  return;
 }
 
-/* Pack Follow_up message */
-void msgPackFollowUp(const PtpClock *ptpClock, octet_t*buf, const Timestamp *preciseOriginTimestamp)
+void msgPackHeader(UInteger8 *buf, PtpClock *ptpClock)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | FOLLOW_UP; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(FOLLOW_UP_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(ptpClock->sentSyncSequenceId - 1);//sentSyncSequenceId has already been  incremented in issueSync
-	*(uint8_t*)(buf + 32) = CTRL_FOLLOW_UP; //Table 23
-	*(int8_t*)(buf + 33) = ptpClock->portDS.logSyncInterval;
-
-	/* Follow_up message */
-	*(int16_t*)(buf + 34) = flip16(preciseOriginTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(preciseOriginTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(preciseOriginTimestamp->nanosecondsField);
+//  *(Integer32*)(buf + 0) = shift16(flip16(VERSION_PTP), 0) | shift16(flip16(VERSION_NETWORK), 1);
+  memset(buf, 0, 50);
+  *(buf + PTPV2_VERSION_OFFSET) = VERSION_PTP;
+  *(buf + PTPV2_MESSAGE_LENGTH_OFFSET) = 0x2C;
+//  memcpy((buf + PTPV2_SUBDOMAIN_OFFSET), ptpClock->subdomain_name, PTPV2_SUBDOMAIN_LENGTH);
+  *(buf + PTPV2_SUBDOMAIN_OFFSET) = 0;
+//  *(Integer32*)(buf + 20) = shift8(ptpClock->port_communication_technology, 1);
+//  memcpy((buf + 22), ptpClock->port_uuid_field, 6);
+  
+//  if(ptpClock->external_timing)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PTP_EXT_SYNC);
+//  if(ptpClock->clock_followup_capable)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PTP_ASSIST);
+//  if(ptpClock->is_boundary_clock)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PTP_BOUNDARY_CLOCK);
 }
 
-/* Unpack Follow_up message */
-void msgUnpackFollowUp(const octet_t *buf, MsgFollowUp *follow)
+void msgPackSync(UInteger8 *buf, Boolean burst,
+  TimeRepresentation *originTimestamp, PtpClock *ptpClock)
 {
-	follow->preciseOriginTimestamp.secondsField.msb = flip16(*(int16_t*)(buf  + 34));
-	follow->preciseOriginTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	follow->preciseOriginTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
+UInteger16 syncInterval;
+UInteger16 pow2Val;
+
+  msgPackHeader(buf, ptpClock);
+  *(UInteger8*)(buf + PTPV2_MESSAGE_TYPE_OFFSET) = PTPV2_SYNC_TYPE;  /* messageType */
+  *(buf + PTPV2_MESSAGE_LENGTH_OFFSET) = PTPV2_SYNC_LENGTH;
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) = flip16(ptpClock->port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->last_sync_event_sequence_number);
+  *(UInteger8*)(buf +PTPV2_CONTROL_OFFSET) = PTP_SYNC_MESSAGE;  /* control */
+//  if(ptpClock->burst_enabled && burst)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+//  else
+//    clearFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+//  if(ptpClock->parent_stats)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+//  else
+//    clearFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+  
+  
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(originTimestamp->seconds);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(originTimestamp->nanoseconds);
+//  *(Integer32*)(buf + 48) = shift16(flip16(ptpClock->epoch_number), 0) | shift16(flip16(ptpClock->current_utc_offset), 1);
+//  *(Integer32*)(buf + 52) = shift8(ptpClock->grandmaster_communication_technology, 1);
+  memcpy((buf + PTPV2_CLOCK_ID_OFFSET), ptpClock->grandmaster_uuid_field, PTPV2_CLOCK_ID_LENGTH);
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) =flip16(ptpClock->grandmaster_port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->grandmaster_sequence_number);
+//  *(Integer32*)(buf + 64) = shift8(ptpClock->grandmaster_stratum, 3);
+//  memcpy((buf + 68), ptpClock->grandmaster_identifier, 4);
+//  *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->grandmaster_variance), 1);
+//  *(Integer32*)(buf + 76) = shift16(flip16(ptpClock->grandmaster_preferred), 0) | shift16(flip16(ptpClock->grandmaster_is_boundary_clock), 1);
+  
+  // Converts msec's to nearest power of 2 PTP value (0 = 1 sec interval, 1 = 2sec interval, etc)
+  syncInterval = ptpClock->sync_interval / 1000;
+  pow2Val = 0;
+  while ( syncInterval)
+  {
+    pow2Val++;
+    syncInterval >>= 1;
+  }
+  
+  if ( pow2Val)
+    pow2Val--;
+    
+//  *(Integer32*)(buf + 80) = shift16(flip16(pow2Val), 1);
+//  *(Integer32*)(buf + 84) = shift16(flip16(ptpClock->clock_variance), 1);
+//  *(Integer32*)(buf + 88) = shift16(flip16(ptpClock->steps_removed), 1);
+//  *(Integer32*)(buf + 92) = shift8(ptpClock->clock_stratum, 3);
+//  memcpy((buf + 96), ptpClock->clock_identifier, 4);
+//  *(Integer32*)(buf + 100) = shift8(ptpClock->parent_communication_technology, 1);
+//  memcpy((buf + 102), ptpClock->parent_uuid, 6);
+//  *(Integer32*)(buf + 108) = shift16(flip16(ptpClock->parent_port_id), 1);
+//  *(Integer32*)(buf + 112) = shift16(flip16(ptpClock->observed_variance), 1);
+//  *(Integer32*)(buf + 116) = flip32(ptpClock->observed_drift);
+//  *(Integer32*)(buf + 120) = shift8(ptpClock->utc_reasonable, 3);
 }
 
-/* Pack delayResp message */
-void msgPackDelayResp(const PtpClock *ptpClock, octet_t *buf, const MsgHeader *header, const Timestamp *receiveTimestamp)
+void msgPackDelayReq(UInteger8 *buf, Boolean burst,
+  TimeRepresentation *originTimestamp, PtpClock *ptpClock)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | DELAY_RESP; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(DELAY_RESP_LENGTH);
-	/* *(uint8_t*)(buf+4) = header->domainNumber; */ /* TODO: Why? */
-	memset((buf + 8), 0, 8);
+UInteger16 syncInterval;
+UInteger16 pow2Val;
 
-	/* Copy correctionField of  delayReqMessage */
-	*(int32_t*)(buf + 8) = flip32(header->correctionfield >> 32);
-	*(int32_t*)(buf + 12) = flip32((int32_t)header->correctionfield);
-	*(int16_t*)(buf + 30) = flip16(header->sequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_DELAY_RESP; //Table 23
-	*(int8_t*)(buf + 33) = ptpClock->portDS.logMinDelayReqInterval; //Table 24
-
-	/* delay_resp message */
-	*(int16_t*)(buf + 34) = flip16(receiveTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(receiveTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(receiveTimestamp->nanosecondsField);
-	memcpy((buf + 44), header->sourcePortIdentity.clockIdentity, CLOCK_IDENTITY_LENGTH);
-	*(int16_t*)(buf + 52) = flip16(header->sourcePortIdentity.portNumber);
+  msgPackHeader(buf, ptpClock);
+  *(UInteger8*)(buf + PTPV2_MESSAGE_TYPE_OFFSET) = PTPV2_DELAY_REQUEST_TYPE;  /* messageType */
+  *(buf + PTPV2_MESSAGE_LENGTH_OFFSET) = PTPV2_SYNC_LENGTH;
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) = flip16(ptpClock->port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->last_sync_event_sequence_number);
+  *(UInteger8*)(buf + PTPV2_CONTROL_OFFSET) = PTP_DELAY_REQ_MESSAGE;  /* control */
+//  if(ptpClock->burst_enabled && burst)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+//  else
+//    clearFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+//  if(ptpClock->parent_stats)
+//    setFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+//  else
+//    clearFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+  
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(originTimestamp->seconds);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(originTimestamp->nanoseconds);
+//  *(Integer32*)(buf + 48) = shift16(flip16(ptpClock->epoch_number), 0) | shift16(flip16(ptpClock->current_utc_offset), 1);
+//  *(Integer32*)(buf + 52) = shift8(ptpClock->grandmaster_communication_technology, 1);
+  memcpy((buf + PTPV2_CLOCK_ID_OFFSET), ptpClock->grandmaster_uuid_field, PTPV2_CLOCK_ID_LENGTH);
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) = flip16(ptpClock->grandmaster_port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->grandmaster_sequence_number);
+//  *(Integer32*)(buf + 64) = shift8(ptpClock->grandmaster_stratum, 3);
+//  memcpy((buf + 68), ptpClock->grandmaster_identifier, 4);
+//  *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->grandmaster_variance), 1);
+//  *(Integer32*)(buf + 76) = shift16(flip16(ptpClock->grandmaster_preferred), 0) | shift16(flip16(ptpClock->grandmaster_is_boundary_clock), 1);
+  
+  // Converts msec's to nearest power of 2 PTP value (0 = 1 sec interval, 1 = 2sec interval, etc)
+  syncInterval = ptpClock->sync_interval / 1000;
+  pow2Val = 0;
+  while ( syncInterval)
+  {
+    pow2Val++;
+    syncInterval >>= 1;
+  }
+  
+  if ( pow2Val)
+    pow2Val--;
+   
+//  *(Integer32*)(buf + 80) = shift16(flip16(pow2Val), 1);
+//  *(Integer32*)(buf + 84) = shift16(flip16(ptpClock->clock_variance), 1);
+//  *(Integer32*)(buf + 88) = shift16(flip16(ptpClock->steps_removed), 1);
+//  *(Integer32*)(buf + 92) = shift8(ptpClock->clock_stratum, 3);
+//  memcpy((buf + 96), ptpClock->clock_identifier, 4);
+//  *(Integer32*)(buf + 100) = shift8(ptpClock->parent_communication_technology, 1);
+//  memcpy((buf + 102), ptpClock->parent_uuid, 6);
+//  *(Integer32*)(buf + 108) = shift16(flip16(ptpClock->parent_port_id), 1);
+//  *(Integer32*)(buf + 112) = shift16(flip16(ptpClock->observed_variance), 1);
+//  *(Integer32*)(buf + 116) = flip32(ptpClock->observed_drift);
+//  *(Integer32*)(buf + 120) = shift8(ptpClock->utc_reasonable, 3);
 }
 
-/* Unpack delayResp message */
-void msgUnpackDelayResp(const octet_t *buf, MsgDelayResp *resp)
+void msgPackFollowUp(UInteger8 *buf, UInteger16 associatedSequenceId,
+  TimeRepresentation *preciseOriginTimestamp, PtpClock *ptpClock)
 {
-	resp->receiveTimestamp.secondsField.msb = flip16(*(int16_t*)(buf  + 34));
-	resp->receiveTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	resp->receiveTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
-	memcpy(resp->requestingPortIdentity.clockIdentity, (buf + 44), CLOCK_IDENTITY_LENGTH);
-	resp->requestingPortIdentity.portNumber = flip16(*(int16_t*)(buf  + 52));
+  msgPackHeader(buf, ptpClock);
+  *(UInteger8*)(buf + PTPV2_MESSAGE_TYPE_OFFSET) = 2;  /* messageType */
+  *(buf + PTPV2_MESSAGE_LENGTH_OFFSET) = PTPV2_SYNC_LENGTH;
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) = flip16(ptpClock->port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->last_general_event_sequence_number);
+  *(UInteger8*)(buf + PTPV2_CONTROL_OFFSET) = PTP_FOLLOWUP_MESSAGE;  /* control */
+  clearFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+  clearFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+  
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(associatedSequenceId);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(preciseOriginTimestamp->seconds);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(preciseOriginTimestamp->nanoseconds);
 }
 
-/* Pack PdelayReq message */
-void msgPackPDelayReq(const PtpClock *ptpClock, octet_t *buf, const Timestamp *originTimestamp)
+void msgPackDelayResp(UInteger8 *buf, MsgHeader *header,
+  TimeRepresentation *delayReceiptTimestamp, PtpClock *ptpClock)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | PDELAY_REQ; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(PDELAY_REQ_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(ptpClock->sentPDelayReqSequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_OTHER; //Table 23
-	*(int8_t*)(buf + 33) = 0x7F; //Table 24
-	memset((buf + 8), 0, 8);
-
-	/* Pdelay_req message */
-	*(int16_t*)(buf + 34) = flip16(originTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(originTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(originTimestamp->nanosecondsField);
-
-	memset((buf + 44), 0, 10); // RAZ reserved octets
+  msgPackHeader(buf, ptpClock);
+  *(UInteger8*)(buf + PTPV2_MESSAGE_TYPE_OFFSET) = 2;  /* messageType */
+  *(Integer16*)(buf + PTPV2_SRC_PORT_ID_OFFSET) = flip16(ptpClock->port_id_field);
+  *(Integer16*)(buf + PTPV2_SEQUENCE_ID_OFFSET) = flip16(ptpClock->last_general_event_sequence_number);
+  *(UInteger8*)(buf + PTPV2_CONTROL_OFFSET) = PTP_DELAY_RESP_MESSAGE;  /* control */
+  clearFlag((buf + PTPV2_FLAG_OFFSET), PTP_SYNC_BURST);
+  clearFlag((buf + PTPV2_FLAG_OFFSET), PARENT_STATS);
+  
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_SEC_OFFSET) = flip32(delayReceiptTimestamp->seconds);
+  *(Integer32*)(buf + PTPV2_ORIGIN_TS_NSEC_OFFSET) = flip32(delayReceiptTimestamp->nanoseconds);
+//  *(Integer32*)(buf + 48) = shift8(header->sourceCommunicationTechnology, 1);
+  memcpy(buf + PTPV2_CLOCK_ID_OFFSET, header->sourceUuid, PTPV2_CLOCK_ID_LENGTH);
+//  *(Integer32*)(buf + 56) = shift16(flip16(header->sourcePortId), 0) | shift16(flip16(header->sequenceId), 1);
 }
 
-/* Unpack PdelayReq message */
-void msgUnpackPDelayReq(const octet_t *buf, MsgPDelayReq *pdelayreq)
+UInteger16 msgPackManagement(UInteger8 *buf, MsgManagement *manage, PtpClock *ptpClock)
 {
-	pdelayreq->originTimestamp.secondsField.msb = flip16(*(int16_t*)(buf  + 34));
-	pdelayreq->originTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	pdelayreq->originTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
+	return 0;
+//  *(UInteger8*)(buf + 20) = 2;  /* messageType */
+//  *(Integer32*)(buf + 28) = shift16(flip16(ptpClock->port_id_field), 0) | shift16(flip16(ptpClock->last_general_event_sequence_number), 1);
+//  *(UInteger8*)(buf + 32) = PTP_MANAGEMENT_MESSAGE;  /* control */
+//  clearFlag((buf + 34), PTP_SYNC_BURST);
+//  clearFlag((buf + 34), PARENT_STATS);
+//  *(Integer32*)(buf + 40) = shift8(manage->targetCommunicationTechnology, 1);
+//  memcpy(buf + 42, manage->targetUuid, 6);
+//  *(Integer32*)(buf + 48) = shift16(flip16(manage->targetPortId), 0) | shift16(flip16(MM_STARTING_BOUNDARY_HOPS), 1);
+//  *(Integer32*)(buf + 52) = shift16(flip16(MM_STARTING_BOUNDARY_HOPS), 0);
+//
+//  *(UInteger8*)(buf + 55) = manage->managementMessageKey;
+//
+//  switch(manage->managementMessageKey)
+//  {
+//  case PTP_MM_GET_FOREIGN_DATA_SET:
+//    *(UInteger16*)(buf + 62) = manage->recordKey;
+//    *(Integer32*)(buf + 56) = shift16(flip16(4), 1);
+//    return 64;
+//
+//  default:
+//    *(Integer32*)(buf + 56) = shift16(flip16(0), 1);
+//    return 60;
+//  }
 }
 
-/* Pack PdelayResp message */
-void msgPackPDelayResp(octet_t *buf, const MsgHeader *header, const Timestamp *requestReceiptTimestamp)
+UInteger16 msgPackManagementResponse(UInteger8 *buf, MsgHeader *header, MsgManagement *manage, PtpClock *ptpClock)
 {
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | PDELAY_RESP; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(PDELAY_RESP_LENGTH);
-	/* *(uint8_t*)(buf+4) = header->domainNumber; */ /* TODO: Why? */
-	memset((buf + 8), 0, 8);
-	*(int16_t*)(buf + 30) = flip16(header->sequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_OTHER; //Table 23
-	*(int8_t*)(buf + 33) = 0x7F; //Table 24
-
-	/* Pdelay_resp message */
-	*(int16_t*)(buf + 34) = flip16(requestReceiptTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(requestReceiptTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(requestReceiptTimestamp->nanosecondsField);
-	memcpy((buf + 44), header->sourcePortIdentity.clockIdentity, CLOCK_IDENTITY_LENGTH);
-	*(int16_t*)(buf + 52) = flip16(header->sourcePortIdentity.portNumber);
-
-}
-
-/* Unpack PdelayResp message */
-void msgUnpackPDelayResp(const octet_t *buf, MsgPDelayResp *presp)
-{
-	presp->requestReceiptTimestamp.secondsField.msb = flip16(*(int16_t*)(buf  + 34));
-	presp->requestReceiptTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	presp->requestReceiptTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
-	memcpy(presp->requestingPortIdentity.clockIdentity, (buf + 44), CLOCK_IDENTITY_LENGTH);
-	presp->requestingPortIdentity.portNumber = flip16(*(int16_t*)(buf + 52));
-}
-
-/* Pack PdelayRespfollowup message */
-void msgPackPDelayRespFollowUp(octet_t *buf, const MsgHeader *header, const Timestamp *responseOriginTimestamp)
-{
-	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | PDELAY_RESP_FOLLOW_UP; //Table 19
-	*(int16_t*)(buf + 2)  = flip16(PDELAY_RESP_FOLLOW_UP_LENGTH);
-	*(int16_t*)(buf + 30) = flip16(header->sequenceId);
-	*(uint8_t*)(buf + 32) = CTRL_OTHER; //Table 23
-	*(int8_t*)(buf + 33) = 0x7F; //Table 24
-
-	/* Copy correctionField of  PdelayReqMessage */
-	*(int32_t*)(buf + 8) = flip32(header->correctionfield >> 32);
-	*(int32_t*)(buf + 12) = flip32((int32_t)header->correctionfield);
-
-	/* Pdelay_resp_follow_up message */
-	*(int16_t*)(buf + 34) = flip16(responseOriginTimestamp->secondsField.msb);
-	*(uint32_t*)(buf + 36) = flip32(responseOriginTimestamp->secondsField.lsb);
-	*(uint32_t*)(buf + 40) = flip32(responseOriginTimestamp->nanosecondsField);
-	memcpy((buf + 44), header->sourcePortIdentity.clockIdentity, CLOCK_IDENTITY_LENGTH);
-	*(int16_t*)(buf + 52) = flip16(header->sourcePortIdentity.portNumber);
-}
-
-/* Unpack PdelayResp message */
-void msgUnpackPDelayRespFollowUp(const octet_t *buf, MsgPDelayRespFollowUp *prespfollow)
-{
-	prespfollow->responseOriginTimestamp.secondsField.msb = flip16(*(int16_t*)(buf  + 34));
-	prespfollow->responseOriginTimestamp.secondsField.lsb = flip32(*(uint32_t*)(buf + 36));
-	prespfollow->responseOriginTimestamp.nanosecondsField = flip32(*(uint32_t*)(buf + 40));
-	memcpy(prespfollow->requestingPortIdentity.clockIdentity, (buf + 44), CLOCK_IDENTITY_LENGTH);
-	prespfollow->requestingPortIdentity.portNumber = flip16(*(int16_t*)(buf + 52));
+	return 0;
+//UInteger16 syncInterval;
+//UInteger16 pow2Val;
+//TimeInternal internalTime;
+//TimeRepresentation externalTime;
+//
+//  *(UInteger8*)(buf + 20) = 2;  /* messageType */
+//  *(Integer32*)(buf + 28) = shift16(flip16(ptpClock->port_id_field), 0) | shift16(flip16(ptpClock->last_general_event_sequence_number), 1);
+//  *(UInteger8*)(buf + 32) = PTP_MANAGEMENT_MESSAGE;  /* control */
+//  clearFlag((buf + 34), PTP_SYNC_BURST);
+//  clearFlag((buf + 34), PARENT_STATS);
+//  *(Integer32*)(buf + 40) = shift8(header->sourceCommunicationTechnology, 1);
+//  memcpy(buf + 42, header->sourceUuid, 6);
+//  *(Integer32*)(buf + 48) = shift16(flip16(header->sourcePortId), 0) | shift16(flip16(MM_STARTING_BOUNDARY_HOPS), 1);
+//  *(Integer32*)(buf + 52) = shift16(flip16(manage->startingBoundaryHops - manage->boundaryHops + 1), 0);
+//
+//  switch(manage->managementMessageKey)
+//  {
+//  case PTP_MM_OBTAIN_IDENTITY:
+//    *(UInteger8*)(buf + 55) = PTP_MM_CLOCK_IDENTITY;
+//    *(Integer32*)(buf + 56) = shift16(flip16(64), 1);
+//    *(Integer32*)(buf + 60) = shift8(ptpClock->clock_communication_technology, 3);
+//    memcpy(buf + 64, ptpClock->clock_uuid_field, 6);
+//    *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->clock_port_id_field), 1);
+//    memcpy((buf + 76), MANUFACTURER_ID, 48);
+//    return 124;
+//
+//  case PTP_MM_GET_DEFAULT_DATA_SET:
+//    *(UInteger8*)(buf + 55) = PTP_MM_DEFAULT_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(76), 1);
+//    *(Integer32*)(buf + 60) = shift8(ptpClock->clock_communication_technology, 3);
+//    memcpy(buf + 64, ptpClock->clock_uuid_field, 6);
+//    *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->clock_port_id_field), 1);
+//    *(Integer32*)(buf + 76) = shift8(ptpClock->clock_stratum, 3);
+//    memcpy(buf + 80, ptpClock->clock_identifier, 4);
+//    *(Integer32*)(buf + 84) = shift16(flip16(ptpClock->clock_variance), 1);
+//    *(Integer32*)(buf + 88) = shift8(ptpClock->clock_followup_capable, 3);
+//    *(Integer32*)(buf + 92) = shift8(ptpClock->preferred, 3);
+//    *(Integer32*)(buf + 96) = shift8(ptpClock->initializable, 3);
+//    *(Integer32*)(buf + 100) = shift8(ptpClock->external_timing, 3);
+//    *(Integer32*)(buf + 104) = shift8(ptpClock->is_boundary_clock, 3);
+//
+//    // Converts msec's to nearest power of 2 PTP value (0 = 1 sec interval, 1 = 2sec interval, etc)
+//    syncInterval = ptpClock->sync_interval / 1000;
+//    pow2Val = 0;
+//    while ( syncInterval)
+//    {
+//        pow2Val++;
+//        syncInterval >>= 1;
+//    }
+//
+//    if ( pow2Val)
+//        pow2Val--;
+//
+//    *(Integer32*)(buf + 108) = shift8(pow2Val, 3);
+//    memcpy(buf + 112, ptpClock->subdomain_name, 16);
+//    *(Integer32*)(buf + 128) = shift16(flip16(ptpClock->number_ports), 1);
+//    *(Integer32*)(buf + 132) = shift16(flip16(ptpClock->number_foreign_records), 1);
+//    return 136;
+//
+//  case PTP_MM_GET_CURRENT_DATA_SET:
+//    *(UInteger8*)(buf + 55) = PTP_MM_CURRENT_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(20), 1);
+//    *(Integer32*)(buf + 60) = shift16(flip16(ptpClock->steps_removed), 1);
+//
+//    fromInternalTime(&ptpClock->offset_from_master, &externalTime, 0);
+//    *(Integer32*)(buf + 64) = flip32(externalTime.seconds);
+//    *(Integer32*)(buf + 68) = flip32(externalTime.nanoseconds);
+//
+//    fromInternalTime(&ptpClock->one_way_delay, &externalTime, 0);
+//    *(Integer32*)(buf + 72) = flip32(externalTime.seconds);
+//    *(Integer32*)(buf + 76) = flip32(externalTime.nanoseconds);
+//    return 80;
+//
+//  case PTP_MM_GET_PARENT_DATA_SET:
+//    *(UInteger8*)(buf + 55) = PTP_MM_PARENT_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(90), 1);
+//    *(Integer32*)(buf + 60) = shift8(ptpClock->parent_communication_technology, 3);
+//    memcpy(buf + 64, ptpClock->parent_uuid, 6);
+//    *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->parent_port_id), 1);
+//    *(Integer32*)(buf + 76) = shift16(flip16(ptpClock->parent_last_sync_sequence_number), 1);
+//    *(Integer32*)(buf + 80) = shift8(ptpClock->parent_followup_capable, 1);
+//    *(Integer32*)(buf + 84) = shift8(ptpClock->parent_external_timing, 3);
+//    *(Integer32*)(buf + 88) = shift16(flip16(ptpClock->parent_variance), 1);
+//    *(Integer32*)(buf + 92) = shift8(ptpClock->parent_stats, 3);
+//    *(Integer32*)(buf + 96) = shift16(flip16(ptpClock->observed_variance), 1);
+//    *(Integer32*)(buf + 100) = flip32(ptpClock->observed_drift);
+//    *(Integer32*)(buf + 104) = shift8(ptpClock->utc_reasonable, 3);
+//    *(Integer32*)(buf + 108) = shift8(ptpClock->grandmaster_communication_technology, 3);
+//    memcpy(buf + 112, ptpClock->grandmaster_uuid_field, 6);
+//    *(Integer32*)(buf + 120) = shift16(flip16(ptpClock->grandmaster_port_id_field), 1);
+//    *(Integer32*)(buf + 124) = shift8(ptpClock->grandmaster_stratum, 3);
+//    memcpy(buf + 128, ptpClock->grandmaster_identifier, 4);
+//    *(Integer32*)(buf + 132) = shift16(flip16(ptpClock->grandmaster_variance), 1);
+//    *(Integer32*)(buf + 136) = shift8(ptpClock->grandmaster_preferred, 3);
+//    *(Integer32*)(buf + 140) = shift8(ptpClock->grandmaster_is_boundary_clock, 3);
+//    *(Integer32*)(buf + 144) = shift16(flip16(ptpClock->grandmaster_sequence_number), 1);
+//    return 148;
+//
+//  case PTP_MM_GET_PORT_DATA_SET:
+//    if(manage->targetPortId && manage->targetPortId != ptpClock->port_id_field)
+//    {
+//      *(UInteger8*)(buf + 55) = PTP_MM_NULL;
+//      *(Integer32*)(buf + 56) = shift16(flip16(0), 1);
+//      return 0;
+//    }
+//
+//    *(UInteger8*)(buf + 55) = PTP_MM_PORT_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(52), 1);
+//    *(Integer32*)(buf + 60) = shift16(flip16(ptpClock->port_id_field), 1);
+//    *(Integer32*)(buf + 64) = shift8(ptpClock->port_state, 3);
+//    *(Integer32*)(buf + 68) = shift16(flip16(ptpClock->last_sync_event_sequence_number), 1);
+//    *(Integer32*)(buf + 72) = shift16(flip16(ptpClock->last_general_event_sequence_number), 1);
+//    *(Integer32*)(buf + 76) = shift8(ptpClock->port_communication_technology, 3);
+//    memcpy(buf + 80, ptpClock->port_uuid_field, 6);
+//    *(Integer32*)(buf + 88) = shift16(flip16(ptpClock->port_id_field), 1);
+//    *(Integer32*)(buf + 92) = shift8(ptpClock->burst_enabled, 3);
+//    *(Integer32*)(buf + 96) = shift8(4, 1) | shift8(2, 2) | shift8(2, 3);
+//    memcpy(buf + 100, ptpClock->subdomain_address, 4);
+//    memcpy(buf + 106, ptpClock->event_port_address, 2);
+//    memcpy(buf + 110, ptpClock->general_port_address, 2);
+//    return 112;
+//
+//  case PTP_MM_GET_GLOBAL_TIME_DATA_SET:
+//    *(UInteger8*)(buf + 55) = PTP_MM_GLOBAL_TIME_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(24), 1);
+//
+//    getTime( (RunTimeOpts *)ptpClock->rtOpts, &internalTime);
+//    fromInternalTime(&internalTime, &externalTime, ptpClock->halfEpoch);
+//    *(Integer32*)(buf + 60) = flip32(externalTime.seconds);
+//    *(Integer32*)(buf + 64) = flip32(externalTime.nanoseconds);
+//
+//    *(Integer32*)(buf + 68) = shift16(flip16(ptpClock->current_utc_offset), 1);
+//    *(Integer32*)(buf + 72) = shift8(ptpClock->leap_59, 3);
+//    *(Integer32*)(buf + 76) = shift8(ptpClock->leap_61, 3);
+//    *(Integer32*)(buf + 80) = shift16(flip16(ptpClock->epoch_number), 1);
+//    return 84;
+//
+//  case PTP_MM_GET_FOREIGN_DATA_SET:
+//    if((manage->targetPortId && manage->targetPortId != ptpClock->port_id_field)
+//      || !manage->recordKey || manage->recordKey > ptpClock->number_foreign_records)
+//    {
+//      *(UInteger8*)(buf + 55) = PTP_MM_NULL;
+//      *(Integer32*)(buf + 56) = shift16(flip16(0), 1);
+//      return 0;
+//    }
+//
+//    *(UInteger8*)(buf + 55) = PTP_MM_FOREIGN_DATA_SET;
+//    *(Integer32*)(buf + 56) = shift16(flip16(28), 1);
+//    *(Integer32*)(buf + 60) = shift16(flip16(ptpClock->port_id_field), 1);
+//    *(Integer32*)(buf + 64) = shift16(flip16(manage->recordKey - 1), 1);
+//    *(Integer32*)(buf + 68) = shift8(ptpClock->foreign[manage->recordKey - 1].foreign_master_communication_technology, 3);
+//    memcpy(buf + 72, ptpClock->foreign[manage->recordKey - 1].foreign_master_uuid, 6);
+//    *(Integer32*)(buf + 80) = shift16(flip16(ptpClock->foreign[manage->recordKey - 1].foreign_master_port_id), 1);
+//    *(Integer32*)(buf + 84) = shift16(flip16(ptpClock->foreign[manage->recordKey - 1].foreign_master_syncs), 1);
+//    return 88;
+//
+//  default:
+//    return 0;
+//  }
 }

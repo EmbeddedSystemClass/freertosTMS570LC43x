@@ -561,7 +561,7 @@ Boolean netInit(NetPath *netPath, RunTimeOpts *rtOpts, PtpClock *ptpClock)
 //    netPath->eventSock = 0xC000;
 //    netPath->generalSock = 0xC001;
     netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
-    netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
+//    netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
     netPath->rtOpts = rtOpts;
     netPath->ptpClock = ptpClock;
     rtOpts->haveLoopbackedSend = FALSE;
@@ -921,16 +921,16 @@ PHYMSG_MESSAGE phyMsg;
 	PHYMSG_MESSAGE phyMsg;
 
     if ( rtOpts->haveLoopbackedSend ) {
-        ethHead = &rtOpts->txBuff[0];
-        ipHead  = &rtOpts->txBuff[0x0E];
-        udpHead = &rtOpts->txBuff[0x22];
-        ptpHead = &rtOpts->txBuff[0x2A];
-        memcpy( buf, ptpHead, rtOpts->lastSendLength-0x2A);
+//        ethHead = &rtOpts->txBuff[0];
+//        ipHead  = &rtOpts->txBuff[0x0E];
+//        udpHead = &rtOpts->txBuff[0x22];
+        ptpHead = &rtOpts->txBuff[0];
+        memcpy( buf, ptpHead, rtOpts->lastSendLength);
 
         rtOpts->haveLoopbackedSend = FALSE;
 
-        destPort = *(NS_UINT16*)&udpHead[0x02];
-        if ( destPort == 0x3F01 && !rtOpts->useOneStepFlag) {
+//        destPort = *(NS_UINT16*)&udpHead[0x02];
+//        if ( destPort == 0x3F01 && !rtOpts->useOneStepFlag) {
             if( !(((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfConfigOptions & STSOPT_TXTS_EN) ) {
                 if ( PTPCheckForEvents( rtOpts->eplPortHandle) & PTPEVT_TRANSMIT_TIMESTAMP_BIT) {
                     PTPGetTransmitTimestamp( rtOpts->eplPortHandle, &time->seconds, &time->nanoseconds,
@@ -947,10 +947,10 @@ PHYMSG_MESSAGE phyMsg;
                 // Reset flag to allow it to pick up the operation below
                 rtOpts->haveLoopbackedSend = TRUE;
             }
-        }
-        else {
-            return 2;
-        }
+//        }
+//        else {
+//            return 2;
+//        }
     }
 
     if ( !MACReceivePacket(netPath, rtOpts->rxBuff, &length))
@@ -961,85 +961,85 @@ PHYMSG_MESSAGE phyMsg;
     //IsPhyStatusFrame assumes raw packet. Using UDP stack assume all packets
     //received are 1588 packets
     psfStart = rtOpts->rxBuff;
-    while( psfStart ) {
-        psfStart = intGetNextPhyMessage( rtOpts->eplPortHandle, psfStart, &msgType, &phyMsg, 0 );
-        if( !psfStart ) {
-            continue;
-        }
-#if 1
-        // Debug help
-        switch( msgType ) {
-        case PHYMSG_STATUS_TX:
-            DBG( "netRecv: PSF : PHYMSG_STATUS_TX:   %ds %dns  %d\n",
-                        phyMsg.TxStatus.txTimestampSecs,
-                        phyMsg.TxStatus.txTimestampNanoSecs,
-                        phyMsg.TxStatus.txOverflowCount );
-            break;
-        case PHYMSG_STATUS_RX:
-            DBG( "netRecv: PSF : PHYMSG_STATUS_RX:   %ds %dns  %d   #%d   %d  %d\n",
-                        phyMsg.RxStatus.rxTimestampSecs,
-                        phyMsg.RxStatus.rxTimestampNanoSecs,
-                        phyMsg.RxStatus.rxOverflowCount,
-                        phyMsg.RxStatus.sequenceId,
-                        phyMsg.RxStatus.messageType,
-                        phyMsg.RxStatus.sourceHash );
-            break;
-        case PHYMSG_STATUS_TRIGGER:
-            DBG( "netRecv: PSF : PHYMSG_STATUS_TRIGGER:   %d\n", phyMsg.TriggerStatus.triggerStatus );
-            break;
-        case PHYMSG_STATUS_EVENT:
-            DBG( "netRecv: PSF : PHYMSG_STATUS_EVENT: \n" );
-            break;
-        case PHYMSG_STATUS_ERROR:
-            DBG( "netRecv: PSF : PHYMSG_STATUS_ERROR: \n" );
-            break;
-        case PHYMSG_STATUS_REG_READ:
-            // Should never get this, but just in case!
-            DBG( "netRecv: PSF : PHYMSG_STATUS_REG_READ: \n" );
-            break;
-        default:
-            DBG( "netRecv: PSF : PSF %04X\n", msgType );
-            break;
-        }
-#endif
+//    while( psfStart ) {
+//        psfStart = intGetNextPhyMessage( rtOpts->eplPortHandle, psfStart, &msgType, &phyMsg, 0 );
+//        if( !psfStart ) {
+//            continue;
+//        }
+//#if 1
+//        // Debug help
+//        switch( msgType ) {
+//        case PHYMSG_STATUS_TX:
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_TX:   %ds %dns  %d\n",
+//                        phyMsg.TxStatus.txTimestampSecs,
+//                        phyMsg.TxStatus.txTimestampNanoSecs,
+//                        phyMsg.TxStatus.txOverflowCount );
+//            break;
+//        case PHYMSG_STATUS_RX:
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_RX:   %ds %dns  %d   #%d   %d  %d\n",
+//                        phyMsg.RxStatus.rxTimestampSecs,
+//                        phyMsg.RxStatus.rxTimestampNanoSecs,
+//                        phyMsg.RxStatus.rxOverflowCount,
+//                        phyMsg.RxStatus.sequenceId,
+//                        phyMsg.RxStatus.messageType,
+//                        phyMsg.RxStatus.sourceHash );
+//            break;
+//        case PHYMSG_STATUS_TRIGGER:
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_TRIGGER:   %d\n", phyMsg.TriggerStatus.triggerStatus );
+//            break;
+//        case PHYMSG_STATUS_EVENT:
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_EVENT: \n" );
+//            break;
+//        case PHYMSG_STATUS_ERROR:
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_ERROR: \n" );
+//            break;
+//        case PHYMSG_STATUS_REG_READ:
+//            // Should never get this, but just in case!
+//            DBG( "netRecv: PSF : PHYMSG_STATUS_REG_READ: \n" );
+//            break;
+//        default:
+//            DBG( "netRecv: PSF : PSF %04X\n", msgType );
+//            break;
+//        }
+//#endif
+//
+//        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+//        if( psfList ) {
+//            // Already have a list add to the end of it
+//            while( psfList->nxtMsg )
+//                psfList = psfList->nxtMsg;
+//            psfList = psfList->nxtMsg = malloc( sizeof(PHYMSG_LIST) );
+//        }
+//        else {
+//            // No list yet, start it.
+////            psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = OAIAlloc( sizeof(PHYMSG_LIST) );
+//           ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = (PHYMSG_LIST *)malloc(sizeof(PHYMSG_LIST));
+//           psfList =  ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+//        }
+//        psfList->nxtMsg = NULL;
+//        psfList->msgType = msgType;
+//        memcpy( &psfList->phyMsg, &phyMsg, sizeof(PHYMSG_MESSAGE) );
+//    }  // while( psfStart )
 
-        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
-        if( psfList ) {
-            // Already have a list add to the end of it
-            while( psfList->nxtMsg )
-                psfList = psfList->nxtMsg;
-            psfList = psfList->nxtMsg = malloc( sizeof(PHYMSG_LIST) );
-        }
-        else {
-            // No list yet, start it.
-//            psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = OAIAlloc( sizeof(PHYMSG_LIST) );
-           ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList = (PHYMSG_LIST *)malloc(sizeof(PHYMSG_LIST));
-           psfList =  ((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
-        }
-        psfList->nxtMsg = NULL;
-        psfList->msgType = msgType;
-        memcpy( &psfList->phyMsg, &phyMsg, sizeof(PHYMSG_MESSAGE) );
-    }  // while( psfStart )
-
-    if( rtOpts->haveLoopbackedSend && (((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfConfigOptions & STSOPT_TXTS_EN) ) {
-        // Look for TX Timestamp PSF
-        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
-        if( psfList ) {
-            do {
-                if( psfList->msgType == PHYMSG_STATUS_TX ) {
-                    time->seconds = psfList->phyMsg.TxStatus.txTimestampSecs;
-                    time->nanoseconds = psfList->phyMsg.TxStatus.txTimestampNanoSecs;
-                    DBG( "PSF timestamp - %d sec, %d nanosec\n",
-                          time->seconds, time->nanoseconds);
-                }
-                psfList = psfList->nxtMsg;
-            } while( psfList );
-			rtOpts->haveLoopbackedSend = FALSE;
-			return 1;
-		}
-		DBG("[!psfList]");
-		return 0;
-    }
+//    if( rtOpts->haveLoopbackedSend && (((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfConfigOptions & STSOPT_TXTS_EN) ) {
+//        // Look for TX Timestamp PSF
+//        psfList = (PHYMSG_LIST *)((PEPL_PORT_HANDLE)rtOpts->eplPortHandle)->psfList;
+//        if( psfList ) {
+//            do {
+//                if( psfList->msgType == PHYMSG_STATUS_TX ) {
+//                    time->seconds = psfList->phyMsg.TxStatus.txTimestampSecs;
+//                    time->nanoseconds = psfList->phyMsg.TxStatus.txTimestampNanoSecs;
+//                    DBG( "PSF timestamp - %d sec, %d nanosec\n",
+//                          time->seconds, time->nanoseconds);
+//                }
+//                psfList = psfList->nxtMsg;
+//            } while( psfList );
+//			rtOpts->haveLoopbackedSend = FALSE;
+//			return 1;
+//		}
+//		DBG("[!psfList]");
+//		return 0;
+//    }
 
 //    x;
 //    DBGV( "DUMP RX PACKET - Length %d\n", length);
@@ -1155,7 +1155,13 @@ uint32_t MACSendPacket(NetPath * net_path, Octet * txbuff, uint32_t txbuff_len){
 
 	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
 	{
-		destination.sin_port = FreeRTOS_htons(320);
+		if(	txbuff[0] == PTPV2_SYNC_TYPE ||
+			txbuff[0] == PTPV2_DELAY_REQUEST_TYPE	){
+			destination.sin_port = FreeRTOS_htons(320);
+		}else if(txbuff[0] == PTPV2_DELAY_RESPONSE_TYPE ||
+				     txbuff[0] == PTPV2_FOLLOWUP_TYPE){
+			destination.sin_port = FreeRTOS_htons(319);
+		}
 		destination.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
 		bits_written = FreeRTOS_sendto( net_path->eventSock, txbuff,  txbuff_len, 0, &destination, destination_address_length);
 	}
@@ -1303,10 +1309,10 @@ void SendAPacket( Octet *buf, UInteger16 length, NetPath *netPath, UInteger16 sr
 //    DBGV( "\n\n");
 
     // Send the packet
-    MACSendPacket( rtOpts->eplPortHandle, txBuf, (NS_UINT)(txBufPtr-txBuf) + length);
+    MACSendPacket( netPath, txBuf, length);
 
     // Need to loop the packet back into the receive engine
-    rtOpts->lastSendLength = (NS_UINT)(txBufPtr-txBuf) + length;
+    rtOpts->lastSendLength = length;
     rtOpts->haveLoopbackedSend = TRUE;
     return;
 }

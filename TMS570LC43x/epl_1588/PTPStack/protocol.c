@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 
@@ -430,8 +430,10 @@ void handle(RunTimeOpts *rtOpts, PtpClock *ptpClock)
     ptpClock->msgTmpHeader.sequenceId,
     time.seconds, time.nanoseconds);
   
-  isFromSelf = ptpClock->msgTmpHeader.sourceCommunicationTechnology == ptpClock->port_communication_technology
-                && ptpClock->msgTmpHeader.sourcePortId == ptpClock->port_id_field
+//  isFromSelf = ptpClock->msgTmpHeader.sourceCommunicationTechnology == ptpClock->port_communication_technology
+//                && ptpClock->msgTmpHeader.sourcePortId == ptpClock->port_id_field
+//                && !memcmp(ptpClock->msgTmpHeader.sourceUuid, ptpClock->port_uuid_field, PTP_UUID_LENGTH);
+  isFromSelf = ptpClock->msgTmpHeader.sourcePortId == ptpClock->port_id_field
                 && !memcmp(ptpClock->msgTmpHeader.sourceUuid, ptpClock->port_uuid_field, PTP_UUID_LENGTH);
 
   switch(ptpClock->msgTmpHeader.control)
@@ -504,9 +506,10 @@ void handleSync(MsgHeader *header, Octet *msgIbuf, TimeInternal *time, Boolean i
       ptpClock->parent_uuid[3], ptpClock->parent_uuid[4], ptpClock->parent_uuid[5]);
     
     if( header->sequenceId > ptpClock->parent_last_sync_sequence_number
-      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
-      && header->sourcePortId == ptpClock->parent_port_id
-      && !memcmp(header->sourceUuid, ptpClock->parent_uuid, PTP_UUID_LENGTH) )
+//      && header->sourceCommunicationTechnology == ptpClock->parent_communication_technology
+//      && header->sourcePortId == ptpClock->parent_port_id
+//      && !memcmp(header->sourceUuid, ptpClock->parent_uuid, PTP_UUID_LENGTH)
+    		)
     {
       /* addForeign() takes care of msgUnpackSync() */
       ptpClock->record_update = TRUE;
@@ -545,7 +548,7 @@ void handleSync(MsgHeader *header, Octet *msgIbuf, TimeInternal *time, Boolean i
         issueDelayReq(rtOpts, ptpClock);
         
         ptpClock->Q = 0;
-//        ptpClock->R = getRand(&ptpClock->random_seed)%(PTP_DELAY_REQ_INTERVAL - 2) + 2;
+        ptpClock->R = getRand(&ptpClock->random_seed)%(PTP_DELAY_REQ_INTERVAL - 2) + 2;
         ptpClock->R = 3;
         DBG("Q = %d, R = %d\n", ptpClock->Q, ptpClock->R);
       }
@@ -556,10 +559,10 @@ void handleSync(MsgHeader *header, Octet *msgIbuf, TimeInternal *time, Boolean i
     
   case PTP_MASTER:
   default:
-    if( header->sourceCommunicationTechnology == ptpClock->clock_communication_technology
-      || header->sourceCommunicationTechnology == PTP_DEFAULT
-      || ptpClock->clock_communication_technology == PTP_DEFAULT )
-    {
+//    if( header->sourceCommunicationTechnology == ptpClock->clock_communication_technology
+//      || header->sourceCommunicationTechnology == PTP_DEFAULT
+//      || ptpClock->clock_communication_technology == PTP_DEFAULT )
+//    {
       if(!isFromSelf)
       {
         ptpClock->record_update = TRUE;
@@ -570,7 +573,7 @@ void handleSync(MsgHeader *header, Octet *msgIbuf, TimeInternal *time, Boolean i
         addTime(time, time, &rtOpts->outboundLatency);
         issueFollowup(time, rtOpts, ptpClock);
       }
-    }
+//    }
     break;
   }
 }

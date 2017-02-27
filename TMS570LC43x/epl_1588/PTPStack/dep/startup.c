@@ -38,7 +38,7 @@ shall not remove or alter any copyright or other notices associated with the
 Software
 
 RESTRICTIONS: The Software may be distributed only in connection the 
-distribution of COMPANY’s Products, and only subject to the following 
+distribution of COMPANYï¿½s Products, and only subject to the following 
 additional Restrictions:  (a) NSC Components:  The Software may be used 
 only in connection with Components that are incorporated into COMPANY's 
 Products; (b) Sublicensing Source:  The Software may be sublicensed in 

@@ -138,7 +138,7 @@ purpose.
 /* ptp constants */
 #define PTP_UUID_LENGTH                     8
 #define PTP_CODE_STRING_LENGTH              4
-#define PTP_SUBDOMAIN_NAME_LENGTH           16
+#define PTP_SUBDOMAIN_NAME_LENGTH           1
 #define PTP_MAX_MANAGEMENT_PAYLOAD_SIZE     90
 /* no support for intervals less than one */
 //#define PTP_SYNC_INTERVAL_TIMEOUT(x)        (1<<((x)<0?1:(x))) 

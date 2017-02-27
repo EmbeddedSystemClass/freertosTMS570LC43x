@@ -110,6 +110,8 @@ int runPtpd(void)
   PEPL_PORT_HANDLE epl_port_handle = malloc(sizeof(struct PORT_OBJ));
   epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
   epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
+  epl_port_handle->psfConfigOptions |= STSOPT_TXTS_EN;
+  epl_port_handle->psfConfigOptions |= STSOPT_RXTS_EN;
   hdkif_t *hdkif;
   hdkif = &hdkif_data[0U];
 
@@ -133,11 +135,6 @@ int runPtpd(void)
   epl_port_handle->hdkif = *hdkif;
   epl_port_handle->rxCfgItems = rxCfgItems;
   epl_port_handle->rxCfgOpts = rxCfgOpts;
-//  init1588(epl_port_handle);
-
-//  epl_port_handle.hdkif = *hdkif;
-//  epl_port_handle.rxCfgItems = rxCfgItems;
-//  epl_port_handle.rxCfgOpts = rxCfgOpts;
 
   init1588(epl_port_handle);
   
@@ -158,12 +155,19 @@ int runPtpd(void)
   rtOpts.ai = DEFAULT_AI;
   rtOpts.max_foreign_records = DEFUALT_MAX_FOREIGN_RECORDS;
   rtOpts.currentUtcOffset = DEFAULT_UTC_OFFSET;
+  rtOpts.slaveOnly = true;
   
   int argc = 0;
   char ** argv = {0};
   if( !(ptpClock = ptpdStartup(argc, argv, &ret, &rtOpts)) )
     return ret;
   
+  ptpClock->external_timing = false;
+  ptpClock->clock_followup_capable = false;
+  ptpClock->is_boundary_clock = false;
+  ptpClock->burst_enabled = false;
+  ptpClock->parent_stats = false;
+
   if(rtOpts.probe)
   {
     probe(&rtOpts, ptpClock);

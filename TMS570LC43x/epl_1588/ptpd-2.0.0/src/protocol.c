@@ -1383,7 +1383,9 @@ static void issuePDelayReq(PtpClock *ptpClock)
 
 	msgPackPDelayReq(ptpClock, ptpClock->msgObuf, &originTimestamp);
 
-	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_REQ_LENGTH, &internalTime))
+//	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_REQ_LENGTH, &internalTime))
+	//TODO: implement
+	if (0)
 	{
 		ERROR("issuePDelayReq: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);
@@ -1410,7 +1412,9 @@ static void issuePDelayResp(PtpClock *ptpClock, TimeInternal *time, const MsgHea
 	fromInternalTime(time, &requestReceiptTimestamp);
 	msgPackPDelayResp(ptpClock->msgObuf, pDelayReqHeader, &requestReceiptTimestamp);
 
-	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_LENGTH, time))
+	//TODO: implement
+//	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_LENGTH, time))
+	if (0)
 	{
 		ERROR("issuePDelayResp: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);
@@ -1454,7 +1458,9 @@ static void issuePDelayRespFollowUp(PtpClock *ptpClock, const TimeInternal *time
 
 	msgPackPDelayRespFollowUp(ptpClock->msgObuf, pDelayReqHeader, &responseOriginTimestamp);
 
-	if (!netSendPeerGeneral(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_FOLLOW_UP_LENGTH))
+//	if (!netSendPeerGeneral(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_FOLLOW_UP_LENGTH))
+	//TODO: implement
+	if (0)
 	{
 		ERROR("issuePDelayRespFollowUp: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);

@@ -132,10 +132,9 @@ purpose.
 
 void init1588(PEPL_PORT_HANDLE epl_port_handle);
 int runPtpd(void);
+
 #define malloc(x)	pvPortMalloc(x)
-
 void *pvPortCalloc(int value, size_t size);
-
 #define calloc(x, y)		pvPortCalloc(x, y)
 
 #define EXPORT

@@ -655,7 +655,8 @@ Boolean netSelect(TimeInternal *timeout, NetPath *netPath)
 #elif defined(_WIN32)
   return FALSE;
 #elif defined(freertos)
-  return FALSE;
+  //TODO: implement select
+  return TRUE;
 #endif
 }
 

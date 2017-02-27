@@ -172,12 +172,12 @@ int runPtpd(void)
 
   if(rtOpts.probe)
   {
-    probe(&rtOpts, ptpClock);
+//    probe(&rtOpts, ptpClock);
   }
   else
   {
     /* do the protocol engine */
-    protocol(&rtOpts, ptpClock);
+//    protocol(&rtOpts, ptpClock);
   }
   
   ptpdShutdown(ptpClock);

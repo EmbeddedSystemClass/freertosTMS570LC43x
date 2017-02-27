@@ -20,6 +20,27 @@
 #ifndef PTPD_H_
 #define PTPD_H_
 
+#include "FreeRTOS.h"
+#include "os_task.h"
+#include "os_semphr.h"
+
+/* FreeRTOS+CLI includes. */
+#include "FreeRTOS_CLI.h"
+
+/* FreeRTOS+TCP includes. */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+#include "udp_echo.h"
+
+#define socket FreeRTOS_socket
+#define SOCK_DGRAM FREERTOS_SOCK_DGRAM
+#define IPPROTO_UDP FREERTOS_IPPROTO_UDP
+#define AF_INET 		FREERTOS_AF_INET
+#define PF_INET 		FREERTOS_AF_INET
+#define htons(x)		FreeRTOS_htons(x)
+#define htonl(x)			FreeRTOS_htonl(x)
+#define bind(x,y,z) 	FreeRTOS_bind(x,y,z)
+
 /* #define PTPD_DBGVV */
 /* #define PTPD_DBGV */
 /* #define PTPD_DBG */

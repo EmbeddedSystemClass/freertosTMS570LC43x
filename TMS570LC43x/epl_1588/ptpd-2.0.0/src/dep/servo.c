@@ -43,7 +43,8 @@ void initClock(PtpClock *ptpClock)
 	if (!ptpClock->servo.noAdjust)
 		adjFreq(0);
 
-	netEmptyEventQ(&ptpClock->netPath);
+	//TODO: implement
+//	netEmptyEventQ(&ptpClock->netPath);
 }
 
 static int32_t order(int32_t n)

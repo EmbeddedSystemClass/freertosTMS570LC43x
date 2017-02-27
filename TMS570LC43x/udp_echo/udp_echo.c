@@ -176,7 +176,8 @@ void vStartPTP1588Task( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPri
 
 void prv1588PTPTask( void *pvParameters )
 {
-	runPtpd();
+//	runPtpd();
+	ptpd_thread();
 	vTaskDelete( NULL );
 }
 

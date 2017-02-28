@@ -9,7 +9,7 @@ static void handleFollowUp(PtpClock*, bool);
 static void handlePDelayReq(PtpClock*, TimeInternal*, bool);
 static void handleDelayReq(PtpClock*, TimeInternal*, bool);
 static void handlePDelayResp(PtpClock*, TimeInternal*, bool);
-static void handleDelayResp(PtpClock*, bool);
+static void handleDelayResp(PtpClock *ptpClock, TimeInternal *time,  bool  isFromSelf);
 static void handlePDelayRespFollowUp(PtpClock*, bool);
 static void handleManagement(PtpClock*, bool);
 static void handleSignaling(PtpClock*, bool);
@@ -564,7 +564,7 @@ static void handle(PtpClock *ptpClock)
 				break;
 
 		case DELAY_RESP:
-				handleDelayResp(ptpClock, isFromSelf);
+				handleDelayResp(ptpClock, &time,  isFromSelf);
 				break;
 
 		case PDELAY_RESP:
@@ -911,7 +911,7 @@ static void handleDelayReq(PtpClock *ptpClock, TimeInternal *time, bool isFromSe
 	}
 }
 
-static void handleDelayResp(PtpClock *ptpClock, bool  isFromSelf)
+static void handleDelayResp(PtpClock *ptpClock, TimeInternal *time,  bool  isFromSelf)
 {
 	bool  isFromCurrentParent = FALSE;
 	bool  isCurrentRequest = FALSE;
@@ -957,6 +957,9 @@ static void handleDelayResp(PtpClock *ptpClock, bool  isFromSelf)
 						toInternalTime(&ptpClock->timestamp_delayReqRecieve, &ptpClock->msgTmp.resp.receiveTimestamp);
 
 						scaledNanosecondsToInternalTime(&ptpClock->msgTmpHeader.correctionfield, &correctionField);
+//						updateDelay(ptpClock, &ptpClock->timestamp_delayReqSend, &ptpClock->timestamp_delayReqRecieve, &correctionField);
+						ptpClock->timestamp_delayReqSend.seconds = time->seconds;
+						ptpClock->timestamp_delayReqSend.nanoseconds = time->nanoseconds;
 						updateDelay(ptpClock, &ptpClock->timestamp_delayReqSend, &ptpClock->timestamp_delayReqRecieve, &correctionField);
 
 						ptpClock->portDS.logMinDelayReqInterval = ptpClock->msgTmpHeader.logMessageInterval;

@@ -1,0 +1,54 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/ptpd-2.0.0/src/dep/msg.c \
+../epl_1588/ptpd-2.0.0/src/dep/net.c \
+../epl_1588/ptpd-2.0.0/src/dep/servo.c \
+../epl_1588/ptpd-2.0.0/src/dep/startup.c \
+../epl_1588/ptpd-2.0.0/src/dep/sys.c \
+../epl_1588/ptpd-2.0.0/src/dep/timer.c 
+
+C_DEPS += \
+./epl_1588/ptpd-2.0.0/src/dep/msg.d \
+./epl_1588/ptpd-2.0.0/src/dep/net.d \
+./epl_1588/ptpd-2.0.0/src/dep/servo.d \
+./epl_1588/ptpd-2.0.0/src/dep/startup.d \
+./epl_1588/ptpd-2.0.0/src/dep/sys.d \
+./epl_1588/ptpd-2.0.0/src/dep/timer.d 
+
+OBJS += \
+./epl_1588/ptpd-2.0.0/src/dep/msg.obj \
+./epl_1588/ptpd-2.0.0/src/dep/net.obj \
+./epl_1588/ptpd-2.0.0/src/dep/servo.obj \
+./epl_1588/ptpd-2.0.0/src/dep/startup.obj \
+./epl_1588/ptpd-2.0.0/src/dep/sys.obj \
+./epl_1588/ptpd-2.0.0/src/dep/timer.obj 
+
+OBJS__QUOTED += \
+"epl_1588/ptpd-2.0.0/src/dep/msg.obj" \
+"epl_1588/ptpd-2.0.0/src/dep/net.obj" \
+"epl_1588/ptpd-2.0.0/src/dep/servo.obj" \
+"epl_1588/ptpd-2.0.0/src/dep/startup.obj" \
+"epl_1588/ptpd-2.0.0/src/dep/sys.obj" \
+"epl_1588/ptpd-2.0.0/src/dep/timer.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588/ptpd-2.0.0/src/dep/msg.d" \
+"epl_1588/ptpd-2.0.0/src/dep/net.d" \
+"epl_1588/ptpd-2.0.0/src/dep/servo.d" \
+"epl_1588/ptpd-2.0.0/src/dep/startup.d" \
+"epl_1588/ptpd-2.0.0/src/dep/sys.d" \
+"epl_1588/ptpd-2.0.0/src/dep/timer.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/ptpd-2.0.0/src/dep/msg.c" \
+"../epl_1588/ptpd-2.0.0/src/dep/net.c" \
+"../epl_1588/ptpd-2.0.0/src/dep/servo.c" \
+"../epl_1588/ptpd-2.0.0/src/dep/startup.c" \
+"../epl_1588/ptpd-2.0.0/src/dep/sys.c" \
+"../epl_1588/ptpd-2.0.0/src/dep/timer.c" 
+
+

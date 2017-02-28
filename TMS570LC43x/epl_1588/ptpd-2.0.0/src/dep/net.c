@@ -178,12 +178,14 @@ size_t netRecvEvent( NetPath *netPath, octet_t *buf, TimeInternal *time)
     case PTPV2_SYNC_TYPE:
     case PTPV2_FOLLOWUP_TYPE:
     case PTPV2_DELAY_REQUEST_TYPE:
+	//The tx timestamp willl be coming in in the correction fields of this packet
     case PTPV2_DELAY_RESPONSE_TYPE:
 		PTPGetTimestampFromFrame((uint8_t*)buf, (uint32_t*)&(time->seconds),(uint32_t*) &(time->nanoseconds));
 		break;
     default:
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
     }
+
     if(!(time->seconds)){
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
     }

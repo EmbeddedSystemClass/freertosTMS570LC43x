@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package aero_network;
+
+message timing_packet {
+	required offset_from_master_s;
+	required offset_from_master_ns;
+}

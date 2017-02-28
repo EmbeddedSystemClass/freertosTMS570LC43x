@@ -17,12 +17,41 @@ ForeignMasterRecord ptpForeignRecords[DEFAULT_MAX_FOREIGN_RECORDS];
 RX_CFG_ITEMS rxCfgItems;
 uint32_t rxCfgOpts;
 extern hdkif_t hdkif_data[];
+extern uint8 emacAddress[6U];
 
-#define malloc(x)	pvPortMalloc(x)
-void *pvPortCalloc(int value, size_t size);
-#define calloc(x, y)		pvPortCalloc(x, y)
+void * protomalloc(void * allocator_data, size_t size){
+	return malloc(size);
+}
+
+void protofree(void * allocator_data, void *pointer){
+	return free(pointer);
+}
+
+ProtobufCAllocator protoallocator = {
+		.alloc = protomalloc,
+		.free = protofree,
+		.allocator_data = NULL,
+};
+
 
 __IO uint32_t PTPTimer = 0;
+
+void proto_practice(void){
+	AeroNetwork__TimingPacket timing_packet = {
+		.mac_address = *(int64_t*)emacAddress,
+		.offset_from_master_s = 1,
+		.offset_from_master_ns = 2,
+		.mean_path_delay_s = 3,
+		.mean_path_delay_ns = 4,
+	};
+	aero_network__timing_packet__init(&timing_packet);
+	size_t pack_size = aero_network__timing_packet__get_packed_size(&timing_packet);
+	uint8_t * packet_buffer = malloc(pack_size);
+	memset(packet_buffer, 0, pack_size);
+	aero_network__timing_packet__pack(&timing_packet, packet_buffer);
+
+	AeroNetwork__TimingPacket * unpacked = aero_network__timing_packet__unpack(&protoallocator, pack_size, packet_buffer);
+}
 
 //static void ptpd_thread(void *arg)
 void ptpd_thread(void *arg)

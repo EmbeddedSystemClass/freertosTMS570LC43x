@@ -32,6 +32,19 @@
 #include "FreeRTOS_Sockets.h"
 #include "udp_echo.h"
 
+//void *pvPortCalloc(int value, size_t size);
+#define malloc(x)		pvPortMalloc(x)
+#define free(x)			vPortFree(x)
+#define calloc(x, y)		pvPortCalloc(x, y)
+#include "timing_packet.pb-c.h"
+
+void protofree(void * allocator_data, void *pointer);
+void * protomalloc(void * allocator_data, size_t size);
+void proto_practice(void);
+
+extern ProtobufCAllocator protoallocator;
+
+
 #define socket FreeRTOS_socket
 #define SOCK_DGRAM FREERTOS_SOCK_DGRAM
 #define IPPROTO_UDP FREERTOS_IPPROTO_UDP

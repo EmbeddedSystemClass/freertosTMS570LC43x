@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;TMS570LC43x/source/protobufs/protobuf-c/protobuf-c.o&apos;" deleteContents="false" description="Delete resource &apos;TMS570LC43x/source/protobufs/protobuf-c/protobuf-c.o&apos;" element1="/TMS570LC43x/source/protobufs/protobuf-c/protobuf-c.o" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1488315422733"/>
+</session>

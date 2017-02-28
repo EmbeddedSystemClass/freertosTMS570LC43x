@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+package aero_network;
+
+message timing_packet {
+
+}

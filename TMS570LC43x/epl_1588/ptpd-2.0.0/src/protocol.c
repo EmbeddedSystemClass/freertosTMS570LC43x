@@ -26,6 +26,7 @@ static void issuePDelayRespFollowUp(PtpClock*, const TimeInternal*, const MsgHea
 //static void issueManagement(const MsgHeader*,MsgManagement*,PtpClock*);
 
 static bool doInit(PtpClock*);
+extern ProtobufCAllocator protoallocator;
 
 #ifdef PTPD_DBG
 static char *stateString(uint8_t state)
@@ -963,6 +964,10 @@ static void handleDelayResp(PtpClock *ptpClock, TimeInternal *time,  bool  isFro
 						updateDelay(ptpClock, &ptpClock->timestamp_delayReqSend, &ptpClock->timestamp_delayReqRecieve, &correctionField);
 
 						ptpClock->portDS.logMinDelayReqInterval = ptpClock->msgTmpHeader.logMessageInterval;
+
+						//TODO: ship off packet to network analysis
+						proto_practice();
+
 					}
 					else
 					{

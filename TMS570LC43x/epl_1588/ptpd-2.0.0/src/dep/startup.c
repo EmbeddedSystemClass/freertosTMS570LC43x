@@ -2,6 +2,8 @@
 
 #include "../ptpd.h"
 
+extern uint8 emacAddress[6U];
+
 void ptpdShutdown(PtpClock *ptpClock)
 {
 	netShutdown(&ptpClock->netPath);
@@ -9,6 +11,8 @@ void ptpdShutdown(PtpClock *ptpClock)
 
 int16_t ptpdStartup(PtpClock * ptpClock, RunTimeOpts *rtOpts, ForeignMasterRecord* foreign)
 {
+	memcpy(ptpClock->portUuidField, emacAddress, CLOCK_IDENTITY_LENGTH);
+
 	ptpClock->rtOpts = rtOpts;
 	ptpClock->foreignMasterDS.records = foreign;
 

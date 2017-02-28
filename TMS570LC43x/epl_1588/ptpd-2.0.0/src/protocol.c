@@ -197,6 +197,8 @@ void toState(PtpClock *ptpClock, uint8_t state)
 						/* none */
 						break;
 			}
+		//TODO: undo
+//			ptpClock->portDS.portState = PTP_SLAVE;
 			ptpClock->portDS.portState = PTP_UNCALIBRATED;
 
 			break;
@@ -212,7 +214,6 @@ void toState(PtpClock *ptpClock, uint8_t state)
 			break;
 	}
 }
-
 
 static bool doInit(PtpClock *ptpClock)
 {
@@ -328,6 +329,8 @@ void doState(PtpClock *ptpClock)
 					{
 							DBG("event SYNCHRONIZATION_FAULT\n");
 							clearFlag(ptpClock->events, SYNCHRONIZATION_FAULT);
+							//TODO: undo
+//							toState(ptpClock, PTP_SLAVE);
 							toState(ptpClock, PTP_UNCALIBRATED);
 					}
 
@@ -335,6 +338,8 @@ void doState(PtpClock *ptpClock)
 					{
 							DBG("event MASTER_CLOCK_CHANGED\n");
 							clearFlag(ptpClock->events, MASTER_CLOCK_CHANGED);
+							//TODO: undo
+//							toState(ptpClock, PTP_SLAVE);
 							toState(ptpClock, PTP_UNCALIBRATED);
 					}
 
@@ -445,7 +450,6 @@ void doState(PtpClock *ptpClock)
 			break;
 	}
 }
-
 
 /* Check and handle received messages */
 static void handle(PtpClock *ptpClock)
@@ -758,7 +762,6 @@ static void handleSync(PtpClock *ptpClock, TimeInternal *time, bool isFromSelf)
 	}
 }
 
-
 static void handleFollowUp(PtpClock *ptpClock, bool isFromSelf)
 {
 	TimeInternal preciseOriginTimestamp;
@@ -846,7 +849,6 @@ static void handleFollowUp(PtpClock *ptpClock, bool isFromSelf)
 	}
 }
 
-
 static void handleDelayReq(PtpClock *ptpClock, TimeInternal *time, bool isFromSelf)
 {
 	switch (ptpClock->portDS.delayMechanism)
@@ -908,8 +910,6 @@ static void handleDelayReq(PtpClock *ptpClock, TimeInternal *time, bool isFromSe
 			break;
 	}
 }
-
-
 
 static void handleDelayResp(PtpClock *ptpClock, bool  isFromSelf)
 {
@@ -979,7 +979,6 @@ static void handleDelayResp(PtpClock *ptpClock, bool  isFromSelf)
 			break;
 	}
 }
-
 
 static void handlePDelayReq(PtpClock *ptpClock, TimeInternal *time, bool  isFromSelf)
 {
@@ -1383,9 +1382,8 @@ static void issuePDelayReq(PtpClock *ptpClock)
 
 	msgPackPDelayReq(ptpClock, ptpClock->msgObuf, &originTimestamp);
 
-//	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_REQ_LENGTH, &internalTime))
-	//TODO: implement
-	if (0)
+	//TODO: implement multicast peer send
+	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_REQ_LENGTH, &internalTime))
 	{
 		ERROR("issuePDelayReq: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);
@@ -1412,9 +1410,9 @@ static void issuePDelayResp(PtpClock *ptpClock, TimeInternal *time, const MsgHea
 	fromInternalTime(time, &requestReceiptTimestamp);
 	msgPackPDelayResp(ptpClock->msgObuf, pDelayReqHeader, &requestReceiptTimestamp);
 
-	//TODO: implement
-//	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_LENGTH, time))
-	if (0)
+	//TODO: implement multicast peer send
+//	if (0)
+	if (!netSendPeerEvent(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_LENGTH, time))
 	{
 		ERROR("issuePDelayResp: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);
@@ -1458,9 +1456,9 @@ static void issuePDelayRespFollowUp(PtpClock *ptpClock, const TimeInternal *time
 
 	msgPackPDelayRespFollowUp(ptpClock->msgObuf, pDelayReqHeader, &responseOriginTimestamp);
 
-//	if (!netSendPeerGeneral(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_FOLLOW_UP_LENGTH))
-	//TODO: implement
-	if (0)
+	//TODO: implement multicast peer send
+//	if (0)
+	if (!netSendPeerGeneral(&ptpClock->netPath, ptpClock->msgObuf, PDELAY_RESP_FOLLOW_UP_LENGTH))
 	{
 		ERROR("issuePDelayRespFollowUp: can't sent\n");
 		toState(ptpClock, PTP_FAULTY);

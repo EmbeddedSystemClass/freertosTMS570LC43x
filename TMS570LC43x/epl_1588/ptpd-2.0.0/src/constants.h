@@ -29,9 +29,11 @@
 #define DEFAULT_UTC_OFFSET              34
 #define DEFAULT_UTC_VALID               FALSE
 #define DEFAULT_PDELAYREQ_INTERVAL      1 /* -4 in 802.1AS */
-#define DEFAULT_DELAYREQ_INTERVAL       3 /* from DEFAULT_SYNC_INTERVAL to DEFAULT_SYNC_INTERVAL + 5 */
-#define DEFAULT_SYNC_INTERVAL           0 /* -7 in 802.1AS */
-#define DEFAULT_SYNC_RECEIPT_TIMEOUT    3
+//#define DEFAULT_DELAYREQ_INTERVAL       3 /* from DEFAULT_SYNC_INTERVAL to DEFAULT_SYNC_INTERVAL + 5 */
+//#define DEFAULT_SYNC_RECEIPT_TIMEOUT    3
+#define DEFAULT_DELAYREQ_INTERVAL       -2 /* from DEFAULT_SYNC_INTERVAL to DEFAULT_SYNC_INTERVAL + 5 */
+#define DEFAULT_SYNC_INTERVAL           -2 /* -7 in 802.1AS */
+#define DEFAULT_SYNC_RECEIPT_TIMEOUT    0
 #define DEFAULT_ANNOUNCE_RECEIPT_TIMEOUT 6 /* 3 by default */
 #define DEFAULT_QUALIFICATION_TIMEOUT   -9 /* DEFAULT_ANNOUNCE_INTERVAL + N */
 #define DEFAULT_FOREIGN_MASTER_TIME_WINDOW 4
@@ -50,9 +52,12 @@
 #define DEFAULT_FREQUENCY_TRACEABLE     FALSE /* frequency derived from frequency standard? */
 #define DEFAULT_TIMESCALE               ARB_TIMESCALE /* PTP_TIMESCALE or ARB_TIMESCALE */
 
-#define DEFAULT_CALIBRATED_OFFSET_NS    10000 /* offset from master < 10us -> calibrated */
-#define DEFAULT_UNCALIBRATED_OFFSET_NS  1000000 /* offset from master > 1000us -> uncalibrated */
-#define MAX_ADJ_OFFSET_NS       100000000 /* max offset to try to adjust it < 100ms */
+//#define DEFAULT_CALIBRATED_OFFSET_NS    		10000 /* offset from master < 10us -> calibrated */
+//#define DEFAULT_UNCALIBRATED_OFFSET_NS  	1000000 /* offset from master > 1000us -> uncalibrated */
+//#define MAX_ADJ_OFFSET_NS       100000000 /* max offset to try to adjust it < 100ms */
+#define DEFAULT_CALIBRATED_OFFSET_NS    		1000 /* offset from master < 10us -> calibrated */
+#define DEFAULT_UNCALIBRATED_OFFSET_NS  	100000 /* offset from master > 1000us -> uncalibrated */
+#define MAX_ADJ_OFFSET_NS       100000  /* max offset to try to adjust it < 100ms */
 
 /* features, only change to refelect changes in implementation */
 #define NUMBER_PORTS      1

@@ -149,15 +149,15 @@ void setTime(const TimeInternal *time)
 
 int seeded = 0;
 
-uint32_t getRand(uint32_t seed)
+uint32_t getRand(uint32_t rand_max)
 {
     if ( !seeded)
     {
-        srand((unsigned int)seed);
+        srand((unsigned int)12);
         seeded = 1;
     }
 
-    return rand();
+    return rand() % rand_max;
 }
 
 boolean adjFreq(int32_t adj)
@@ -167,7 +167,8 @@ boolean adjFreq(int32_t adj)
   else if(adj < -ADJ_FREQ_MAX)
     adj = -ADJ_FREQ_MAX;
 
-  int sign = (adj > 0) ? 1:-1;
+  int sign = (adj >= 0) ? false:true;
+  //TODO: figure this out
   PTPClockSetRateAdjustment(rtOpts.epl_port_handle, abs(adj), false,  sign);
   return true;
 }

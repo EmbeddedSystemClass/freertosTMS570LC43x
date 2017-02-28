@@ -825,7 +825,17 @@ void PTPClockSetRateAdjustment (
 //          Temp_Rate = Current_Rate + Temp_Rate_delta = 343597 + -687194 = -343597
 //****************************************************************************
 {
-	uint32_t reg;
+	uint32_t reg = 0;
+	reg = EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEH) >> 16;
+	reg = (reg & P640_PTP_RATE_HI_MASK) << P640_PTP_RATE_HI_SHIFT;
+	reg |= EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEL) >> 16;
+
+	if(adjDirectionFlag){
+		reg -= rateAdjValue;
+	}
+	else {
+		reg += rateAdjValue;
+	}
 
     reg = (rateAdjValue >> P640_PTP_RATE_HI_SHIFT) & P640_PTP_RATE_HI_MASK;
     if ( tempAdjFlag) reg |= P640_PTP_TMP_RATE;

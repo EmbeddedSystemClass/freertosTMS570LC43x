@@ -109,7 +109,7 @@ bool  adjFreq(int32_t adj)
 	DBGV("adjFreq %d\n", adj);
 
 	if (adj > ADJ_FREQ_MAX)
-		adj = ADJ_FREQ_MAX;
+		adj = J_FREQ_MAX;
 	else if (adj < -ADJ_FREQ_MAX)
 		adj = -ADJ_FREQ_MAX;
 

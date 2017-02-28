@@ -5,7 +5,6 @@
 #define __IO
 
 #define PTPD_THREAD_PRIO    (tskIDLE_PRIORITY + 2)
-void initEMAC(PEPL_PORT_HANDLE epl_port_handle);
 
 //static sys_mbox_t ptp_alert_queue;
 
@@ -28,17 +27,38 @@ __IO uint32_t PTPTimer = 0;
 //static void ptpd_thread(void *arg)
 void ptpd_thread(void *arg)
 {
+    PEPL_PORT_HANDLE epl_port_handle = pvPortMalloc(sizeof(PORT_OBJ));
+    rtOpts.epl_port_handle = epl_port_handle;
 
-  PEPL_PORT_HANDLE epl_port_handle = malloc(sizeof(struct PORT_OBJ));
-  rtOpts.epl_port_handle = epl_port_handle;
-  hdkif_t *hdkif;
-  hdkif = &hdkif_data[0U];
+    epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
+    epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
+    epl_port_handle->psfConfigOptions |= STSOPT_TXTS_EN;
+    epl_port_handle->psfConfigOptions |= STSOPT_RXTS_EN;
 
-  EMACInstConfig(hdkif);
-  epl_port_handle->hdkif = *hdkif;
-  epl_port_handle->rxCfgItems = rxCfgItems;
-  epl_port_handle->rxCfgOpts = rxCfgOpts;
-  initEMAC(epl_port_handle);
+    memset(&(epl_port_handle->rxCfgItems), 0, sizeof(RX_CFG_ITEMS));
+    rxCfgItems.ptpVersion = 0x02;
+    rxCfgItems.ptpFirstByteMask = 0x00;
+    rxCfgItems.ptpFirstByteData = 0x00;
+    rxCfgItems.ipAddrData = 0;
+    rxCfgItems.tsMinIFG = 0x0C;
+    rxCfgItems.srcIdHash = 0;
+    rxCfgItems.ptpDomain = 0;
+    rxCfgItems.tsSecLen = 3;
+    rxCfgItems.rxTsSecondsOffset = 8;
+    rxCfgItems.rxTsNanoSecOffset = 12;
+
+    rxCfgOpts = 0;
+    rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+   					   RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+   					   RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
+
+    hdkif_t *hdkif;
+    hdkif = &hdkif_data[0U];
+    epl_port_handle->hdkif = *hdkif;
+    epl_port_handle->rxCfgItems = rxCfgItems;
+    epl_port_handle->rxCfgOpts = rxCfgOpts;
+    EMACInstConfig(hdkif);
+    init1588(epl_port_handle);
 
 	// Initialize run-time options to default values.
 	rtOpts.announceInterval = DEFAULT_ANNOUNCE_INTERVAL;
@@ -70,15 +90,6 @@ void ptpd_thread(void *arg)
 		return;
 	}
 
-#ifdef USE_DHCP
-	// If DHCP, wait until the default interface has an IP address.
-	while (!netif_default->ip_addr.addr)
-	{
-		// Sleep for 500 milliseconds.
-		sys_msleep(500);
-	}
-#endif
-
 	// Loop forever.
 	for (;;)
 	{
@@ -101,27 +112,27 @@ void ptpd_thread(void *arg)
 }
 
 void initEMAC(PEPL_PORT_HANDLE epl_port_handle){
-  epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
-  epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
-  epl_port_handle->psfConfigOptions |= STSOPT_TXTS_EN;
-  epl_port_handle->psfConfigOptions |= STSOPT_RXTS_EN;
+    epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
+    epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
+    epl_port_handle->psfConfigOptions |= STSOPT_TXTS_EN;
+    epl_port_handle->psfConfigOptions |= STSOPT_RXTS_EN;
 
-  memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
-  rxCfgItems.ptpVersion = 0x02;
-  rxCfgItems.ptpFirstByteMask = 0x00;
-  rxCfgItems.ptpFirstByteData = 0x00;
-  rxCfgItems.ipAddrData = 0;
-  rxCfgItems.tsMinIFG = 0x0C;
-  rxCfgItems.srcIdHash = 0;
-  rxCfgItems.ptpDomain = 0;
-  rxCfgItems.tsSecLen = 3;
-  rxCfgItems.rxTsSecondsOffset = 8;
-  rxCfgItems.rxTsNanoSecOffset = 12;
+    memset(&(epl_port_handle->rxCfgItems), 0, sizeof(RX_CFG_ITEMS));
+    epl_port_handle->rxCfgItems.ptpVersion = 0x02;
+    epl_port_handle->rxCfgItems.ptpFirstByteMask = 0x00;
+    epl_port_handle->rxCfgItems.ptpFirstByteData = 0x00;
+    epl_port_handle->rxCfgItems.ipAddrData = 0;
+    epl_port_handle->rxCfgItems.tsMinIFG = 0x0C;
+    epl_port_handle->rxCfgItems.srcIdHash = 0;
+    epl_port_handle->rxCfgItems.ptpDomain = 0;
+    epl_port_handle->rxCfgItems.tsSecLen = 3;
+    epl_port_handle->rxCfgItems.rxTsSecondsOffset = 8;
+    epl_port_handle->rxCfgItems.rxTsNanoSecOffset = 12;
 
-  rxCfgOpts = 0;
-  rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-					   RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
-					   RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
+    epl_port_handle->rxCfgOpts = 0;
+    epl_port_handle->rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
+  					   RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
+  					   RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
 
   init1588(epl_port_handle);
 }

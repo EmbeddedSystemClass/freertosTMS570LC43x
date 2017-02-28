@@ -184,7 +184,7 @@ size_t netRecvEvent( NetPath *netPath, octet_t *buf, TimeInternal *time)
     default:
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
     }
-    if(!time->seconds || time->nanoseconds){
+    if(!(time->seconds)){
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
     }
 	return length;
@@ -264,3 +264,17 @@ size_t netSendGeneral(NetPath *netPath, const octet_t *buf, int16_t length )
     return MACSendPacket( netPath, buf, length);
 }
 
+
+size_t netSendPeerGeneral(NetPath *netPath, const octet_t *buf, int16_t  length)
+{
+//	return netSend(buf, length, NULL, &netPath->peerMulticastAddr, netPath->generalPcb);
+	//TODO: implement
+    return MACSendPacket( netPath, buf, length);
+}
+
+size_t netSendPeerEvent(NetPath *netPath, const octet_t *buf, int16_t  length, TimeInternal* time)
+{
+//	return netSend(buf, length, time, &netPath->peerMulticastAddr, netPath->eventPcb);
+	//TODO: implement
+    return MACSendPacket( netPath, buf, length);
+}

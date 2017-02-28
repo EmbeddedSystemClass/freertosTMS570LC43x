@@ -1,0 +1,24 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/PTPStack/dep/sys.c 
+
+C_DEPS += \
+./epl_1588/PTPStack/dep/sys.d 
+
+OBJS += \
+./epl_1588/PTPStack/dep/sys.obj 
+
+OBJS__QUOTED += \
+"epl_1588/PTPStack/dep/sys.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588/PTPStack/dep/sys.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/PTPStack/dep/sys.c" 
+
+

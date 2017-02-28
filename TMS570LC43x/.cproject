@@ -40,6 +40,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DISPLAY_ERROR_NUMBER.66347531" name="Emit diagnostic identifier numbers (--display_error_number, -pden)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DISPLAY_ERROR_NUMBER" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DIAG_WRAP.1819909629" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DIAG_WRAP" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.INCLUDE_PATH.821061366" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.INCLUDE_PATH" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/epl_1588/ptpd-2.0.0/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS-Plus-TCP/protocols/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS-Plus-TCP/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/include&quot;"/>
@@ -57,7 +58,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS-Plus-UART-Console/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/FreeRTOS-Plus-UDP-Console/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/epl_1588/PTPStack}&quot;"/>
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE.1448526791" name="Pre-define NAME (--define, -D)" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compilerID.DEFINE" useByScannerDiscovery="false"/>
 								<inputType id="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__C_SRCS.2036494037" name="C Sources" superClass="com.ti.ccstudio.buildDefinitions.TMS470_16.12.compiler.inputType__C_SRCS"/>
@@ -89,7 +89,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="epl_1588/PTPStack/dep/msg.c|epl_1588/ptpd-2.0.0/src/dep/sys_time.c|epl_1588/ptpd-2.0.0/src/dep/net.c|epl_1588/PTPStack/dep/timer.c|epl_1588/PTPStack/dep/startup.c|epl_1588/PTPStack/dep/servo.c|epl_1588/PTPStack/protocol.c|epl_1588/PTPStack/probe.c|epl_1588/PTPStack/bmc.c|epl_1588/PTPStack/arith.c|epl_1588/PTPStack/dep/msg.v2.c|EPL_v193_20091023|source/mainDemo.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|source/HL_sci.c|source/HL_sys_main.c|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/ff_dev_support.c|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-FAT/portable/avr32_uc3|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="epl_1588/ptpControl.c|epl_1588/PTPStack|epl_1588/PTPStack/dep/net.c|epl_1588/ptpd-2.0.0/src/dep/sys_time.old.c|epl_1588/ptpd-2.0.0/src/dep/net.old.c|epl_1588/PTPStack/dep/timer.c|epl_1588/PTPStack/dep/startup.c|epl_1588/PTPStack/dep/servo.c|epl_1588/PTPStack/dep/msg.v2.c|epl_1588/PTPStack/dep/msg.c|FreeRTOS-Plus-FAT/portable/lpc18xx|FreeRTOS-Plus-TCP/portable/NetworkInterface/STM32Fxx|epl_1588/PTPStack/arith.c|EPL_v193_20091023|FreeRTOS-Plus-FAT/portable/Zynq|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_1.c|FreeRTOS-Plus-FAT/ff_dev_support.c|epl_1588/PTPStack/bmc.c|source/HL_sys_main.c|FreeRTOS-Plus-FAT/portable/STM32F4xx|FreeRTOS-Plus-TCP/portable/NetworkInterface/ATSAM4E|epl_1588/PTPStack/probe.c|source/HL_sci.c|source/mainDemo.c|epl_1588/PTPStack/protocol.c|FreeRTOS-Plus-TCP/portable/NetworkInterface/WinPCap|FreeRTOS-Plus-TCP/portable/NetworkInterface/Zynq|FreeRTOS-Plus-FAT/portable/ATSAM4E|FreeRTOS-Plus-TCP/portable/BufferManagement/BufferAllocation_2.c|FreeRTOS-Plus-FAT/portable/avr32_uc3" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

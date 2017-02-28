@@ -5,6 +5,10 @@
 
 typedef int32_t s32_t ;
 
+#define PBUF_QUEUE_SIZE 512
+#define IFACE_NAME_LENGTH		10
+#define NET_ADDRESS_LENGTH 	6
+
 struct ptptime_t {
   s32_t tv_sec;
   s32_t tv_nsec;
@@ -68,6 +72,7 @@ typedef struct
 // Struct used  to store network datas
 typedef struct
 {
+	Socket_t eventSock, generalSock;
 	int32_t   multicastAddr;
 	int32_t   peerMulticastAddr;
 	int32_t   unicastAddr;

@@ -267,8 +267,8 @@ uint32_t MonitorGpioSignals (
 
 void PTPClockReadCurrent (
     		PEPL_PORT_HANDLE epl_port_handle,
-        uint32_t *retNumberOfSeconds,
-        uint32_t *retNumberOfNanoSeconds);
+        int32_t *retNumberOfSeconds,
+        int32_t *retNumberOfNanoSeconds);
 
 void PTPGetTransmitTimestamp (
     		PEPL_PORT_HANDLE epl_port_handle,

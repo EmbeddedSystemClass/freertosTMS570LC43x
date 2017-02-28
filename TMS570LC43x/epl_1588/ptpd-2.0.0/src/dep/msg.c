@@ -114,8 +114,11 @@ void msgUnpackSync(const octet_t *buf, MsgSync *sync)
 void msgPackDelayReq(const PtpClock *ptpClock, octet_t *buf, const Timestamp *originTimestamp)
 {
 	/* Changes in header */
-	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
-	*(char*)(buf + 0) = *(char*)(buf + 0) | DELAY_REQ; //Table 19
+	//TODO: what was this?
+//	*(char*)(buf + 0) = *(char*)(buf + 0) & 0xF0; //RAZ messageType
+//	*(char*)(buf + 0) = *(char*)(buf + 0) | DELAY_REQ; //Table 19
+
+	*(char*)(buf + 0) = DELAY_REQ; //Table 19
 	*(int16_t*)(buf + 2)  = flip16(DELAY_REQ_LENGTH);
 	*(int16_t*)(buf + 30) = flip16(ptpClock->sentDelayReqSequenceId);
 	*(uint8_t*)(buf + 32) = CTRL_DELAY_REQ; //Table 23

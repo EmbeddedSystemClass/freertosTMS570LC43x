@@ -1,0 +1,42 @@
+################################################################################
+# Automatically-generated file. Do not edit!
+################################################################################
+
+# Add inputs and outputs from these tool invocations to the build variables 
+C_SRCS += \
+../epl_1588/ptpd-2.0.0/src/arith.c \
+../epl_1588/ptpd-2.0.0/src/bmc.c \
+../epl_1588/ptpd-2.0.0/src/protocol.c \
+../epl_1588/ptpd-2.0.0/src/ptpd.c 
+
+C_DEPS += \
+./epl_1588/ptpd-2.0.0/src/arith.d \
+./epl_1588/ptpd-2.0.0/src/bmc.d \
+./epl_1588/ptpd-2.0.0/src/protocol.d \
+./epl_1588/ptpd-2.0.0/src/ptpd.d 
+
+OBJS += \
+./epl_1588/ptpd-2.0.0/src/arith.obj \
+./epl_1588/ptpd-2.0.0/src/bmc.obj \
+./epl_1588/ptpd-2.0.0/src/protocol.obj \
+./epl_1588/ptpd-2.0.0/src/ptpd.obj 
+
+OBJS__QUOTED += \
+"epl_1588/ptpd-2.0.0/src/arith.obj" \
+"epl_1588/ptpd-2.0.0/src/bmc.obj" \
+"epl_1588/ptpd-2.0.0/src/protocol.obj" \
+"epl_1588/ptpd-2.0.0/src/ptpd.obj" 
+
+C_DEPS__QUOTED += \
+"epl_1588/ptpd-2.0.0/src/arith.d" \
+"epl_1588/ptpd-2.0.0/src/bmc.d" \
+"epl_1588/ptpd-2.0.0/src/protocol.d" \
+"epl_1588/ptpd-2.0.0/src/ptpd.d" 
+
+C_SRCS__QUOTED += \
+"../epl_1588/ptpd-2.0.0/src/arith.c" \
+"../epl_1588/ptpd-2.0.0/src/bmc.c" \
+"../epl_1588/ptpd-2.0.0/src/protocol.c" \
+"../epl_1588/ptpd-2.0.0/src/ptpd.c" 
+
+

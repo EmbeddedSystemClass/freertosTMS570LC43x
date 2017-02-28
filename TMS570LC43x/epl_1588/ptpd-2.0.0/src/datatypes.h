@@ -2,6 +2,7 @@
 #define DATATYPES_H_
 
 #define NETIF_MAX_HWADDR_LEN	100
+#include "epl_types.h"
 
 /**
  *\file
@@ -385,6 +386,7 @@ typedef struct
 
 typedef struct
 {
+		PEPL_PORT_HANDLE epl_port_handle;
 		int8_t  announceInterval;
 		int8_t  syncInterval;
 		ClockQuality clockQuality;

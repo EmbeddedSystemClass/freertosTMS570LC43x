@@ -3,22 +3,14 @@
 #include "../ptpd.h"
 
 /* An array to hold the various system timer handles. */
-//static sys_timer_t ptpdTimers[TIMER_ARRAY_SIZE];
+static TimerHandle_t  ptpdTimers[TIMER_ARRAY_SIZE];
 static bool ptpdTimersExpired[TIMER_ARRAY_SIZE];
  
-static void timerCallback(void const *arg)
+static void vTimerCallback(TimerHandle_t xTimer)
 {
-	int index = (int) arg;
-
-	// Sanity check the index.
-	if (index < TIMER_ARRAY_SIZE)
-	{
-		/* Mark the indicated timer as expired. */
-		ptpdTimersExpired[index] = TRUE;
-
-		/* Notify the PTP thread of a pending operation. */
-		ptpd_alert();
-	}
+	configASSERT(xTimer);
+	int index = (int)pvTimerGetTimerID(xTimer);
+	ptpdTimersExpired[index] = TRUE;
 }
 
 void initTimer(void)
@@ -32,8 +24,20 @@ void initTimer(void)
   {
 		// Mark the timer as not expired.
 		// Initialize the timer.
-//		sys_timer_new(&ptpdTimers[i], timerCallback, osTimerOnce, (void *) i);
+//		sys_timer_new(&ptpdTimers[i], vTimerCallback, osTimerOnce, (void *) i);
+		ptpdTimers[i] = xTimerCreate(
+				"Timer",
+				pdMS_TO_TICKS(1000),
+				pdFALSE,
+				 (void *)i,
+				vTimerCallback
+				);
 		ptpdTimersExpired[i] = FALSE;
+
+		if(ptpdTimers[i] == NULL){
+			//TODO: handle
+		}
+
 	}
 }
 
@@ -44,7 +48,7 @@ void timerStop(int32_t index)
 
 	// Cancel the timer and reset the expired flag.
 	DBGV("timerStop: stop timer %d\n", index);
-//  sys_timer_stop(&ptpdTimers[index]);
+	xTimerStop(ptpdTimers[index], 0);
 	ptpdTimersExpired[index] = FALSE;
 }
 
@@ -56,7 +60,14 @@ void timerStart(int32_t index, uint32_t interval_ms)
 	// Set the timer duration and start the timer.
 	DBGV("timerStart: set timer %d to %d\n", index, interval_ms);
 	ptpdTimersExpired[index] = FALSE;
-//  sys_timer_start(&ptpdTimers[index], interval_ms);
+	int block_for_ticks = 100;
+//	interval_ms /= portTICK_PERIOD_MS;
+	if(!interval_ms){
+		interval_ms = 10;
+	}
+	if(xTimerChangePeriod(ptpdTimers[index], interval_ms, block_for_ticks) != pdPASS){
+		//TODO: handle
+	}
 }
 
 bool timerExpired(int32_t index)
@@ -66,8 +77,6 @@ bool timerExpired(int32_t index)
 
 	/* Determine if the timer expired. */
 	if (!ptpdTimersExpired[index]) return FALSE;
-	DBGV("timerExpired: timer %d expired\n", index);
 	ptpdTimersExpired[index] = FALSE;
-
 	return TRUE;
 }

@@ -30,6 +30,7 @@ void ptpd_thread(void *arg)
 {
 
   PEPL_PORT_HANDLE epl_port_handle = malloc(sizeof(struct PORT_OBJ));
+  rtOpts.epl_port_handle = epl_port_handle;
   hdkif_t *hdkif;
   hdkif = &hdkif_data[0U];
 

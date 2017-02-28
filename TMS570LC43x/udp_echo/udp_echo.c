@@ -189,8 +189,8 @@ Socket_t prvOpenUDPServerSocket( uint16_t usPort )
 {
 struct freertos_sockaddr xServer;
 Socket_t xSocket = FREERTOS_INVALID_SOCKET;
-TickType_t xSendTimeOut = 1;
-TickType_t xRecvTimeOut = 1;
+TickType_t xSendTimeOut = 100;
+TickType_t xRecvTimeOut = 100;
 
 	xSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
 	if( xSocket != FREERTOS_INVALID_SOCKET)

@@ -629,8 +629,8 @@ void PTPSetMiscConfig (PEPL_PORT_HANDLE epl_port_handle,
 }
 
 void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
-        uint32_t *retNumberOfSeconds,
-        uint32_t *retNumberOfNanoSeconds)
+        int32_t *retNumberOfSeconds,
+        int32_t *retNumberOfNanoSeconds)
 //  Returns a snapshot of the current IEEE 1588 clock value.
 //  
 //  portHandle

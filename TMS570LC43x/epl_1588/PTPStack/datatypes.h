@@ -90,9 +90,9 @@ purpose.
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
-#include "HL_emac.h"
-#include "dep/datatypes_dep.h"
 #include "dep/constants_dep.h"
+#include "dep/datatypes_dep.h"
+#include "HL_emac.h"
 
 typedef struct {
   UInteger32 seconds;

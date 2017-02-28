@@ -1,425 +1,266 @@
 /* net.c */
+/*****************************************************************************
+COPYRIGHT NOTICE
 
-#include "../ptpd.h"
+PTP Notice for PTPd Software
 
-/* Initialize network queue. */
-static void netQInit(BufQueue *queue)
+The following copyright notice applies to all files which compose the original
+PTPd Software. This notice applies as if the text was explicitly included each
+file.
+
+Copyright (c) 2006 Aidan Williams
+Copyright (c) 2005-2007 Kendall Correll
+
+Permission is hereby granted to use, copy, modify, and distribute this software
+for any purpose and without fee, provided that this notice appears in all
+copies. The authors make no representations about the suitability of this
+software for any purpose. This software is provided "as is" without express or
+implied warranty.
+
+National Semiconductor Notice for Modified Software
+
+The following copyright notice applies Modifications of the PTPd Software 
+developed by National Semiconductor Corporation, and distributed by 
+National Semiconductor as a Modified Version of the PTPd Software.  
+
+Copyright (c) 2008 National Semiconductor
+
+The associated Modified Software is distributed by National Semiconductor under 
+the above PTPd Notice and Permission, and under the following License, 
+Restrictions, Disclaimers and Limitations:
+
+LICENSE:  Permission is granted to copy, use, modify and/or distribute the 
+Software in Source and/or Binary form, including as an FPGA or other hardware 
+implementation of the Software, subject to the Restrictions, Disclaimers and 
+Limitations.  NSC and/or its licensors retain ownership of all copyright, 
+patent and other intellectual property rights in the Software, and COMPANY 
+shall not remove or alter any copyright or other notices associated with the 
+Software
+
+RESTRICTIONS: The Software may be distributed only in connection the 
+distribution of COMPANY�s Products, and only subject to the following 
+additional Restrictions:  (a) NSC Components:  The Software may be used 
+only in connection with Components that are incorporated into COMPANY's 
+Products; (b) Sublicensing Source:  The Software may be sublicensed in 
+Source form, without any right to grant further downstream sublicenses, 
+solely in accordance with this Agreement including these Restrictions;  
+(c) Confidentiality.  The Source form of the Software is confidential, 
+and unauthorized use or disclosure is prohibited; and (d) Export Compliance.  
+The Software is subject to United States export control laws and regulations, 
+and any product, software or technical data acquired from NSC, or any direct 
+product thereof, shall not be, directly or indirectly, exported, re-exported, 
+or released to any destination without first obtaining any export license or 
+other approval required by the U.S. government, or other applicable non-U.S. 
+governments.  This provision shall survive any termination of this Agreement.
+
+DISCLAIMERS:   The Software is provided "AS IS" without warranty of any kind, 
+including any warranty as to the design or manufacture of COMPANY Products 
+incorporating Components.  NSC and its licensors expressly disclaim all 
+warranties, expressed, implied or otherwise, including without limitation, 
+warranties of merchantability, fitness for a particular purpose and 
+non-infringement of intellectual property rights.  
+Any COMPANY Product incorporating any Software (or any FPGA or other hardware 
+implementation) and associated Components should not be released to production 
+without full test, verification, and qualification, including verification of 
+the selection, configuration and performance of any Software (or any FPGA or 
+other hardware implementation) and/or Components, and including verification 
+that the product design meets functional, performance, reliability and any 
+applicable export or other regulatory requirements.
+
+LIMITATIONS ON LIABILITY.  NSC or its licensors shall not be liable for any 
+direct or indirect or punitive damages of any kind, including but not limited 
+to any special, consequential or incidental damages, including any costs of 
+labor, delay, requalification, or replacement, and any lost business 
+opportunity, profits, or goodwill, whether arising out of the use or 
+inability to use the Software (or the use or inability to use any COMPANY 
+Product incorporating the Software), even if NSC is advised of the 
+possibility of such damages.  In no event shall NSC's aggregate liability from 
+any obligation arising out of or in connection with the license or use of the 
+Software, under any theory of liability including but not limited to contract, 
+tort or promissory fraud, exceed the consideration received by NSC, if any, 
+for the license to the Software.  The foregoing limitation shall not apply to 
+damages resulting directly from NSC's willful and wanton conduct.  To the 
+maximum extent permitted under law, the limitations in this paragraph shall 
+apply even if this limited remedy is found to have failed of its essential 
+purpose.
+
+******************************************************************************/
+
+
+//#include "epl.h"
+#include "ptpd.h"
+/* FreeRTOS includes. */
+#include "FreeRTOS.h"
+#include "os_task.h"
+#include "os_semphr.h"
+
+/* FreeRTOS+CLI includes. */
+#include "FreeRTOS_CLI.h"
+
+/* FreeRTOS+TCP includes. */
+#include "FreeRTOS_IP.h"
+#include "FreeRTOS_Sockets.h"
+#include "udp_echo.h"
+
+#define socket FreeRTOS_socket
+#define SOCK_DGRAM FREERTOS_SOCK_DGRAM
+#define IPPROTO_UDP FREERTOS_IPPROTO_UDP
+#define AF_INET 		FREERTOS_AF_INET
+#define PF_INET 		FREERTOS_AF_INET
+#define htons(x)		FreeRTOS_htons(x)
+#define htonl(x)			FreeRTOS_htonl(x)
+#define bind(x,y,z) 	FreeRTOS_bind(x,y,z)
+uint32_t MACReceivePacket(NetPath * netPath, octet_t * rxbuff, uint32_t *rxbuff_len);
+extern RunTimeOpts rtOpts;
+
+/* Demo app includes. */
+#include "udp_echo.h"
+#include "NetworkInterface.h"
+
+#define freertos		1
+
+NS_UINT8 *
+    intGetNextPhyMessage (
+        IN PEPL_PORT_HANDLE portHandle,
+        IN OUT NS_UINT8 *msgLocation,
+        IN OUT PHYMSG_MESSAGE_TYPE_ENUM *messageType,
+        IN OUT PHYMSG_MESSAGE *phyMessageOut,
+        IN NS_BOOL usePSFList);
+
+
+uint32_t findIface(octet_t *ifaceName, uint8_t *communicationTechnology,
+  octet_t *uuid, boolean multicast, NetPath *netPath)
 {
-	queue->head = 0;
-	queue->tail = 0;
-	sys_mutex_new(&queue->mutex);
+  return FALSE;
 }
 
-/* Put data to the network queue. */
-static bool netQPut(BufQueue *queue, void *pbuf)
+/* start all of the UDP stuff */
+/* must specify 'subdomainName', optionally 'ifaceName', if not then pass ifaceName == "" */
+/* returns other args */
+/* on socket options, see the 'socket(7)' and 'ip' man pages */
+boolean netInit(NetPath *netPath, PtpClock *ptpClock)
 {
-	bool retval = FALSE;
-
-	sys_mutex_lock(&queue->mutex);
-
-	// Is there room on the queue for the buffer?
-	if (((queue->head + 1) & PBUF_QUEUE_MASK) != queue->tail)
-	{
-		// Place the buffer in the queue.
-		queue->head = (queue->head + 1) & PBUF_QUEUE_MASK;
-		queue->pbuf[queue->head] = pbuf;
-		retval = TRUE;
-	}
-
-	sys_mutex_unlock(&queue->mutex);
-
-	return retval;
+  netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
+  netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
+    return TRUE;
 }
 
-/* Get data from the network queue. */
-static void *netQGet(BufQueue *queue)
+/* shut down the UDP stuff */
+boolean netShutdown(NetPath *netPath)
 {
-	void *pbuf = NULL;
-
-	sys_mutex_lock(&queue->mutex);
-
-	// Is there a buffer on the queue?
-	if (queue->tail != queue->head)
-	{
-		// Get the buffer from the queue.
-		queue->tail = (queue->tail + 1) & PBUF_QUEUE_MASK;
-		pbuf = queue->pbuf[queue->tail];
-	}
-
-	sys_mutex_unlock(&queue->mutex);
-
-	return pbuf;
+  return TRUE;
 }
 
-/* Free any remaining pbufs in the queue. */
-static void netQEmpty(BufQueue *queue)
-{
-	sys_mutex_lock(&queue->mutex);
-
-	// Free each remaining buffer in the queue.
-	while (queue->tail != queue->head)
-	{
-		// Get the buffer from the queue.
-		queue->tail = (queue->tail + 1) & PBUF_QUEUE_MASK;
-		pbuf_free(queue->pbuf[queue->tail]);
-	}
-	
-	sys_mutex_unlock(&queue->mutex);
-}
-
-/* Check if something is in the queue */
-static bool netQCheck(BufQueue  *queue)
-{
-	bool  retval = FALSE;
-
-	sys_mutex_lock(&queue->mutex);
-
-	if (queue->tail != queue->head) retval = TRUE;
-
-	sys_mutex_unlock(&queue->mutex);
-
-	return retval;
-}
-
-/* Shut down  the UDP and network stuff */
-bool netShutdown(NetPath *netPath)
-{
-	struct ip_addr multicastAaddr;
-
-	DBG("netShutdown\n");
-
-	/* leave multicast group */
-	multicastAaddr.addr = netPath->multicastAddr;
-	igmp_leavegroup(IP_ADDR_ANY, &multicastAaddr);
-
-	/* Disconnect and close the Event UDP interface */
-	if (netPath->eventPcb)
-	{
-		udp_disconnect(netPath->eventPcb);
-		udp_remove(netPath->eventPcb);
-		netPath->eventPcb = NULL;
-	}
-
-	/* Disconnect and close the General UDP interface */
-	if (netPath->generalPcb)
-	{
-		udp_disconnect(netPath->generalPcb);
-		udp_remove(netPath->generalPcb);
-		netPath->generalPcb = NULL;
-	}
-
-	/* Clear the network addresses. */
-	netPath->multicastAddr = 0;
-	netPath->unicastAddr = 0;
-
-	/* Return a success code. */
-	return TRUE;
-}
-
-/* Find interface to  be used.  uuid should be filled with MAC address of the interface.
-	 Will return the IPv4 address of  the interface. */
-static int32_t findIface(const octet_t *ifaceName, octet_t *uuid, NetPath *netPath)
-{
-	struct netif *iface;
-
-	iface = netif_default;
-	memcpy(uuid, iface->hwaddr, iface->hwaddr_len);
-
-	return iface->ip_addr.addr;
-}
-
-/* Process an incoming message on the Event port. */
-static void netRecvEventCallback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-																 struct ip_addr *addr, u16_t port)
-{
-	NetPath *netPath = (NetPath *) arg;
-
-	/* Place the incoming message on the Event Port QUEUE. */
-	if (!netQPut(&netPath->eventQ, p))
-	{
-		pbuf_free(p);
-		ERROR("netRecvEventCallback: queue full\n");
-		return;
-	}
-
-	/* Alert the PTP thread there is now something to do. */
-	ptpd_alert();
-}
-
-/* Process an incoming message on the General port. */
-static void netRecvGeneralCallback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-																	 struct ip_addr *addr, u16_t port)
-{
-	NetPath *netPath = (NetPath *) arg;
-
-	/* Place the incoming message on the Event Port QUEUE. */
-	if (!netQPut(&netPath->generalQ, p))
-	{
-		pbuf_free(p);
-		ERROR("netRecvGeneralCallback: queue full\n");
-		return;
-	}
-
-	/* Alert the PTP thread there is now something to do. */
-	ptpd_alert();
-}
-
-/* Start  all of the UDP stuff */
-bool netInit(NetPath *netPath, PtpClock *ptpClock)
-{
-	struct in_addr netAddr;
-	struct ip_addr interfaceAddr;
-	char addrStr[NET_ADDRESS_LENGTH];
-
-	DBG("netInit\n");
-
-	/* Initialize the buffer queues. */
-	netQInit(&netPath->eventQ);
-	netQInit(&netPath->generalQ);
-
-	/* Find a network interface */
-	interfaceAddr.addr = findIface(ptpClock->rtOpts->ifaceName, ptpClock->portUuidField, netPath);
-	if (!(interfaceAddr.addr))
-	{
-			ERROR("netInit: Failed to find interface address\n");
-			goto fail01;
-	}
-
-	/* Open lwIP raw udp interfaces for the event port. */
-	netPath->eventPcb = udp_new();
-	if (NULL == netPath->eventPcb)
-	{
-			ERROR("netInit: Failed to open Event UDP PCB\n");
-			goto fail02;
-	}
-
-	/* Open lwIP raw udp interfaces for the general port. */
-	netPath->generalPcb = udp_new();
-	if (NULL == netPath->generalPcb)
-	{
-			ERROR("netInit: Failed to open General UDP PCB\n");
-			goto fail03;
-	}
-
-	/* Configure network (broadcast/unicast) addresses. */
-	netPath->unicastAddr = 0; /* disable unicast */
-
-	/* Init General multicast IP address */
-	memcpy(addrStr, DEFAULT_PTP_DOMAIN_ADDRESS, NET_ADDRESS_LENGTH);
-	if (!inet_aton(addrStr, &netAddr))
-	{
-			ERROR("netInit: failed to encode multi-cast address: %s\n", addrStr);
-			goto fail04;
-	}
-	netPath->multicastAddr = netAddr.s_addr;
-
-	/* Join multicast group (for receiving) on specified interface */
-	igmp_joingroup(&interfaceAddr, (struct ip_addr *)&netAddr);
-
-	/* Init Peer multicast IP address */
-	memcpy(addrStr, PEER_PTP_DOMAIN_ADDRESS, NET_ADDRESS_LENGTH);
-	if (!inet_aton(addrStr, &netAddr))
-	{
-			ERROR("netInit: failed to encode peer multi-cast address: %s\n", addrStr);
-			goto fail04;
-	}
-	netPath->peerMulticastAddr = netAddr.s_addr;
-
-	/* Join peer multicast group (for receiving) on specified interface */
-	igmp_joingroup(&interfaceAddr, (struct ip_addr *) &netAddr);
-
-	/* Multicast send only on specified interface. */
-	netPath->eventPcb->multicast_ip.addr = netPath->multicastAddr;
-	netPath->generalPcb->multicast_ip.addr = netPath->multicastAddr;
-
-	/* Establish the appropriate UDP bindings/connections for events. */
-	udp_recv(netPath->eventPcb, netRecvEventCallback, netPath);
-	udp_bind(netPath->eventPcb, IP_ADDR_ANY, PTP_EVENT_PORT);
-	/*  udp_connect(netPath->eventPcb, &netAddr, PTP_EVENT_PORT); */
-
-	/* Establish the appropriate UDP bindings/connections for general. */
-	udp_recv(netPath->generalPcb, netRecvGeneralCallback, netPath);
-	udp_bind(netPath->generalPcb, IP_ADDR_ANY, PTP_GENERAL_PORT);
-	/*  udp_connect(netPath->generalPcb, &netAddr, PTP_GENERAL_PORT); */
-
-	/* Return a success code. */
-	return TRUE;
-
-fail04:
-	udp_remove(netPath->generalPcb);
-fail03:
-	udp_remove(netPath->eventPcb);
-fail02:
-fail01:
-	return FALSE;
-}
-
-/* Wait for a packet  to come in on either port.  For now, there is no wait.
- * Simply check to  see if a packet is available on either port and return 1,
- *  otherwise return 0. */
 int32_t netSelect(NetPath *netPath, const TimeInternal *timeout)
 {
-	/* Check the packet queues.  If there is data, return TRUE. */
-	if (netQCheck(&netPath->eventQ) || netQCheck(&netPath->generalQ)) return 1;
-
-	return 0;
+  //TODO: implement select
+  return TRUE;
 }
 
-/* Delete all waiting packets in event queue. */
-void netEmptyEventQ(NetPath *netPath)
+size_t netRecvEvent( NetPath *netPath, octet_t *buf, TimeInternal *time)
 {
-	netQEmpty(&netPath->eventQ);
+	uint32_t length;
+
+    if ( !MACReceivePacket(netPath, buf, &length))
+        return 0;
+    DBG( "NR2\n" );
+
+    if ( length < 44)
+        return 0;
+
+    if ( buf[1] != 0x02)        // PTP Version
+        return 0;
+
+//	time->nanoseconds =  *(NS_UINT32*)&buf[PTPV2_ORIGIN_TS_NSEC_OFFSET];
+//	time->seconds =  *(NS_UINT32*)&buf[PTPV2_ORIGIN_TS_SEC_OFFSET];
+//	PTPGetTimestampFromFrame(buf, &(time->seconds), &(time->nanoseconds));
+    switch(buf[0]){
+    case PTPV2_SYNC_TYPE:
+    case PTPV2_FOLLOWUP_TYPE:
+    case PTPV2_DELAY_REQUEST_TYPE:
+    case PTPV2_DELAY_RESPONSE_TYPE:
+		PTPGetTimestampFromFrame((uint8_t*)buf, (uint32_t*)&(time->seconds),(uint32_t*) &(time->nanoseconds));
+		break;
+    default:
+		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
+    }
+    if(!time->seconds || time->nanoseconds){
+		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
+    }
+	return length;
 }
 
-static ssize_t netRecv(octet_t *buf, TimeInternal *time, BufQueue *msgQueue)
-{
-	int i;
-	int j;
-	u16_t length;
-	struct pbuf *p;
-	struct pbuf *pcopy;
-
-	/* Get the next buffer from the queue. */
-	if ((p = (struct pbuf*) netQGet(msgQueue)) == NULL)
+uint32_t MACReceivePacket(NetPath * net_path, octet_t * rxbuff, uint32_t *rx_len){
+	socklen_t xClientAddressLength = 0;
+	int received_data_length =0;
+	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
 	{
-		return 0;
-	}
-
-	/* Verify that we have enough space to store the contents. */
-	if (p->tot_len > PACKET_SIZE)
-	{
-		ERROR("netRecv: received truncated message\n");
-		pbuf_free(p);
-		return 0;
-	}
-
-	/* Verify there is contents to copy. */
-	if (p->tot_len == 0)
-	{
-		ERROR("netRecv: received empty packet\n");
-		pbuf_free(p);
-		return 0;
-	}
-
-	if (time != NULL)
-	{
-#if LWIP_PTP
-		time->seconds = p->time_sec;
-		time->nanoseconds = p->time_nsec;
-#else
-		getTime(time);
-#endif
-	}
-
-	/* Get the length of the buffer to copy. */
-	length = p->tot_len;
-
-	/* Copy the pbuf payload into the buffer. */
-	pcopy = p;
-	j = 0;
-	for (i = 0; i < length; i++)
-	{
-		// Copy the next byte in the payload.
-		buf[i] = ((u8_t *)pcopy->payload)[j++];
-
-		// Skip to the next buffer in the payload?
-		if (j == pcopy->len)
-		{
-			// Move to the next buffer.
-			pcopy = pcopy->next;
-			j = 0;
+		struct freertos_sockaddr client;
+		received_data_length = FreeRTOS_recvfrom( net_path->eventSock, ( void * ) rxbuff,  2048, 0, &client, &xClientAddressLength );
+		if(!(received_data_length >= 0)){
+			received_data_length = 0;
 		}
 	}
-
-	/* Free up the pbuf (chain). */
-	pbuf_free(p);
-
-	return length;
-}
-
-ssize_t netRecvEvent(NetPath *netPath, octet_t *buf, TimeInternal *time)
-{
-	return netRecv(buf, time, &netPath->eventQ);
-}
-
-ssize_t netRecvGeneral(NetPath *netPath, octet_t *buf, TimeInternal *time)
-{
-	return netRecv(buf, time, &netPath->generalQ);
-}
-
-static ssize_t netSend(const octet_t *buf, int16_t  length, TimeInternal *time, const int32_t * addr, struct udp_pcb * pcb)
-{
-	err_t result;
-	struct pbuf * p;
-
-	/* Allocate the tx pbuf based on the current size. */
-	p = pbuf_alloc(PBUF_TRANSPORT, length, PBUF_RAM);
-	if (NULL == p)
-	{
-		ERROR("netSend: Failed to allocate Tx Buffer\n");
-		goto fail01;
+	if(!received_data_length){
+		if( net_path->generalSock!= FREERTOS_INVALID_SOCKET )
+		{
+			struct freertos_sockaddr client;
+			received_data_length = FreeRTOS_recvfrom( net_path->generalSock, ( void * ) rxbuff,  2048, 0, &client, &xClientAddressLength );
+			if(!(received_data_length >= 0)){
+				received_data_length = 0;
+			}
+		}
 	}
+	*rx_len = received_data_length;
+    return received_data_length;
+}
 
-	/* Copy the incoming data into the pbuf payload. */
-	result = pbuf_take(p, buf, length);
-	if (ERR_OK != result)
-	{
-		ERROR("netSend: Failed to copy data to Pbuf (%d)\n", result);
-		goto fail02;
+uint32_t MACSendPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len){
+	struct freertos_sockaddr destination;
+	Socket_t send_socket;
+	socklen_t destination_address_length = 0;
+	uint32_t bits_written = 0;
+	uint8_t message_type = txbuff[0];
+	if(message_type == PTPV2_DELAY_RESPONSE_TYPE || message_type == PTPV2_FOLLOWUP_TYPE){
+		destination.sin_port = FreeRTOS_htons(320);
+		send_socket = net_path->generalSock;
+	}else if(message_type == PTPV2_SYNC_TYPE || message_type == PTPV2_DELAY_REQUEST_TYPE ){
+		send_socket = net_path->eventSock;
+		destination.sin_port = FreeRTOS_htons(319);
 	}
+	destination.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
 
-	/* send the buffer. */
-	result = udp_sendto(pcb, p, (void *)addr, pcb->local_port);
-	if (ERR_OK != result)
+	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
 	{
-		ERROR("netSend: Failed to send data (%d)\n", result);
-		goto fail02;
+		bits_written = FreeRTOS_sendto( send_socket, txbuff,  txbuff_len, 0, &destination, destination_address_length);
 	}
-
-	if (time != NULL)
+	else
 	{
-#if LWIP_PTP
-		time->seconds = p->time_sec;
-		time->nanoseconds = p->time_nsec;
-#else
-		/* TODO: use of loopback mode */
-		/*
-		time->seconds = 0;
-		time->nanoseconds = 0;
-		*/
-		getTime(time);
-#endif
-		DBGV("netSend: %d sec %d nsec\n", time->seconds, time->nanoseconds);
-	} else {
-		DBGV("netSend\n");
+		/* The socket could not be opened. */
+		//TODO: something about this
+//		vTaskDelete( NULL );
 	}
-
-
-fail02:
-	pbuf_free(p);
-
-fail01:
-	return length;
-
-	/*  return (0 == result) ? length : 0; */
+	return bits_written;
 }
 
-ssize_t netSendEvent(NetPath *netPath, const octet_t *buf, int16_t  length, TimeInternal *time)
+size_t netRecvGeneral(NetPath *netPath, octet_t *buf, TimeInternal * time)
 {
-	return netSend(buf, length, time, &netPath->multicastAddr, netPath->eventPcb);
+  return FALSE;
 }
 
-ssize_t netSendGeneral(NetPath *netPath, const octet_t *buf, int16_t  length)
+void SendAPacket( octet_t *buf, uint16_t length, NetPath *netPath, uint16_t srcPort, uint16_t destPort)
 {
-	return netSend(buf, length, NULL, &netPath->multicastAddr, netPath->generalPcb);
+    // Send the packet
+    MACSendPacket( netPath, buf, length);
 }
 
-ssize_t netSendPeerGeneral(NetPath *netPath, const octet_t *buf, int16_t  length)
+size_t netSendEvent( NetPath *netPath, const  octet_t *buf, int16_t length, TimeInternal * time)
 {
-	return netSend(buf, length, NULL, &netPath->peerMulticastAddr, netPath->generalPcb);
+    return MACSendPacket( netPath, buf, length);
 }
 
-ssize_t netSendPeerEvent(NetPath *netPath, const octet_t *buf, int16_t  length, TimeInternal* time)
+size_t netSendGeneral(NetPath *netPath, const octet_t *buf, int16_t length )
 {
-	return netSend(buf, length, time, &netPath->peerMulticastAddr, netPath->eventPcb);
+    return MACSendPacket( netPath, buf, length);
 }
+

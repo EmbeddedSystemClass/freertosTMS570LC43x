@@ -12,6 +12,8 @@
  *
  */
 
+#define PTP_ANALYSIS_PORT  5000
+
 /* platform dependent */
 #define PTPV2_FLAG_OFFSET							6
 #define PTPV2_FLAG_LENGTH							2

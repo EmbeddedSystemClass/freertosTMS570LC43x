@@ -15,7 +15,7 @@ PROTOBUF_C__BEGIN_DECLS
 #endif
 
 
-typedef struct _AeroNetwork__TimingPacket AeroNetwork__TimingPacket;
+typedef struct _AeroNetwork__Ptp1588TimingPacket AeroNetwork__Ptp1588TimingPacket;
 
 
 /* --- enums --- */
@@ -23,43 +23,73 @@ typedef struct _AeroNetwork__TimingPacket AeroNetwork__TimingPacket;
 
 /* --- messages --- */
 
-struct  _AeroNetwork__TimingPacket
+struct  _AeroNetwork__Ptp1588TimingPacket
 {
   ProtobufCMessage base;
+  protobuf_c_boolean has_mac_address;
   int64_t mac_address;
+  protobuf_c_boolean has_sync_receive_s;
+  int32_t sync_receive_s;
+  protobuf_c_boolean has_sync_receive_ns;
+  int32_t sync_receive_ns;
+  protobuf_c_boolean has_delay_request_send_s;
+  int32_t delay_request_send_s;
+  protobuf_c_boolean has_delay_request_send_ns;
+  int32_t delay_request_send_ns;
+  protobuf_c_boolean has_delay_request_receive_s;
+  int32_t delay_request_receive_s;
+  protobuf_c_boolean has_delay_request_receive_ns;
+  int32_t delay_request_receive_ns;
+  protobuf_c_boolean has_offset_from_master_s;
   int32_t offset_from_master_s;
+  protobuf_c_boolean has_offset_from_master_ns;
   int32_t offset_from_master_ns;
+  protobuf_c_boolean has_mean_path_delay_s;
   int32_t mean_path_delay_s;
+  protobuf_c_boolean has_mean_path_delay_ns;
   int32_t mean_path_delay_ns;
+  protobuf_c_boolean has_master_to_slave_delay_s;
+  int32_t master_to_slave_delay_s;
+  protobuf_c_boolean has_master_to_slave_delay_ns;
+  int32_t master_to_slave_delay_ns;
+  protobuf_c_boolean has_slave_to_master_delay_s;
+  int32_t slave_to_master_delay_s;
+  protobuf_c_boolean has_slave_to_master_delay_ns;
+  int32_t slave_to_master_delay_ns;
+  protobuf_c_boolean has_port_state;
+  int32_t port_state;
+  char *experiment_id;
+  protobuf_c_boolean has_time_bucket;
+  int64_t time_bucket;
 };
-#define AERO_NETWORK__TIMING_PACKET__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&aero_network__timing_packet__descriptor) \
-    , 0, 0, 0, 0, 0 }
+#define AERO_NETWORK__PTP1588_TIMING_PACKET__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&aero_network__ptp1588_timing_packet__descriptor) \
+    , 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, 0,0, NULL, 0,0 }
 
 
-/* AeroNetwork__TimingPacket methods */
-void   aero_network__timing_packet__init
-                     (AeroNetwork__TimingPacket         *message);
-size_t aero_network__timing_packet__get_packed_size
-                     (const AeroNetwork__TimingPacket   *message);
-size_t aero_network__timing_packet__pack
-                     (const AeroNetwork__TimingPacket   *message,
+/* AeroNetwork__Ptp1588TimingPacket methods */
+void   aero_network__ptp1588_timing_packet__init
+                     (AeroNetwork__Ptp1588TimingPacket         *message);
+size_t aero_network__ptp1588_timing_packet__get_packed_size
+                     (const AeroNetwork__Ptp1588TimingPacket   *message);
+size_t aero_network__ptp1588_timing_packet__pack
+                     (const AeroNetwork__Ptp1588TimingPacket   *message,
                       uint8_t             *out);
-size_t aero_network__timing_packet__pack_to_buffer
-                     (const AeroNetwork__TimingPacket   *message,
+size_t aero_network__ptp1588_timing_packet__pack_to_buffer
+                     (const AeroNetwork__Ptp1588TimingPacket   *message,
                       ProtobufCBuffer     *buffer);
-AeroNetwork__TimingPacket *
-       aero_network__timing_packet__unpack
+AeroNetwork__Ptp1588TimingPacket *
+       aero_network__ptp1588_timing_packet__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   aero_network__timing_packet__free_unpacked
-                     (AeroNetwork__TimingPacket *message,
+void   aero_network__ptp1588_timing_packet__free_unpacked
+                     (AeroNetwork__Ptp1588TimingPacket *message,
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
-typedef void (*AeroNetwork__TimingPacket_Closure)
-                 (const AeroNetwork__TimingPacket *message,
+typedef void (*AeroNetwork__Ptp1588TimingPacket_Closure)
+                 (const AeroNetwork__Ptp1588TimingPacket *message,
                   void *closure_data);
 
 /* --- services --- */
@@ -67,7 +97,7 @@ typedef void (*AeroNetwork__TimingPacket_Closure)
 
 /* --- descriptors --- */
 
-extern const ProtobufCMessageDescriptor aero_network__timing_packet__descriptor;
+extern const ProtobufCMessageDescriptor aero_network__ptp1588_timing_packet__descriptor;
 
 PROTOBUF_C__END_DECLS
 

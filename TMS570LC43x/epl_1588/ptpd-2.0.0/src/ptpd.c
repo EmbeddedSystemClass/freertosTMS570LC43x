@@ -37,25 +37,29 @@ ProtobufCAllocator protoallocator = {
 __IO uint32_t PTPTimer = 0;
 
 void proto_practice(void){
-	AeroNetwork__TimingPacket timing_packet = {
-		.mac_address = *(int64_t*)emacAddress,
-		.offset_from_master_s = 1,
-		.offset_from_master_ns = 2,
-		.mean_path_delay_s = 3,
-		.mean_path_delay_ns = 4,
-	};
-	aero_network__timing_packet__init(&timing_packet);
-	size_t pack_size = aero_network__timing_packet__get_packed_size(&timing_packet);
-	uint8_t * packet_buffer = malloc(pack_size);
-	memset(packet_buffer, 0, pack_size);
-	aero_network__timing_packet__pack(&timing_packet, packet_buffer);
 
-	AeroNetwork__TimingPacket * unpacked = aero_network__timing_packet__unpack(&protoallocator, pack_size, packet_buffer);
+//	AeroNetwork__TimingPacket timing_packet;
+//	aero_network__timing_packet__init(&timing_packet);
+//	timing_packet.mac_address = *(int64_t*)emacAddress;
+//	timing_packet.offset_from_master_s = 1;
+//	timing_packet.offset_from_master_ns = 2;
+//	timing_packet.mean_path_delay_s = 3;
+//	timing_packet.mean_path_delay_ns = 4;
+//
+//	size_t pack_size = aero_network__timing_packet__get_packed_size(&timing_packet);
+//	uint8_t * packet_buffer = malloc(pack_size);
+//	memset(packet_buffer, 0, pack_size);
+//	aero_network__timing_packet__pack(&timing_packet, packet_buffer);
+//
+//	AeroNetwork__TimingPacket * unpacked = aero_network__timing_packet__unpack(&protoallocator, pack_size, packet_buffer);
+//	free(unpacked);
+//	free(packet_buffer);
 }
 
 //static void ptpd_thread(void *arg)
 void ptpd_thread(void *arg)
 {
+	proto_practice();
     PEPL_PORT_HANDLE epl_port_handle = pvPortMalloc(sizeof(PORT_OBJ));
     rtOpts.epl_port_handle = epl_port_handle;
 

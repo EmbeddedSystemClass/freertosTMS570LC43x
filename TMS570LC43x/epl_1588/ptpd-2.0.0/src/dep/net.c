@@ -116,6 +116,68 @@ extern RunTimeOpts rtOpts;
 /* Demo app includes. */
 #include "udp_echo.h"
 #include "NetworkInterface.h"
+extern uint8 emacAddress[6U];
+
+void send_to_analysis(PtpClock *ptpClock){
+
+	AeroNetwork__Ptp1588TimingPacket timing_packet;
+	aero_network__ptp1588_timing_packet__init(&timing_packet);
+	timing_packet.mac_address = *(int64_t*)emacAddress;
+	timing_packet.has_mac_address = true;
+
+	timing_packet.offset_from_master_s = ptpClock->currentDS.offsetFromMaster.seconds;
+	timing_packet.has_offset_from_master_s = true;
+
+	timing_packet.offset_from_master_ns = ptpClock->currentDS.offsetFromMaster.nanoseconds;
+	timing_packet.has_offset_from_master_ns = true;
+
+	timing_packet.mean_path_delay_s = ptpClock->currentDS.meanPathDelay.seconds;
+	timing_packet.has_mean_path_delay_s = true;
+
+	timing_packet.mean_path_delay_ns = ptpClock->currentDS.meanPathDelay.nanoseconds;
+	timing_packet.has_mean_path_delay_ns = true;
+
+	timing_packet.slave_to_master_delay_s = ptpClock->Tsm.seconds;
+	timing_packet.has_slave_to_master_delay_s = true;
+
+	timing_packet.slave_to_master_delay_ns = ptpClock->Tsm.nanoseconds;
+	timing_packet.has_slave_to_master_delay_ns = true;
+
+	timing_packet.master_to_slave_delay_s = ptpClock->Tms.seconds;
+	timing_packet.has_master_to_slave_delay_s = true;
+
+	timing_packet.master_to_slave_delay_ns = ptpClock->Tms.nanoseconds;
+	timing_packet.has_master_to_slave_delay_ns = true;
+
+	timing_packet.sync_receive_s = ptpClock->timestamp_syncRecieve.seconds;
+	timing_packet.has_sync_receive_s = true;
+
+	timing_packet.sync_receive_ns = ptpClock->timestamp_syncRecieve.nanoseconds;
+	timing_packet.has_sync_receive_ns = true;
+
+	timing_packet.delay_request_send_s = ptpClock->timestamp_delayReqSend.seconds;
+	timing_packet.has_delay_request_send_s = true;
+
+	timing_packet.delay_request_send_ns = ptpClock->timestamp_delayReqSend.nanoseconds;
+	timing_packet.has_delay_request_send_ns = true;
+
+	timing_packet.delay_request_receive_s = ptpClock->timestamp_delayReqRecieve.seconds;
+	timing_packet.has_delay_request_receive_s = true;
+
+	timing_packet.delay_request_receive_ns = ptpClock->timestamp_delayReqRecieve.nanoseconds;
+	timing_packet.has_delay_request_receive_ns = true;
+
+	timing_packet.port_state = ptpClock->portDS.portState;
+	timing_packet.has_port_state = true;
+
+	size_t pack_size = aero_network__ptp1588_timing_packet__get_packed_size(&timing_packet);
+	uint8_t * packet_buffer = malloc(pack_size);
+	memset(packet_buffer, 0, pack_size);
+	aero_network__ptp1588_timing_packet__pack(&timing_packet, packet_buffer);
+	netSendAnalysis(&ptpClock->netPath, (const octet_t*) packet_buffer , pack_size);
+	free(packet_buffer);
+}
+
 
 #define freertos		1
 
@@ -142,6 +204,7 @@ boolean netInit(NetPath *netPath, PtpClock *ptpClock)
 {
   netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
   netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
+  netPath->anaysisSocket = prvOpenUDPServerSocket(PTP_ANALYSIS_PORT);
     return TRUE;
 }
 
@@ -245,6 +308,28 @@ uint32_t MACSendPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len
 	return bits_written;
 }
 
+uint32_t MACSendAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len){
+	struct freertos_sockaddr destination;
+	Socket_t send_socket;
+	socklen_t destination_address_length = 0;
+	uint32_t bits_written = 0;
+	send_socket = net_path->anaysisSocket;
+	destination.sin_port = FreeRTOS_htons(5500);
+	destination.sin_addr = FreeRTOS_inet_addr_quick(10, 10, 10, 12);
+
+	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
+	{
+		bits_written = FreeRTOS_sendto( send_socket, txbuff,  txbuff_len, 0, &destination, destination_address_length);
+	}
+	else
+	{
+		/* The socket could not be opened. */
+		//TODO: something about this
+//		vTaskDelete( NULL );
+	}
+	return bits_written;
+}
+
 size_t netRecvGeneral(NetPath *netPath, octet_t *buf, TimeInternal * time)
 {
   return FALSE;
@@ -266,6 +351,10 @@ size_t netSendGeneral(NetPath *netPath, const octet_t *buf, int16_t length )
     return MACSendPacket( netPath, buf, length);
 }
 
+size_t netSendAnalysis(NetPath *netPath, const octet_t *buf, int16_t length )
+{
+    return MACSendAnalysisPacket( netPath, buf, length);
+}
 
 size_t netSendPeerGeneral(NetPath *netPath, const octet_t *buf, int16_t  length)
 {

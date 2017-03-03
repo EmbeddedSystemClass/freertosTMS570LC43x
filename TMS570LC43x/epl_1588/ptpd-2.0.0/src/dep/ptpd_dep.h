@@ -124,6 +124,7 @@ size_t netRecvEvent(NetPath*, octet_t*, TimeInternal*);
 size_t netRecvGeneral(NetPath*, octet_t*, TimeInternal*);
 size_t netSendEvent(NetPath*, const octet_t*, int16_t, TimeInternal*);
 size_t netSendGeneral(NetPath*, const octet_t*, int16_t);
+size_t netSendAnalysis(NetPath*, const octet_t*, int16_t);
 size_t netSendPeerGeneral(NetPath*, const octet_t*, int16_t);
 size_t netSendPeerEvent(NetPath*, const octet_t*, int16_t, TimeInternal*);
 void netEmptyEventQ(NetPath *netPath);

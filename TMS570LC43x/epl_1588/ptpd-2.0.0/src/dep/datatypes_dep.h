@@ -72,7 +72,7 @@ typedef struct
 // Struct used  to store network datas
 typedef struct
 {
-	Socket_t eventSock, generalSock;
+	Socket_t eventSock, generalSock, anaysisSocket;
 	int32_t   multicastAddr;
 	int32_t   peerMulticastAddr;
 	int32_t   unicastAddr;

@@ -136,44 +136,11 @@ void prvUDPEchoTask( void *pvParameters )
 	static char cLocalBuffer[ cmdSOCKET_INPUT_BUFFER_SIZE ];
 	struct freertos_sockaddr xClient;
 
-    PEPL_PORT_HANDLE epl_port_handle = pvPortMalloc(sizeof(PORT_OBJ));
-    epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
-    epl_port_handle->psfConfigOptions |= STSOPT_LITTLE_ENDIAN;
-    epl_port_handle->psfConfigOptions |= STSOPT_TXTS_EN;
-    epl_port_handle->psfConfigOptions |= STSOPT_RXTS_EN;
-
-    memset(&rxCfgItems, 0, sizeof(RX_CFG_ITEMS));
-    rxCfgItems.ptpVersion = 0x02;
-    rxCfgItems.ptpFirstByteMask = 0x00;
-    rxCfgItems.ptpFirstByteData = 0x00;
-    rxCfgItems.ipAddrData = 0;
-    rxCfgItems.tsMinIFG = 0x0C;
-    rxCfgItems.srcIdHash = 0;
-    rxCfgItems.ptpDomain = 0;
-    rxCfgItems.tsSecLen = 3;
-    rxCfgItems.rxTsSecondsOffset = 8;
-    rxCfgItems.rxTsNanoSecOffset = 12;
-
-    rxCfgOpts = 0;
-    rxCfgOpts = RXOPT_IP1588_EN0|RXOPT_IP1588_EN1|RXOPT_IP1588_EN2|
-  					   RXOPT_RX_L2_EN|RXOPT_RX_IPV4_EN|RXOPT_ACC_UDP|RXOPT_ACC_CRC|
-  					   RXOPT_TS_INSERT|RXOPT_RX_TS_EN|RXOPT_TS_SEC_EN;
-    hdkif_t *hdkif;
-    hdkif = &hdkif_data[0U];
-
-    EMACInstConfig(hdkif);
-    epl_port_handle->hdkif = *hdkif;
-    epl_port_handle->rxCfgItems = rxCfgItems;
-    epl_port_handle->rxCfgOpts = rxCfgOpts;
-	init1588(epl_port_handle);
-
 	/* Attempt to open the socket.  The port number is passed in the task
 	parameter.  The strange casting is to remove compiler warnings on 32-bit
 	machines. */
 	xSocket = prvOpenUDPServerSocket( ( uint16_t ) ( ( uint32_t ) pvParameters ) & 0xffffUL );
 	uint32_t bits_written = 0;
-	uint32_t seconds = 0;
-	uint32_t nano_seconds = 0;
 
 	if( xSocket != FREERTOS_INVALID_SOCKET )
 	{
@@ -184,11 +151,7 @@ void prvUDPEchoTask( void *pvParameters )
 
 			if( lBytes > 0 )
 			{
-				if(lBytes > rxCfgItems.rxTsNanoSecOffset + 4){
-					PTPGetTimestampFromFrame((uint8_t *)cLocalBuffer, &seconds, &nano_seconds);
-				}
-				xClient.sin_port = FreeRTOS_htons(320);
-				xClient.sin_addr = FreeRTOS_inet_addr_quick(224, 0, 1, 129);
+				xClient.sin_port = FreeRTOS_htons(ECHO_PORT_BASE + ECHO_PORT);
 				bits_written = FreeRTOS_sendto( xSocket, cLocalBuffer,  lBytes, 0, &xClient, xClientAddressLength );
 			}
 		}
@@ -208,7 +171,6 @@ void vStartPTP1588Task( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPri
 
 void prv1588PTPTask( void *pvParameters )
 {
-//	runPtpd();
 	ptpd_thread();
 	vTaskDelete( NULL );
 }

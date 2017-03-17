@@ -58,7 +58,7 @@
 
 #include "udp_echo.h"
 
-uint8 emacAddress[6U] =	{0x00U, 0x08U, 0xEEU, 0x03U, 0xA6U, 0x6CU};
+uint8 emacAddress[6U] =	{0x00U, 0x08U, 0xEEU, ECHO_PORT, 0xA6U, 0x6CU};
 uint32 emacPhyAddress =	1U;
 static const uint8_t ucIPAddress[4] = {configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3};
 static const uint8_t ucNetMask[4] = {configNET_MASK0, configNET_MASK1, configNET_MASK2, configNET_MASK3};
@@ -163,10 +163,11 @@ if( eNetworkEvent == eNetworkUp )
         	/* Start the UDP command line on port 5001 */
 //        	vStartUDPCommandInterpreterTask( mainUDP_CLI_TASK_STACK_SIZE, mainUDP_CLI_PORT_NUMBER, mainUDP_CLI_TASK_PRIORITY );
 
-        	/* Start the UDP echo on port 5000 */
-//        	vStartUDPEchoTask(mainUDP_Echo_TASK_STACK_SIZE, mainUDP_Echo_PORT_NUMBER, mainUDP_Echo_TASK_PRIORITY);
 
         	vStartPTP1588Task(mainPTP1588_TASK_STACK_SIZE, mainPTP1588_PORT_NUMBER, mainPTP1588_TASK_PRIORITY);
+
+        	/* Start the UDP echo on port 5000 */
+        	vStartUDPEchoTask(mainUDP_Echo_TASK_STACK_SIZE, mainUDP_Echo_PORT_NUMBER, mainUDP_Echo_TASK_PRIORITY);
 
         	xTasksAlreadyCreated = pdTRUE;
         }

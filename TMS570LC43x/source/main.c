@@ -95,8 +95,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName);
 /* RAM disk parameters */
 #define mainRAM_DISK_SECTOR_SIZE	512UL
 //#define mainRAM_DISK_SECTORS		((200UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
-//#define mainRAM_DISK_SECTORS		((180UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
-#define mainRAM_DISK_SECTORS		((10UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
+#define mainRAM_DISK_SECTORS		((180UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
 #define mainIO_MANAGER_CACHE_SIZE	(15UL * mainRAM_DISK_SECTOR_SIZE)
 /* RAM disk mount point */
 #define mainRAM_DISK_NAME			"/ram"
@@ -131,7 +130,7 @@ void main(void)
 	/* Register some more filesystem related commands, like dir, cd, pwd ... */
 	vRegisterFileSystemCLICommands();
 
-//	xTaskCreate(vTask1, "HeartBeat", configMINIMAL_STACK_SIZE * 10, NULL, tskIDLE_PRIORITY + 3  | portPRIVILEGE_BIT, &xTask1Handle);
+	xTaskCreate(vTask1, "HeartBeat", configMINIMAL_STACK_SIZE * 10, NULL, tskIDLE_PRIORITY + 3  | portPRIVILEGE_BIT, &xTask1Handle);
 
 	FreeRTOS_IPInit(ucIPAddress, ucNetMask, ucGatewayAddress, ucDNSServerAddress, emacAddress);
 

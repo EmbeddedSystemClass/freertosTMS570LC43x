@@ -157,7 +157,7 @@
 /* UDP echo server task parameters. */
 #define mainUDP_Echo_TASK_PRIORITY			(3 | portPRIVILEGE_BIT)
 #define mainUDP_Echo_PORT_NUMBER			( 6000UL )
-#define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 20 )
+#define mainUDP_Echo_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
 
 /* PTPD task parameters. */
 #define mainPTP1588_TASK_PRIORITY			(4 | portPRIVILEGE_BIT)

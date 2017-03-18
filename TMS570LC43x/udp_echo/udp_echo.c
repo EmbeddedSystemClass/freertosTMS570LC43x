@@ -132,7 +132,7 @@ void vStartUDPEchoTask( uint16_t usStackSize, uint32_t ulPort, UBaseType_t uxPri
 
 void prvUDPEchoTask( void *pvParameters )
 {
-	int32_t lBytes;
+	int32_t lBytes = 0;
 	static char cLocalBuffer[ cmdSOCKET_INPUT_BUFFER_SIZE ];
 	struct freertos_sockaddr xClient;
 

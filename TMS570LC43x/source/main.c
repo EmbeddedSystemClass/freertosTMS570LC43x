@@ -161,12 +161,12 @@ if( eNetworkEvent == eNetworkUp )
         if( xTasksAlreadyCreated == pdFALSE )
         {
         	/* Start the UDP command line on port 5001 */
-//        	vStartUDPCommandInterpreterTask( mainUDP_CLI_TASK_STACK_SIZE, mainUDP_CLI_PORT_NUMBER, mainUDP_CLI_TASK_PRIORITY );
+        	vStartUDPCommandInterpreterTask( mainUDP_CLI_TASK_STACK_SIZE, mainUDP_CLI_PORT_NUMBER, mainUDP_CLI_TASK_PRIORITY );
 
 
         	vStartPTP1588Task(mainPTP1588_TASK_STACK_SIZE, mainPTP1588_PORT_NUMBER, mainPTP1588_TASK_PRIORITY);
 
-        	/* Start the UDP echo on port 5000 */
+        	/* Start the UDP echo on port 6000 */
         	vStartUDPEchoTask(mainUDP_Echo_TASK_STACK_SIZE, mainUDP_Echo_PORT_NUMBER, mainUDP_Echo_TASK_PRIORITY);
 
         	xTasksAlreadyCreated = pdTRUE;

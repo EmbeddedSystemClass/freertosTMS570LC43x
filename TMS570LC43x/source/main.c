@@ -95,7 +95,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, signed char *pcTaskName);
 /* RAM disk parameters */
 #define mainRAM_DISK_SECTOR_SIZE	512UL
 //#define mainRAM_DISK_SECTORS		((200UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
-#define mainRAM_DISK_SECTORS		((180UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
+#define mainRAM_DISK_SECTORS		((192UL*1024UL) / mainRAM_DISK_SECTOR_SIZE)
 #define mainIO_MANAGER_CACHE_SIZE	(15UL * mainRAM_DISK_SECTOR_SIZE)
 /* RAM disk mount point */
 #define mainRAM_DISK_NAME			"/ram"
@@ -113,6 +113,8 @@ void main(void)
 	gioSetDirection(hetPORT1, 0xAA07C821);
 	gioSetDirection(hetPORT2, 0x00000000);
 	sciInit();
+	adcInit();
+	adcMidPointCalibration(adcREG1);
 
 	_enable_IRQ();
 
@@ -313,7 +315,6 @@ if( eNetworkEvent == eNetworkUp )
         {
         	/* Start the UDP command line on port 5001 */
         	vStartUDPCommandInterpreterTask( mainUDP_CLI_TASK_STACK_SIZE, mainUDP_CLI_PORT_NUMBER, mainUDP_CLI_TASK_PRIORITY );
-
 
         	vStartPTP1588Task(mainPTP1588_TASK_STACK_SIZE, mainPTP1588_PORT_NUMBER, mainPTP1588_TASK_PRIORITY);
 

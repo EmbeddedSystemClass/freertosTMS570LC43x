@@ -151,7 +151,7 @@
 
 /* UDP command server task parameters. */
 #define mainUDP_CLI_TASK_PRIORITY		(4 | portPRIVILEGE_BIT)
-#define mainUDP_CLI_PORT_NUMBER			( 5001UL )
+#define mainUDP_CLI_PORT_NUMBER			( 8001UL )
 #define mainUDP_CLI_TASK_STACK_SIZE		( configMINIMAL_STACK_SIZE * 4 )
 
 /* UDP echo server task parameters. */

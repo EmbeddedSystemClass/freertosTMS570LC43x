@@ -46,7 +46,7 @@ void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data){
 	OAIBeginRegCriticalSection(epl_port_handle->oaiDevHandle);
 	dp83630_set_page(&(epl_port_handle->hdkif), reg);
 	MDIOPhyRegWrite(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg&(~0xE0), data);
-	OAIBeginRegCriticalSection(epl_port_handle->oaiDevHandle);
+	OAIEndRegCriticalSection(epl_port_handle->oaiDevHandle);
 }
 
 uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg){

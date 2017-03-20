@@ -11,6 +11,10 @@
 // epl.h by way of ptp stack includes.
 #include <stdlib.h>
 #include "FreeRTOS.h"
+
+#include "FreeRTOSConfig.h"
+#include "os_task.h"
+
 #include "os_semphr.h"
 
 
@@ -53,8 +57,7 @@ void
 //****************************************************************************
 {
     if(!xSemaphoreTake(hMutex, 1000)) {
-    	//TODO: implement
-//        PLATFORM_ASSERT("EPL_OAI", "xSemaphoreTake timeout");
+    	configASSERT(0);
     }
     return;
 }

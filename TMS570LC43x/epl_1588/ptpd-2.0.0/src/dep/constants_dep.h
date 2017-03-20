@@ -61,8 +61,13 @@
 #define stdout 1
 #endif
 
-#define IFACE_NAME_LENGTH         IF_NAMESIZE
-#define NET_ADDRESS_LENGTH        INET_ADDRSTRLEN
+//Scott added
+#define PBUF_QUEUE_SIZE 512
+#define IFACE_NAME_LENGTH		10
+#define NET_ADDRESS_LENGTH 	6
+
+//#define IFACE_NAME_LENGTH         IF_NAMESIZE
+//#define NET_ADDRESS_LENGTH        INET_ADDRSTRLEN
 
 #define IFCONF_LENGTH 10
 
@@ -98,7 +103,7 @@
 #define MM_STARTING_BOUNDARY_HOPS  0x7fff
 
 /* Must be a power of 2 */
-#define PBUF_QUEUE_SIZE 4
+//#define PBUF_QUEUE_SIZE 4
 #define PBUF_QUEUE_MASK (PBUF_QUEUE_SIZE - 1)
 
 /* others */

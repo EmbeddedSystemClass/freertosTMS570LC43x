@@ -61,6 +61,10 @@ void ptpd_thread(void *arg)
 {
 	proto_practice();
     PEPL_PORT_HANDLE epl_port_handle = pvPortMalloc(sizeof(PORT_OBJ));
+    epl_port_handle->oaiDevHandle = pvPortMalloc(sizeof(OAI_DEV_HANDLE_STRUCT));
+    epl_port_handle->oaiDevHandle->regularMutex = xSemaphoreCreateMutex();
+    epl_port_handle->oaiDevHandle->multiOpMutex = xSemaphoreCreateRecursiveMutex();
+
     rtOpts.epl_port_handle = epl_port_handle;
 
     epl_port_handle->psfConfigOptions |= STSOPT_IPV4;
@@ -142,6 +146,18 @@ void ptpd_thread(void *arg)
 		// Wait up to 100ms for something to do, then do something anyway.
 //		sys_arch_mbox_fetch(&ptp_alert_queue, &msg, 100);
 	}
+
+
+//    epl_port_handle->oaiDevHandle->regularMutex = xSemaphoreCreateRecursiveMutex();
+//    xSemaphore();
+//
+//    epl_port_handle->oaiDevHandle->regularMutex = xSemaphoreCreateMutex();
+//    epl_port_handle->oaiDevHandle->regularMutex = xSemaphoreCreateMutex();
+//
+//    epl_port_handle->oaiDevHandle = pvPortMalloc(sizeof(OAI_DEV_HANDLE_STRUCT));
+//    epl_port_handle->oaiDevHandle = pvPortMalloc(sizeof(OAI_DEV_HANDLE_STRUCT));
+//
+//    vPortFree(epl_port_handle);
 }
 
 void initEMAC(PEPL_PORT_HANDLE epl_port_handle){

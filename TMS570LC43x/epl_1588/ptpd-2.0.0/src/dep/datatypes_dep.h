@@ -5,9 +5,9 @@
 
 typedef int32_t s32_t ;
 
-#define PBUF_QUEUE_SIZE 512
-#define IFACE_NAME_LENGTH		10
-#define NET_ADDRESS_LENGTH 	6
+//#define PBUF_QUEUE_SIZE 512
+//#define IFACE_NAME_LENGTH		10
+//#define NET_ADDRESS_LENGTH 	6
 
 struct ptptime_t {
   s32_t tv_sec;

@@ -12,6 +12,7 @@
 #define _EPL_INCLUDE
 
 #include "epl_types.h"		// EPL Basic type definitions
+#include "epl_oai.h"
 
 #include "epl_regs.h"		// Device register definitions
 #include "HL_mdio.h"

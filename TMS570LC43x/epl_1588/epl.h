@@ -29,6 +29,8 @@
 //#include "epl_quality.h"	// Link Quality API definitions/prototypes
 //#include "epl_tdr.h"		// TDR API definitions/prototypes
 
+#include "epl_platform.h"
+
 #include "epl_1588.h"		// PTP protocol related API definitions/prototypes
 
 #define PAGESEL_REG		(0x13)

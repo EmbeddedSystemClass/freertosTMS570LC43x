@@ -12,6 +12,7 @@
 
 #include "HL_emac.h"
 //#include "epl_1588.h"
+#include "epl_platform.h"
 
 // Note: On platforms where the natural integer size is less then 32-bits
 // in size (eg 16-bit platforms), NS_UINT and NS_SINT must be defined as a 
@@ -105,7 +106,7 @@ typedef struct EPL_DEV_INFO {
 typedef struct DEVICE_OBJ {
     struct DEVICE_OBJ *link;
     struct PORT_OBJ *portObjs;
-//    OAI_DEV_HANDLE oaiDevHandle;
+    OAI_DEV_HANDLE oaiDevHandle;
     NS_UINT baseMdioAddress;
     EPL_DEV_INFO devInfo;
     EPL_DEVICE_CAPA_ENUM capa;
@@ -113,7 +114,7 @@ typedef struct DEVICE_OBJ {
 
 typedef struct PORT_OBJ {
     struct PORT_OBJ *link;              // Must be first field in struct
-//    OAI_DEV_HANDLE oaiDevHandle;
+    OAI_DEV_HANDLE oaiDevHandle;
     PDEVICE_OBJ deviceObj;
     NS_UINT portMdioAddress;
 	EPL_ENUM_TYPE ifType;				// Type of interface to use

@@ -647,7 +647,7 @@ void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
 //  Returns
 //      Nothing
 {
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
 //	uint32_t ptp_control_reg = EPLReadReg(epl_port_handle, PHY_PG4_PTP_CTL);
 //	ptp_control_reg = ptp_control_reg >> 16;
 //	ptp_control_reg |= P640_PTP_RD_CLK;
@@ -662,7 +662,7 @@ void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
 
     *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TDR);
 
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 void PTPClockStepAdjustment (PEPL_PORT_HANDLE epl_port_handle,
@@ -705,13 +705,13 @@ void PTPClockStepAdjustment (PEPL_PORT_HANDLE epl_port_handle,
         numberOfNanoSeconds = (uint32_t)((0x100000000 - numberOfNanoSeconds) & 0xFFFFFFFF);
     }
         
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds >> 16);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, P640_PTP_STEP_CLK);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 void PTPClockSet (PEPL_PORT_HANDLE epl_port_handle,
@@ -732,7 +732,7 @@ void PTPClockSet (PEPL_PORT_HANDLE epl_port_handle,
 //      Nothing
 //****************************************************************************
 {
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds & 0xFFFF);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfNanoSeconds >> 16);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_TDR, numberOfSeconds & 0xFFFF);
@@ -743,7 +743,7 @@ void PTPClockSet (PEPL_PORT_HANDLE epl_port_handle,
 //	ptp_control_reg = ptp_control_reg >> 16;
 //	ptp_control_reg |= P640_PTP_LOAD_CLK;
 //	EPLWriteReg(epl_port_handle, PHY_PG4_PTP_CTL, ptp_control_reg);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 void PTPClockSetRateAdjustment (
@@ -841,10 +841,10 @@ void PTPClockSetRateAdjustment (
     if ( tempAdjFlag) reg |= P640_PTP_TMP_RATE;
     if ( adjDirectionFlag) reg |= P640_PTP_RATE_DIR;
     
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEH, reg);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEL, rateAdjValue & 0xFFFF);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 uint32_t PTPCheckForEvents (PEPL_PORT_HANDLE epl_port_handle)
@@ -931,7 +931,7 @@ void PTPGetTransmitTimestamp (PEPL_PORT_HANDLE epl_port_handle,
 {
 	uint32_t reg;
 
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
 
     reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
@@ -941,7 +941,7 @@ void PTPGetTransmitTimestamp (PEPL_PORT_HANDLE epl_port_handle,
     *retNumberOfSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS);
 
     *retNumberOfSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_TXTS) << 16;
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 void PTPGetReceiveTimestamp (PEPL_PORT_HANDLE epl_port_handle,
@@ -1016,7 +1016,7 @@ void PTPGetReceiveTimestamp (PEPL_PORT_HANDLE epl_port_handle,
 {
 	uint32_t reg = 0;
 
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
 
     *retNumberOfNanoSeconds = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
 
@@ -1031,7 +1031,7 @@ void PTPGetReceiveTimestamp (PEPL_PORT_HANDLE epl_port_handle,
     *sequenceId = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
     reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_RXTS);
 
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 
     *messageType = reg >> 12;
     *hashValue = reg & 0x0FFF;
@@ -1175,7 +1175,7 @@ void PTPArmTrigger (PEPL_PORT_HANDLE epl_port_handle,
 {
 	uint32_t reg;
 
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_LOAD;
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
     
@@ -1197,7 +1197,7 @@ void PTPArmTrigger (PEPL_PORT_HANDLE epl_port_handle,
     
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_EN;
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
  
 boolean PTPHasTriggerExpired (PEPL_PORT_HANDLE epl_port_handle, uint32_t trigger)
@@ -1227,9 +1227,9 @@ boolean PTPHasTriggerExpired (PEPL_PORT_HANDLE epl_port_handle, uint32_t trigger
 {
 	uint32_t reg, trgBit;
 
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_TSTS);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
     
     trgBit = 1 << (trigger * 2);
     if ( reg & trgBit)
@@ -1258,9 +1258,9 @@ void PTPCancelTrigger (PEPL_PORT_HANDLE epl_port_handle, uint32_t trigger)
 {
 	uint32_t reg;
     reg = (trigger << P640_TRIG_SEL_SHIFT) | P640_TRIG_DIS;
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_CTL, reg);
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
 }
 
 boolean PTPGetEvent (PEPL_PORT_HANDLE epl_port_handle,
@@ -1310,14 +1310,14 @@ boolean PTPGetEvent (PEPL_PORT_HANDLE epl_port_handle,
     *eventBits = 0;
     *riseFlags = 0;
 
-//    OAIBeginMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     reg = EPLReadReg( epl_port_handle, PHY_PG4_PTP_ESTS);
     
     *eventsMissed = (reg & P640_EVNTS_MISSED_MASK) >> P640_EVNTS_MISSED_SHIFT;
     
     if ( !(reg & P640_EVENT_DET))
     {
-//        OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+        OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
         return FALSE;
     }
         
@@ -1348,7 +1348,7 @@ boolean PTPGetEvent (PEPL_PORT_HANDLE epl_port_handle,
 
     *eventTimeSeconds |= EPLReadReg( epl_port_handle, PHY_PG4_PTP_EDATA) << 16;
 
-//    OAIEndMultiCriticalSection( portHandle->oaiDevHandle);
+    OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
     
     // Adj for pin input delay and edge detection time
 	if( *eventTimeNanoSeconds < PIN_INPUT_DELAY )

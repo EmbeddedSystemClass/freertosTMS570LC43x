@@ -37,24 +37,28 @@
 //****************************************************************************
 
 #include "epl.h"
+#include "HL_mdio.h"
 #include "NetworkInterface.h"
 extern RX_CFG_ITEMS rxCfgItems;
 extern uint32_t rxCfgOpts;
 
-void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data);
-
 void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data){
+	OAIBeginRegCriticalSection(epl_port_handle->oaiDevHandle);
 	dp83630_set_page(&(epl_port_handle->hdkif), reg);
 	MDIOPhyRegWrite(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg&(~0xE0), data);
+	OAIBeginRegCriticalSection(epl_port_handle->oaiDevHandle);
 }
 
-uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg);
-
 uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg){
+	OAIBeginRegCriticalSection(epl_port_handle->oaiDevHandle);
 	//TODO: return data to be consistent with original API
 	dp83630_set_page(&(epl_port_handle->hdkif), reg);
 	uint32_t data = 0;
-	MDIOPhyRegRead(epl_port_handle->hdkif.mdio_base, epl_port_handle->hdkif.phy_addr, reg&(~0xE0), &data);
+	MDIOPhyRegRead(epl_port_handle->hdkif.mdio_base,
+				   epl_port_handle->hdkif.phy_addr,
+				   reg&(~0xE0),
+				   &data);
+	OAIEndRegCriticalSection(epl_port_handle->oaiDevHandle);
 	return data;
 }
 
@@ -148,12 +152,14 @@ void PTPSetEventConfig (PEPL_PORT_HANDLE epl_port_handle,
     reg |= gpioConnection << P640_EVNT_GPIO_SHIFT;
     reg |= event << P640_EVNT_SEL_SHIFT;
     reg |= P640_EVNT_WR;
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
 	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_EVNT, reg);
     
     if ( eventRiseFlag) reg |= P640_EVNT_RISE;
     if ( eventFallFlag) reg |= P640_EVNT_FALL;
     if ( eventSingle) reg |= P640_EVNT_SINGLE;
 	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_EVNT, reg);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return;
 }
 
@@ -204,19 +210,23 @@ void PTPSetTransmitConfig (PEPL_PORT_HANDLE epl_port_handle,
 
     reg |= ptpVersion << P640_TX_PTP_VER_SHIFT;
 //    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_TXCFG0, reg);
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
 	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TXCFG0, reg);
 
     reg = (ptpFirstByteMask << P640_BYTE0_MASK_SHIFT) | (ptpFirstByteData << P640_BYTE0_DATA_SHIFT);
 //    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_TXCFG1, reg);
 	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TXCFG1, reg);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return;
 }
 
 uint32_t PTPReadTransmitConfig (PEPL_PORT_HANDLE epl_port_handle)
 {
 	uint32_t reg = 0;
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG0);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_TXCFG1) << 16;
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return reg;
 }
 
@@ -308,6 +318,7 @@ void PTPSetPhyStatusFrameConfig (PEPL_PORT_HANDLE epl_port_handle,
 
     reg |= srcAddrToUse << P640_MAC_SRC_ADD_SHIFT;
     reg |= minPreamble << P640_MIN_PRE_SHIFT;
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG5_PSF_CFG0, reg );
 
     reg = ptpReserved << P640_PTP_RESERVED_SHIFT;
@@ -345,6 +356,7 @@ void PTPSetPhyStatusFrameConfig (PEPL_PORT_HANDLE epl_port_handle,
     }
 
     EPLWriteReg( epl_port_handle, PHY_PG6_PSF_CFG4, ipChecksum );
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
 
     epl_port_handle->psfConfigOptions = statusConfigOptions;
     return;
@@ -386,6 +398,7 @@ void PTPSetReceiveConfig (PEPL_PORT_HANDLE epl_port_handle,
     reg |= rxConfigItems->ptpVersion << P640_RX_PTP_VER_SHIFT;
 
 //    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG0, reg);
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
 	EPLWriteReg(epl_port_handle, PHY_PG5_PTP_RXCFG0, reg);
 
 //    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG5_PTP_RXCFG2, rxConfigItems->ipAddrData >> 16);
@@ -434,18 +447,21 @@ void PTPSetReceiveConfig (PEPL_PORT_HANDLE epl_port_handle,
     if ( rxConfigOptions & RXOPT_SRC_ID_HASH_EN) reg |= P640_RX_HASH_EN;
 //    EPLWriteReg( &(epl_port_handle->hdkif), PHY_PG6_PTP_RXHASH, reg);
 	EPLWriteReg(epl_port_handle, PHY_PG6_PTP_RXHASH, reg);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return;
 }
 
 uint32_t PTPReadReceiveConfig (PEPL_PORT_HANDLE epl_port_handle)
 {
 	uint32_t reg = 0;
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG0);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG1);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG2);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG3);
 	reg = EPLReadReg(epl_port_handle, PHY_PG5_PTP_RXCFG4);
 	reg = EPLReadReg(epl_port_handle, PHY_PG6_PTP_RXHASH);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return reg;
 }
 
@@ -506,8 +522,10 @@ void PTPSetTempRateDurationConfig (PEPL_PORT_HANDLE epl_port_handle, uint32_t du
 //  remains constant.
 //****************************************************************************
 {
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
     EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TRDH, duration >> P640_PTP_RATE_HI_SHIFT);
     EPLWriteReg(epl_port_handle, PHY_PG5_PTP_TRDL, duration & 0xFFFF);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
     return;
 }
 
@@ -557,6 +575,7 @@ void PTPSetClockConfig (PEPL_PORT_HANDLE epl_port_handle,
     if ( clockConfigOptions & CLKOPT_CLK_OUT_SPEED_SEL) reg |= P640_PTP_CLKOUT_SPSEL;
     
     reg |= ptpClockDivideByValue << P640_PTP_CLKDIV_SHIFT;
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG6_PTP_COC, reg);
 
     reg = (ptpClockSource << P640_CLK_SRC_SHIFT) | (ptpClockSourcePeriod << P640_CLK_SRC_PER_SHIFT);
@@ -569,6 +588,7 @@ void PTPSetClockConfig (PEPL_PORT_HANDLE epl_port_handle,
     else
         reg |= PHYCR2_CLK_OUT_DIS;
     EPLWriteReg( epl_port_handle, PHY_PG0_PHYCR2, reg);
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
 }
 
 void PTPSetGpioInterruptConfig (PEPL_PORT_HANDLE epl_port_handle, uint32_t gpioInt)
@@ -621,11 +641,13 @@ void PTPSetMiscConfig (PEPL_PORT_HANDLE epl_port_handle,
 //      Nothing
 //****************************************************************************
 {
+    OAIBeginMultiCriticalSection(epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG6_PTP_ETR, ptpEtherType);
     EPLWriteReg( epl_port_handle, PHY_PG6_PTP_OFF, ptpOffset);
     EPLWriteReg( epl_port_handle, PHY_PG6_PTP_SFDCFG,
                  (txSfdGpio << P640_TX_SFD_GPIO_SHIFT) | 
                  (rxSfdGpio << P640_RX_SFD_GPIO_SHIFT));
+    OAIEndMultiCriticalSection(epl_port_handle->oaiDevHandle);
 }
 
 void PTPClockReadCurrent (PEPL_PORT_HANDLE epl_port_handle,
@@ -826,6 +848,7 @@ void PTPClockSetRateAdjustment (
 //****************************************************************************
 {
 	uint32_t reg = 0;
+//    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
 	reg = EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEH) >> 16;
 	reg = (reg & P640_PTP_RATE_HI_MASK) << P640_PTP_RATE_HI_SHIFT;
 	reg |= EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEL) >> 16;
@@ -841,7 +864,7 @@ void PTPClockSetRateAdjustment (
     if ( tempAdjFlag) reg |= P640_PTP_TMP_RATE;
     if ( adjDirectionFlag) reg |= P640_PTP_RATE_DIR;
     
-    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
+//    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEH, reg);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEL, rateAdjValue & 0xFFFF);
     OAIEndMultiCriticalSection( epl_port_handle->oaiDevHandle);
@@ -1520,7 +1543,7 @@ uint8_t * intGetNextPhyMessage (PEPL_PORT_HANDLE epl_port_handle,
         *messageType = psfList->msgType;
         memcpy( phyMessageOut, &psfList->phyMsg, sizeof( PHYMSG_MESSAGE ) );
         epl_port_handle->psfList = psfList->nxtMsg;
-//        OAIFree( psfList );
+        OAIFree( psfList );
         free( psfList );
         return msgLocation; // Didn't do anything with it, send it back around
     } // if( portHdl->psfList )

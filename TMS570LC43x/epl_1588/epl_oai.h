@@ -40,6 +40,8 @@ void
     OAIEndMultiCriticalSection(
         IN OAI_DEV_HANDLE oaiDevHandle);
 
+void OAIFree( void *);
+
 
 // Define EXPORTED if we're building for Windows
 #define EXPORT

@@ -117,3 +117,7 @@ void
     OAIEndCriticalSection( oaiDevHandle->multiOpMutex );
     return;
 }
+
+void OAIFree( void * object){
+	vPortFree(object);
+}

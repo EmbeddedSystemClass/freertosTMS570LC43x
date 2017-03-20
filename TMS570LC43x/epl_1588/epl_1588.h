@@ -147,6 +147,9 @@ typedef struct PHYMSG_LIST {
 extern "C" {
 #endif
 
+void EPLWriteReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg, uint32_t data);
+uint32_t EPLReadReg(PEPL_PORT_HANDLE epl_port_handle, uint32_t reg);
+
 void PTPEnable(
     		PEPL_PORT_HANDLE epl_port_handle,
         boolean enableFlag);

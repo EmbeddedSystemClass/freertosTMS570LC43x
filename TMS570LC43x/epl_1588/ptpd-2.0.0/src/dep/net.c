@@ -239,11 +239,13 @@ size_t netRecvEvent( NetPath *netPath, octet_t *buf, TimeInternal *time)
 //	PTPGetTimestampFromFrame(buf, &(time->seconds), &(time->nanoseconds));
     switch(buf[0]){
     case PTPV2_SYNC_TYPE:
+//    	vTaskDelay((ECHO_PORT * 1 + 1) / portTICK_PERIOD_MS);
     case PTPV2_FOLLOWUP_TYPE:
     case PTPV2_DELAY_REQUEST_TYPE:
 	//The tx timestamp willl be coming in in the correction fields of this packet
     case PTPV2_DELAY_RESPONSE_TYPE:
 		PTPGetTimestampFromFrame((uint8_t*)buf, (uint32_t*)&(time->seconds),(uint32_t*) &(time->nanoseconds));
+//    	vTaskDelay((ECHO_PORT * 1 + 1) / portTICK_PERIOD_MS);
 		break;
     default:
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
@@ -326,6 +328,7 @@ uint32_t MACSendAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t tx
 		/* The socket could not be opened. */
 		//TODO: something about this
 //		vTaskDelete( NULL );
+		configASSERT(false);
 	}
 	return bits_written;
 }

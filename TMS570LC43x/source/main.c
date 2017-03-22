@@ -224,7 +224,7 @@ static const struct xSERVER_CONFIG xServerConfiguration[] =
 
 	/* Configuring RTI timer for serving system time. */
 	vConfigureTimerForSysTime();
-	vStartNTPTask(configMINIMAL_STACK_SIZE * 2, 4);
+	vStartNTPTask(configMINIMAL_STACK_SIZE * 2, 3);
 
 	/* Create the servers defined by the xServerConfiguration array above. */
 	pxTCPServer = FreeRTOS_CreateTCPServer( xServerConfiguration, sizeof( xServerConfiguration ) / sizeof( xServerConfiguration[ 0 ] ) );

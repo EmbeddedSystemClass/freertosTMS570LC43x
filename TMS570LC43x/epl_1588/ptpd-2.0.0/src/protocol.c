@@ -965,7 +965,6 @@ static void handleDelayResp(PtpClock *ptpClock, TimeInternal *time,  bool  isFro
 
 						ptpClock->portDS.logMinDelayReqInterval = ptpClock->msgTmpHeader.logMessageInterval;
 
-						//TODO: ship off packet to network analysis
 						send_to_analysis(ptpClock);
 
 					}

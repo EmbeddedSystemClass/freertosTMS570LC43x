@@ -82,6 +82,7 @@
 #define pow2ms(a) (((a)>0) ? (1000 << (a)) : (1000 >>(-(a))))
 
 #define ADJ_FREQ_MAX  512000
+//#define ADJ_FREQ_MAX  64000
 
 /* UDP/IPv4 dependent */
 

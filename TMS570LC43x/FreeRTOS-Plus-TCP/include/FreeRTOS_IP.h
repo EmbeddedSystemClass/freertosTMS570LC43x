@@ -68,7 +68,7 @@ extern "C" {
 #include "IPTraceMacroDefaults.h"
 
 #define ECHO_PORT_BASE 6500
-#define ECHO_PORT 		15U
+#define ECHO_PORT 		0U
 
 /* Some constants defining the sizes of several parts of a packet */
 #define ipSIZE_OF_ETH_HEADER			14

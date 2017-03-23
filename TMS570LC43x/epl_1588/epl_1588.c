@@ -37,6 +37,7 @@
 //****************************************************************************
 
 #include "epl.h"
+#include "ptpd.h"
 #include "HL_mdio.h"
 #include "NetworkInterface.h"
 extern RX_CFG_ITEMS rxCfgItems;
@@ -847,22 +848,11 @@ void PTPClockSetRateAdjustment (
 //          Temp_Rate = Current_Rate + Temp_Rate_delta = 343597 + -687194 = -343597
 //****************************************************************************
 {
-	uint32_t reg = 0;
-    OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
-	reg = EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEH) >> 16;
-	reg = (reg & P640_PTP_RATE_HI_MASK) << P640_PTP_RATE_HI_SHIFT;
-	reg |= EPLReadReg(epl_port_handle, PHY_PG4_PTP_RATEL) >> 16;
-
-	if(adjDirectionFlag){
-		reg -= rateAdjValue;
-	}
-	else {
-		reg += rateAdjValue;
-	}
-
+	int32_t reg = 0;
+	rateAdjValue *= 100;
     reg = (rateAdjValue >> P640_PTP_RATE_HI_SHIFT) & P640_PTP_RATE_HI_MASK;
     if ( tempAdjFlag) reg |= P640_PTP_TMP_RATE;
-    if ( adjDirectionFlag) reg |= P640_PTP_RATE_DIR;
+    if (adjDirectionFlag) reg |= P640_PTP_RATE_DIR;
     
     OAIBeginMultiCriticalSection( epl_port_handle->oaiDevHandle);
     EPLWriteReg( epl_port_handle, PHY_PG4_PTP_RATEH, reg);

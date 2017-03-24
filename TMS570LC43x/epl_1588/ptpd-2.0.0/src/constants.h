@@ -22,8 +22,10 @@
 #define DEFAULT_NO_RESET_CLOCK          FALSE
 #define DEFAULT_DOMAIN_NUMBER           0
 #define DEFAULT_DELAY_MECHANISM         E2E
-#define DEFAULT_AP                      2
-#define DEFAULT_AI                      16
+//#define DEFAULT_AP                      2
+//#define DEFAULT_AI                      16
+#define DEFAULT_AP                      2 * 4
+#define DEFAULT_AI                      16 * 2
 #define DEFAULT_DELAY_S                 6 /* exponencial smoothing - 2^s */
 #define DEFAULT_OFFSET_S                1 /* exponencial smoothing - 2^s */
 #define DEFAULT_ANNOUNCE_INTERVAL       1 /* 0 in 802.1AS */
@@ -57,7 +59,7 @@
 
 #define DEFAULT_CALIBRATED_OFFSET_NS    		10000 /* offset from master < 10us -> calibrated */
 #define DEFAULT_UNCALIBRATED_OFFSET_NS  	1000000 /* offset from master > 1000us -> uncalibrated */
-#define MAX_ADJ_OFFSET_NS       100000000 /* max offset to try to adjust it < 100ms */
+#define MAX_ADJ_OFFSET_NS       1000000 /* max offset to try to adjust it < 100ms */
 //#define MAX_ADJ_OFFSET_NS       100000000 /* max offset to try to adjust it < 100ms */
 
 //#define DEFAULT_CALIBRATED_OFFSET_NS    		1000 /* offset from master < 10us -> calibrated */

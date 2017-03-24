@@ -12,7 +12,7 @@
  *
  */
 
-#define PTP_ANALYSIS_PORT  5000
+#define PTP_ANALYSIS_PORT  11132
 
 /* platform dependent */
 #define PTPV2_FLAG_OFFSET							6

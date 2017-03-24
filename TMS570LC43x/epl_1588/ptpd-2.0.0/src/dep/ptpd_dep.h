@@ -169,6 +169,9 @@ void timerStart(int32_t,  uint32_t);
 bool timerExpired(int32_t);
 /** \}*/
 
+uint32_t MACSendUDPAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len);
+uint32_t MACSendTCPAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len);
+uint32_t MACSendPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len);
 
 /* Test functions */
 

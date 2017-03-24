@@ -142,24 +142,27 @@ void prvUDPEchoTask( void *pvParameters )
 	xSocket = prvOpenUDPServerSocket( ( uint16_t ) ( ( uint32_t ) pvParameters ) & 0xffffUL );
 	uint32_t bits_written = 0;
 
-	if( xSocket != FREERTOS_INVALID_SOCKET )
+	configASSERT(xSocket != FREERTOS_INVALID_SOCKET )
+	for( ;; )
 	{
-		for( ;; )
-		{
-			/* Wait for incoming data on the opened socket. */
-			lBytes = FreeRTOS_recvfrom( xSocket, ( void * ) cLocalBuffer, sizeof( cLocalBuffer ), 0, &xClient, &xClientAddressLength );
+		/* Wait for incoming data on the opened socket. */
+		lBytes = FreeRTOS_recvfrom(xSocket,
+								   ( void * ) cLocalBuffer,
+								   sizeof( cLocalBuffer ),
+								   0,
+								   &xClient,
+								   &xClientAddressLength );
 
-			if( lBytes > 0 )
-			{
-				xClient.sin_port = FreeRTOS_htons(ECHO_PORT_BASE + ECHO_PORT);
-				bits_written = FreeRTOS_sendto( xSocket, cLocalBuffer,  lBytes, 0, &xClient, xClientAddressLength );
-			}
+		if( lBytes > 0 )
+		{
+			xClient.sin_port = FreeRTOS_htons(ECHO_PORT_BASE + ECHO_PORT);
+			bits_written = FreeRTOS_sendto(xSocket,
+										   cLocalBuffer,
+										   lBytes,
+										   0,
+										   &xClient,
+										   xClientAddressLength );
 		}
-	}
-	else
-	{
-		/* The socket could not be opened. */
-		vTaskDelete( NULL );
 	}
 }
 
@@ -181,10 +184,10 @@ boolean is_ptp1588_packet(uint8_t * packet){
 
 Socket_t prvOpenUDPServerSocket( uint16_t usPort )
 {
-struct freertos_sockaddr xServer;
-Socket_t xSocket = FREERTOS_INVALID_SOCKET;
-TickType_t xSendTimeOut = 100;
-TickType_t xRecvTimeOut = 100;
+	struct freertos_sockaddr xServer;
+	Socket_t xSocket = FREERTOS_INVALID_SOCKET;
+	TickType_t xSendTimeOut = 100;
+	TickType_t xRecvTimeOut = 100;
 
 	xSocket = FreeRTOS_socket( FREERTOS_AF_INET, FREERTOS_SOCK_DGRAM, FREERTOS_IPPROTO_UDP );
 	if( xSocket != FREERTOS_INVALID_SOCKET)
@@ -212,5 +215,53 @@ TickType_t xRecvTimeOut = 100;
 }
 
 
+Socket_t prvOpenUDPClientSocket( uint16_t usPort )
+{
+	Socket_t xSocket = FREERTOS_INVALID_SOCKET;
+	TickType_t xSendTimeOut = 100;
+	TickType_t xRecvTimeOut = 100;
 
+	xSocket = FreeRTOS_socket(FREERTOS_AF_INET,
+							  FREERTOS_SOCK_DGRAM,
+							  FREERTOS_IPPROTO_UDP);
 
+	configASSERT(xSocket != FREERTOS_INVALID_SOCKET);
+
+	/* Set to non-blocking sends with a timeout of zero as the socket might
+	also be used for debug prints which should not block. */
+	FreeRTOS_setsockopt( xSocket, 0, FREERTOS_SO_SNDTIMEO, &xSendTimeOut, sizeof( xSendTimeOut ) );
+	FreeRTOS_setsockopt( xSocket, 0, FREERTOS_SO_RCVTIMEO, &xRecvTimeOut, sizeof( xRecvTimeOut ) );
+
+	return xSocket;
+}
+
+Socket_t prvOpenTCPClientSocket(uint16_t usPort){
+	struct freertos_sockaddr xBindAddress;
+	Socket_t xClientSocket;
+	socklen_t xSize = sizeof(xBindAddress);
+	static const TickType_t xTimeOut = pdMS_TO_TICKS(2000);
+
+	xClientSocket = FreeRTOS_socket(PF_INET,
+									FREERTOS_SOCK_STREAM,
+									FREERTOS_IPPROTO_TCP);
+	configASSERT(xClientSocket != FREERTOS_INVALID_SOCKET);
+
+	FreeRTOS_setsockopt(xClientSocket,
+						0,
+						FREERTOS_SO_RCVTIMEO,
+						&xTimeOut,
+						sizeof(xTimeOut));
+
+	FreeRTOS_setsockopt(xClientSocket,
+						0,
+						FREERTOS_SO_SNDTIMEO,
+						&xTimeOut,
+						sizeof(xTimeOut));
+
+	xBindAddress.sin_port = (uint16_t) usPort;
+	xBindAddress.sin_port = FreeRTOS_htons(xBindAddress.sin_port);
+	xBindAddress.sin_addr = FreeRTOS_inet_addr_quick(10, 10, 10, 12);
+	FreeRTOS_connect(xClientSocket, &xBindAddress, xSize);
+
+	return xClientSocket;
+}

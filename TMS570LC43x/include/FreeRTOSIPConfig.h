@@ -190,7 +190,7 @@ stack.  FreeRTOS includes optional stack overflow detection, see:
 http://www.freertos.org/Stacks-and-stack-overflow-checking.html */
 #define ipconfigIP_TASK_STACK_SIZE_WORDS	( configMINIMAL_STACK_SIZE * 4 )
 
-/* Az EMAC_RX task konfigurációja */
+/* Az EMAC_RX task konfigurï¿½ciï¿½ja */
 #define ipconfigETHERNET_DRIVER_RX_TASK_BLOCK_TIME 			1000	/* Ticks */
 #define ipconfigETHERNET_DRIVER_RX_TASK_PRIORITY			( (configMAX_PRIORITIES - 4)  | portPRIVILEGE_BIT)
 #define ipconfigETHERNET_DRIVER_RX_TASK_STACK_SIZE_WORDS	( configMINIMAL_STACK_SIZE * 3 )
@@ -203,7 +203,7 @@ own random number generation method.  For example, it might be possible to
 generate a random number by sampling noise on an analogue input. */
 
 //extern UBaseType_t uxRand();
-//TODO: nem biztos, hogy ez egy túl hatékony implementáció az uxRand()-ra
+//TODO: nem biztos, hogy ez egy tï¿½l hatï¿½kony implementï¿½ciï¿½ az uxRand()-ra
 //#define ipconfigRAND32()	(rand() & 0xff | (rand() & 0xff) << 8 | (rand() & 0xff) << 16 |(rand() & 0xff) << 24)
 #define ipconfigRAND32()	(rand() << 24)
 
@@ -298,7 +298,7 @@ to a pre-determinable value. */
 #define ipconfigRX_STOP_RECEPTION_LEVEL				(2)
 
 
-/* Maximum hány tick idõt várjon a network buffer felszabadulására */
+/* Maximum hï¿½ny tick idï¿½t vï¿½rjon a network buffer felszabadulï¿½sï¿½ra */
 #define ipconfigTCP_MAX_RECV_BLOCK_TIME_TICKS ( 5000000 / portTICK_PERIOD_US )
 
 /* A FreeRTOS queue is used to send events from application tasks to the IP
@@ -319,7 +319,7 @@ socketAUTO_PORT_ALLOCATION_START_NUMBER to 0xffff.  If
 ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND is set to 0 then calling FreeRTOS_sendto()
 on a socket that has not yet been bound will result in the send operation being
 aborted. */
-#define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND 0
+#define ipconfigALLOW_SOCKET_SEND_WITHOUT_BIND 1
 
 /* Defines the Time To Live (TTL) values used in outgoing UDP packets. */
 #define ipconfigUDP_TIME_TO_LIVE		128
@@ -436,7 +436,7 @@ disconnecting stage will timeout after a period of non-activity. */
 #define ipconfigSUPPORT_SIGNALS					0
 
 #define ipconfigFTP_TX_ZERO_COPY 0
-#define ipconfigFTP_ZERO_COPY_ALIGNED_WRITES	0	// TODO: kideríteni, hogy miért fagy, ha == 1
+#define ipconfigFTP_ZERO_COPY_ALIGNED_WRITES	0	// TODO: kiderï¿½teni, hogy miï¿½rt fagy, ha == 1
 #define ipconfigTCP_IP_SANITY 0
 
 

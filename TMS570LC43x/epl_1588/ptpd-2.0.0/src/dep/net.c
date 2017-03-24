@@ -172,6 +172,7 @@ void send_to_analysis(PtpClock *ptpClock){
 
 	size_t pack_size = aero_network__ptp1588_timing_packet__get_packed_size(&timing_packet);
 	uint8_t * packet_buffer = malloc(pack_size);
+	configASSERT(packet_buffer);
 	memset(packet_buffer, 0, pack_size);
 	aero_network__ptp1588_timing_packet__pack(&timing_packet, packet_buffer);
 	netSendAnalysis(&ptpClock->netPath, (const octet_t*) packet_buffer , pack_size);
@@ -204,8 +205,9 @@ boolean netInit(NetPath *netPath, PtpClock *ptpClock)
 {
   netPath->eventSock = prvOpenUDPServerSocket(PTP_EVENT_PORT);
   netPath->generalSock = prvOpenUDPServerSocket(PTP_GENERAL_PORT);
-  netPath->anaysisSocket = prvOpenUDPServerSocket(PTP_ANALYSIS_PORT);
-    return TRUE;
+  netPath->analysisSocket= prvOpenTCPClientSocket(PTP_ANALYSIS_PORT);
+//  netPath->analysisSocket= prvOpenUDPClientSocket(PTP_ANALYSIS_PORT);
+  return TRUE;
 }
 
 /* shut down the UDP stuff */
@@ -239,13 +241,11 @@ size_t netRecvEvent( NetPath *netPath, octet_t *buf, TimeInternal *time)
 //	PTPGetTimestampFromFrame(buf, &(time->seconds), &(time->nanoseconds));
     switch(buf[0]){
     case PTPV2_SYNC_TYPE:
-//    	vTaskDelay((ECHO_PORT * 1 + 1) / portTICK_PERIOD_MS);
     case PTPV2_FOLLOWUP_TYPE:
     case PTPV2_DELAY_REQUEST_TYPE:
 	//The tx timestamp willl be coming in in the correction fields of this packet
     case PTPV2_DELAY_RESPONSE_TYPE:
 		PTPGetTimestampFromFrame((uint8_t*)buf, (uint32_t*)&(time->seconds),(uint32_t*) &(time->nanoseconds));
-//    	vTaskDelay((ECHO_PORT * 1 + 1) / portTICK_PERIOD_MS);
 		break;
     default:
 		PTPClockReadCurrent(rtOpts.epl_port_handle, &(time->seconds), &(time->nanoseconds));
@@ -306,30 +306,36 @@ uint32_t MACSendPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len
 		/* The socket could not be opened. */
 		//TODO: something about this
 //		vTaskDelete( NULL );
+		configASSERT(false);
 	}
 	return bits_written;
 }
 
-uint32_t MACSendAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len){
+uint32_t MACSendUDPAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len){
 	struct freertos_sockaddr destination;
-	Socket_t send_socket;
-	socklen_t destination_address_length = 0;
-	uint32_t bits_written = 0;
-	send_socket = net_path->anaysisSocket;
-	destination.sin_port = FreeRTOS_htons(5500);
-	destination.sin_addr = FreeRTOS_inet_addr_quick(10, 10, 10, 12);
+	int32_t bits_written = 0;
 
-	if( net_path->eventSock != FREERTOS_INVALID_SOCKET )
-	{
-		bits_written = FreeRTOS_sendto( send_socket, txbuff,  txbuff_len, 0, &destination, destination_address_length);
-	}
-	else
-	{
-		/* The socket could not be opened. */
-		//TODO: something about this
-//		vTaskDelete( NULL );
-		configASSERT(false);
-	}
+	destination.sin_addr = FreeRTOS_inet_addr_quick(10, 10, 10, 12);
+	destination.sin_port = FreeRTOS_htons(PTP_ANALYSIS_PORT);
+
+	configASSERT(net_path->analysisSocket != FREERTOS_INVALID_SOCKET )
+	bits_written = FreeRTOS_sendto(net_path->analysisSocket,
+								   txbuff,
+								   txbuff_len,
+								   0,
+								   &destination,
+								   sizeof(destination));
+	return bits_written;
+}
+
+uint32_t MACSendTCPAnalysisPacket(NetPath * net_path, octet_t * txbuff, uint32_t txbuff_len){
+	int32_t bits_written = 0;
+
+	configASSERT(net_path->analysisSocket != FREERTOS_INVALID_SOCKET )
+	bits_written = FreeRTOS_send(net_path->analysisSocket,
+								   txbuff,
+								   txbuff_len,
+								   0);
 	return bits_written;
 }
 
@@ -356,7 +362,8 @@ size_t netSendGeneral(NetPath *netPath, const octet_t *buf, int16_t length )
 
 size_t netSendAnalysis(NetPath *netPath, const octet_t *buf, int16_t length )
 {
-    return MACSendAnalysisPacket( netPath, buf, length);
+//    return MACSendUDPAnalysisPacket( netPath, buf, length);
+    return MACSendTCPAnalysisPacket( netPath, buf, length);
 }
 
 size_t netSendPeerGeneral(NetPath *netPath, const octet_t *buf, int16_t  length)
